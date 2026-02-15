@@ -1,5 +1,66 @@
+# Data directories (symlinked on HPC)
+data/
+wood_data/
 
-wood_data
-camo_plan.md
+# Model checkpoints
+checkpoints/
+*.pth
+*.pt
 
-carpet/
+# Pre-computed embeddings
+*_embeddings*/
+*.npy
+
+# Results (regenerable)
+results/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# LaTeX build artifacts
+paper/latex/*.aux
+paper/latex/*.log
+paper/latex/*.bbl
+paper/latex/*.blg
+paper/latex/*.out
+paper/latex/*.synctex.gz
+paper/latex/*.fdb_latexmk
+paper/latex/*.fls
+
+# Environment
+.env
+.venv/
+env/
+venv/
+
+# Misc
+*.zip
+*.tar.gz
+*.csv
+*.png
+*.jpg
+!paper/figures/*.png
+!paper/figures/*.jpg
+
+# Conductor workspace
+.context/

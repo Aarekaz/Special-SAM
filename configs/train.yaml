@@ -1,0 +1,42 @@
+# Training configuration for Specialized SAM decoder fine-tuning
+
+seed: 42
+
+model:
+  type: vit_h
+  checkpoint: weights/sam_vit_h_4b8939.pth
+  weights_url: https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth
+
+data:
+  dataset: cod10k
+  train_img_dir: data/cod10k/COD10K-v3/Train/Image
+  train_mask_dir: data/cod10k/COD10K-v3/Train/GT_Object
+  kaggle_dataset: aarekaz/cod10k
+
+preprocessing:
+  target_size: 1024
+  augmentation:
+    horizontal_flip: true
+
+embeddings:
+  dir: data/embeddings/camo_embeddings_vith
+  metadata_csv: data/embeddings/camo_train_meta_vith.csv
+
+training:
+  epochs: 7
+  learning_rate: 1.0e-4
+  optimizer: AdamW
+  batch_size: 1
+  loss:
+    bce_weight: 0.5
+    dice_weight: 0.5
+  prompt_type: random  # random switch between point and box prompts
+
+output:
+  decoder_path: checkpoints/camo_decoder_vith.pth
+
+huggingface:
+  repo_id: AAREKAZ/SpecialSAM
+  upload_embeddings: true
+  upload_metadata: true
+  upload_model: true

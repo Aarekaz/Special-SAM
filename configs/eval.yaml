@@ -1,0 +1,35 @@
+# Evaluation configuration for SAM base vs specialized comparison
+
+model:
+  type: vit_h
+  base_checkpoint: weights/sam_vit_h_4b8939.pth
+  specialized_decoder: checkpoints/camo_decoder_vith.pth
+
+data:
+  test_img_dir: data/cod10k/COD10K-v3/Test/Image
+  test_mask_dir: data/cod10k/COD10K-v3/Test/GT_Object
+
+evaluation:
+  max_samples: 200
+  target_size: 1024
+  boundary_threshold: 5
+  prompt_strategies:
+    - center
+    - edge_single
+    - multi_grid
+    - multi_random
+
+metrics:
+  - iou
+  - dice
+  - f1
+  - boundary_f1
+  - s_alpha
+  - e_phi
+  - f_beta_w
+  - mae
+
+output:
+  results_csv: results/comprehensive_evaluation_results.csv
+  comparison_plot: results/comprehensive_evaluation_comparison.png
+  visualization_dir: results/visualizations
