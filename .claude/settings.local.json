@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs:*)",
+      "Bash(git -C /c/Development/Special-SAM log --oneline)",
+      "Bash(git -C /c/Development/Special-SAM show:*)",
+      "Bash(wc:*)"
+    ]
+  }
+}
