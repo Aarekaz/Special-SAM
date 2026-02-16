@@ -29,7 +29,7 @@ def load_results(csv_path="results/comprehensive_evaluation_results.csv"):
 def format_table1_data(df):
     """Format data for Table 1: Main Results."""
     # Filter for the 3 main strategies
-    strategies = ["Center-of-Mass (1 point)", "Edge (1 point)", "Multi-Point Grid (4 points)"]
+    strategies = ["Center-of-Mass (Single)", "Edge (Single)", "Multi-Point Grid (4 pts)", "Multi-Point Random (3 pts)"]
 
     table_data = []
     for model in ["Base SAM ViT-H", "Specialized SAM ViT-H"]:
@@ -59,9 +59,10 @@ def format_table1_data(df):
 def format_table2_data(df):
     """Format data for Table 2: Improvement Analysis."""
     strategy_map = {
-        "Center-of-Mass (1 point)": "Center-of-Mass",
-        "Edge (1 point)": "Edge (Single)",
-        "Multi-Point Grid (4 points)": "Multi-Point Grid",
+        "Center-of-Mass (Single)": "Center-of-Mass",
+        "Edge (Single)": "Edge",
+        "Multi-Point Grid (4 pts)": "Multi-Point Grid",
+        "Multi-Point Random (3 pts)": "Multi-Point Random",
     }
 
     table_data = []
@@ -91,7 +92,7 @@ def format_table2_data(df):
 
 def format_table3_data(df):
     """Format data for Table 3: Detailed Metrics (Specialized only)."""
-    strategies = ["Center-of-Mass (1 point)", "Edge (1 point)", "Multi-Point Grid (4 points)"]
+    strategies = ["Center-of-Mass (Single)", "Edge (Single)", "Multi-Point Grid (4 pts)", "Multi-Point Random (3 pts)"]
 
     table_data = []
     for strategy in strategies:
@@ -169,7 +170,7 @@ def generate_summary_report(df):
     print("="*70)
 
     spec_center = df[(df['model'] == 'Specialized SAM ViT-H') &
-                     (df['prompt_strategy'] == 'Center-of-Mass (1 point)')].iloc[0]
+                     (df['prompt_strategy'] == 'Center-of-Mass (Single)')].iloc[0]
 
     print(f"\nSpecialized SAM (Center-of-Mass prompt):")
     print(f"  mIoU:     {spec_center['iou_mean']:.4f}")
@@ -180,9 +181,9 @@ def generate_summary_report(df):
     print(f"  MAE:      {spec_center['mae_mean']:.4f}")
 
     base_edge = df[(df['model'] == 'Base SAM ViT-H') &
-                   (df['prompt_strategy'] == 'Edge (1 point)')].iloc[0]
+                   (df['prompt_strategy'] == 'Edge (Single)')].iloc[0]
     spec_edge = df[(df['model'] == 'Specialized SAM ViT-H') &
-                   (df['prompt_strategy'] == 'Edge (1 point)')].iloc[0]
+                   (df['prompt_strategy'] == 'Edge (Single)')].iloc[0]
 
     edge_gain = ((spec_edge['iou_mean'] - base_edge['iou_mean']) / base_edge['iou_mean']) * 100
 
