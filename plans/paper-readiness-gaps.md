@@ -82,10 +82,21 @@ Overall     | 4000     | 0.475     | 0.657            | +38.3%
 
 | Metric | Implementation Status | Paper Claims | Actual Reporting |
 |--------|----------------------|--------------|------------------|
-| S-alpha (Structure) | ✅ Code exists | ✅ Mentioned | ❌ Never shown |
-| E-phi (Enhanced Alignment) | ✅ Code exists | ✅ Mentioned | ❌ Never shown |
-| F-beta-w (Weighted F-measure) | ✅ Code exists | ✅ Mentioned | ❌ Never shown |
-| MAE (Mean Absolute Error) | ✅ Code exists | ✅ Mentioned | ❌ Never shown |
+| S-alpha (Structure) | ✅ Code exists | ✅ Mentioned | 🔄 Infrastructure ready |
+| E-phi (Enhanced Alignment) | ✅ Code exists | ✅ Mentioned | 🔄 Infrastructure ready |
+| F-beta-w (Weighted F-measure) | ✅ Code exists | ✅ Mentioned | 🔄 Infrastructure ready |
+| MAE (Mean Absolute Error) | ✅ Code exists | ✅ Mentioned | 🔄 Infrastructure ready |
+
+**STATUS UPDATE (2026-02-16):**
+- ✅ Created `src/data/` module (cod10k.py, transforms.py)
+- ✅ Created setup automation (`scripts/setup_evaluation.py`)
+- ✅ Created paper update tool (`scripts/update_paper_tables.py`)
+- ✅ Downloaded COD10K dataset (2.26GB)
+- ⏳ Downloading SAM weights (2.39GB) - in progress
+- ⏳ Downloading decoder checkpoint (16MB) - pending
+- 📋 Next: Run evaluation → Generate tables → Update paper
+
+See `SESSION_SUMMARY.md` for complete details.
 
 **CRITICAL ISSUE:**
 ```python

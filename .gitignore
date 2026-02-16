@@ -1,6 +1,6 @@
 # Data directories (symlinked on HPC)
-data/
-wood_data/
+/data/
+/wood_data/
 
 # Model checkpoints
 checkpoints/
