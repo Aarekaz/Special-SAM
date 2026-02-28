@@ -119,14 +119,16 @@ The final loss of 0.1059 indicates the model is still generalizing rather than m
 
 **Table 1: Comprehensive evaluation across prompt strategies (200 test samples)**
 
-| Model | Prompt Strategy | mIoU | Dice | Boundary F1 |
-|-------|----------------|------|------|-------------|
-| Base SAM ViT-H | Center-of-Mass (1pt) | 0.4752 | 0.5346 | 0.4977 |
-| Base SAM ViT-H | Edge (1pt) | 0.2272 | 0.2762 | 0.3025 |
-| Base SAM ViT-H | Multi-Point Grid (4pt) | 0.6080 | 0.6780 | 0.5929 |
-| **Specialized SAM** | **Center-of-Mass (1pt)** | **0.6573** | **0.7398** | **0.6528** |
-| **Specialized SAM** | **Edge (1pt)** | **0.6463** | **0.7340** | **0.6375** |
-| **Specialized SAM** | **Multi-Point Grid (4pt)** | **0.6681** | **0.7531** | **0.6573** |
+| Model | Prompt Strategy | mIoU | Dice | S-alpha | E-phi | F-beta-w | MAE | Boundary F1 |
+|-------|----------------|------|------|---------|-------|----------|-----|-------------|
+| Base SAM ViT-H | Center-of-Mass (1pt) | 0.4752 | 0.5346 | 0.6313 | 0.7738 | 0.5496 | 0.1485 | 0.4977 |
+| Base SAM ViT-H | Edge (1pt) | 0.2272 | 0.2762 | 0.4979 | 0.6364 | 0.2635 | 0.1672 | 0.3025 |
+| Base SAM ViT-H | Multi-Point Grid (4pt) | 0.6080 | 0.6780 | 0.7409 | 0.8574 | 0.6962 | 0.0895 | 0.5929 |
+| Base SAM ViT-H | Multi-Point Random (3pt) | 0.7472 | 0.8316 | 0.8374 | 0.9394 | 0.8215 | 0.0421 | 0.7122 |
+| **Specialized SAM** | **Center-of-Mass (1pt)** | **0.6573** | **0.7398** | **0.7805** | **0.9063** | **0.7341** | **0.0510** | **0.6528** |
+| **Specialized SAM** | **Edge (1pt)** | **0.6463** | **0.7340** | **0.7748** | **0.9114** | **0.6895** | **0.0469** | **0.6375** |
+| **Specialized SAM** | **Multi-Point Grid (4pt)** | **0.6681** | **0.7531** | **0.7932** | **0.9141** | **0.7535** | **0.0475** | **0.6573** |
+| **Specialized SAM** | **Multi-Point Random (3pt)** | **0.7331** | **0.8185** | **0.8479** | **0.9382** | **0.8231** | **0.0331** | **0.7217** |
 
 ### 5.2 Prompt Robustness Analysis
 
@@ -139,6 +141,7 @@ The most striking result is the **uniformity of improvement across prompt types*
 | Center-of-Mass | 0.4752 | 0.6573 | +0.1821 | +38.3% |
 | Edge (Single) | 0.2272 | 0.6463 | +0.4191 | **+184.4%** |
 | Multi-Point Grid | 0.6080 | 0.6681 | +0.0601 | +9.9% |
+| Multi-Point Random | 0.7472 | 0.7331 | -0.0141 | -1.9% |
 
 The **+184% relative improvement on edge prompts** is the headline finding. Edge prompts are the hardest because they place the prompt point at the ambiguous boundary between camouflaged object and background. Base SAM produces nearly random masks (22.72% mIoU) from edge prompts, while our specialized decoder achieves 64.63% — comparable to its performance with easier prompt types.
 
@@ -148,11 +151,12 @@ This suggests that decoder specialization doesn't merely improve mask quality fo
 
 **Table 3: Full metrics for specialized model across prompt strategies**
 
-| Prompt Strategy | mIoU | Dice | Boundary Prec | Boundary Rec | Boundary F1 |
-|----------------|------|------|--------------|-------------|-------------|
-| Center-of-Mass | 0.6573 | 0.7398 | 0.6720 | 0.6785 | 0.6528 |
-| Edge (Single) | 0.6463 | 0.7340 | 0.6324 | 0.6950 | 0.6375 |
-| Multi-Point Grid | 0.6681 | 0.7531 | 0.6801 | 0.6801 | 0.6573 |
+| Prompt Strategy | mIoU | Dice | S-alpha | E-phi | F-beta-w | MAE | Boundary Prec | Boundary Rec | Boundary F1 |
+|----------------|------|------|---------|-------|----------|-----|--------------|-------------|-------------|
+| Center-of-Mass | 0.6573 | 0.7398 | 0.7805 | 0.9063 | 0.7341 | 0.0510 | 0.6720 | 0.6785 | 0.6528 |
+| Edge (Single) | 0.6463 | 0.7340 | 0.7748 | 0.9114 | 0.6895 | 0.0469 | 0.6324 | 0.6950 | 0.6375 |
+| Multi-Point Grid | 0.6681 | 0.7531 | 0.7932 | 0.9141 | 0.7535 | 0.0475 | 0.6801 | 0.6801 | 0.6573 |
+| Multi-Point Random | 0.7331 | 0.8185 | 0.8479 | 0.9382 | 0.8231 | 0.0331 | 0.7431 | 0.7351 | 0.7217 |
 
 Boundary recall is consistently high across strategies (0.678–0.695), indicating that the specialized decoder reliably recovers ground truth boundaries regardless of prompt type. The boundary precision is slightly lower for edge prompts (0.632 vs 0.672–0.680), suggesting minor over-segmentation when prompted at boundaries.
 

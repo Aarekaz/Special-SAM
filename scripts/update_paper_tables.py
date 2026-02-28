@@ -119,50 +119,71 @@ def format_table3_data(df):
     return table_data
 
 
-def print_markdown_table(title, data, columns):
-    """Print a markdown table."""
-    print(f"\n## {title}\n")
+def format_markdown_table(title, data, columns):
+    """Format a markdown table and return as string."""
+    lines = []
+    lines.append(f"\n## {title}\n")
 
     # Header
-    print("| " + " | ".join(columns) + " |")
-    print("|" + "|".join(["---"] * len(columns)) + "|")
+    lines.append("| " + " | ".join(columns) + " |")
+    lines.append("|" + "|".join(["---"] * len(columns)) + "|")
 
     # Rows
     for row in data:
         values = [str(row.get(col, '???')) for col in columns]
-        print("| " + " | ".join(values) + " |")
+        lines.append("| " + " | ".join(values) + " |")
+
+    return "\n".join(lines)
 
 
 def generate_summary_report(df):
-    """Generate a summary report of all metrics."""
+    """Generate a summary report and write tables to files."""
+    out_dir = Path("results/tables")
+    out_dir.mkdir(parents=True, exist_ok=True)
+
     print("\n" + "="*70)
     print("SUMMARY REPORT: COD Metrics Now Available")
     print("="*70)
 
     # Table 1
     table1_data = format_table1_data(df)
-    print_markdown_table(
+    table1 = format_markdown_table(
         "Table 1: Main Results (COD10K, 200 samples)",
         table1_data,
         ['Model', 'Prompt Strategy', 'mIoU', 'Dice', 'S-alpha', 'E-phi', 'F-beta-w', 'MAE', 'Boundary F1']
     )
+    print(table1)
 
     # Table 2
     table2_data = format_table2_data(df)
-    print_markdown_table(
+    table2 = format_markdown_table(
         "Table 2: Improvement Analysis by Prompt Type",
         table2_data,
         ['Prompt Type', 'Base mIoU', 'Specialized mIoU', 'Absolute Gain', 'Relative Gain']
     )
+    print(table2)
 
     # Table 3
     table3_data = format_table3_data(df)
-    print_markdown_table(
+    table3 = format_markdown_table(
         "Table 3: Detailed Metrics (Specialized SAM)",
         table3_data,
         ['Prompt Strategy', 'mIoU', 'Dice', 'S-alpha', 'E-phi', 'F-beta-w', 'MAE',
          'Boundary Prec', 'Boundary Rec', 'Boundary F1']
     )
+    print(table3)
+
+    # Write all tables to a single file
+    all_tables = "\n\n".join([table1, table2, table3])
+    tables_file = out_dir / "all_tables.md"
+    tables_file.write_text(all_tables)
+    print(f"\nTables written to: {tables_file}")
+
+    # Write individual table files
+    (out_dir / "table1_main_results.md").write_text(table1)
+    (out_dir / "table2_improvement.md").write_text(table2)
+    (out_dir / "table3_detailed.md").write_text(table3)
+    print(f"Individual tables written to: {out_dir}/")
 
     # Key findings
     print("\n" + "="*70)
@@ -191,19 +212,6 @@ def generate_summary_report(df):
     print(f"  Base:       {base_edge['iou_mean']:.4f} mIoU")
     print(f"  Specialized: {spec_edge['iou_mean']:.4f} mIoU")
     print(f"  Gain:       {edge_gain:+.1f}% relative improvement")
-
-    print("\n" + "="*70)
-    print("NEXT STEPS")
-    print("="*70)
-    print("\n1. Copy the tables above into paper/paper.md")
-    print("   - Replace Table 1 (line ~122)")
-    print("   - Update Table 2 (line ~136)")
-    print("   - Update Table 3 (line ~150)")
-    print("\n2. Update abstract with COD metric values")
-    print("\n3. Mark Option B complete in plans/paper-readiness-gaps.md")
-    print("\n4. Commit changes:")
-    print("   git add paper/paper.md plans/paper-readiness-gaps.md results/")
-    print("   git commit -m 'Add COD metrics to paper tables'")
 
 
 def main():
