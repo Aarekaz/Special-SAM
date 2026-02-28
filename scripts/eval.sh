@@ -3,12 +3,10 @@
 #SBATCH --output=logs/eval_%j.out
 #SBATCH --error=logs/eval_%j.err
 #SBATCH --partition=gpu
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:A100:1
 #SBATCH --mem=32G
 #SBATCH --cpus-per-task=4
 #SBATCH --time=03:00:00
-
-module load cuda/12.9
 
 export PATH="/SEAS/home/g37014071/.conda/envs/specialsam/bin:$PATH"
 
