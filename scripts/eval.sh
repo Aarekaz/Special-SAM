@@ -11,10 +11,10 @@
 module load miniconda/23.11.0-2
 module load cuda/12.9
 
+source activate specialsam
+
 cd "$SLURM_SUBMIT_DIR" || exit 1
 mkdir -p logs
-
-conda activate specialsam
 
 echo "Starting comprehensive evaluation at $(date)"
 echo "GPU: $(nvidia-smi --query-gpu=name --format=csv,noheader)"
