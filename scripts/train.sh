@@ -8,17 +8,16 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --time=02:00:00
 
-module load miniconda/23.11.0-2
 module load cuda/12.9
 
-eval "$(conda shell.bash hook)"
-conda activate specialsam
+export PATH="/SEAS/home/g37014071/.conda/envs/specialsam/bin:$PATH"
 
 cd "$SLURM_SUBMIT_DIR" || exit 1
 mkdir -p logs
 
 echo "Starting decoder training at $(date)"
 echo "GPU: $(nvidia-smi --query-gpu=name --format=csv,noheader)"
+echo "Python: $(which python)"
 
 python -m src.training.train --config configs/train.yaml
 

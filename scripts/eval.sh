@@ -8,17 +8,16 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --time=03:00:00
 
-module load miniconda/23.11.0-2
 module load cuda/12.9
 
-eval "$(conda shell.bash hook)"
-conda activate specialsam
+export PATH="/SEAS/home/g37014071/.conda/envs/specialsam/bin:$PATH"
 
 cd "$SLURM_SUBMIT_DIR" || exit 1
 mkdir -p logs
 
 echo "Starting comprehensive evaluation at $(date)"
 echo "GPU: $(nvidia-smi --query-gpu=name --format=csv,noheader)"
+echo "Python: $(which python)"
 
 python -m src.evaluation.evaluate --config configs/eval.yaml
 
