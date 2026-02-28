@@ -8,6 +8,7 @@ Usage:
 """
 
 import argparse
+import re
 from pathlib import Path
 
 import cv2
@@ -25,6 +26,19 @@ from src.models.sam_loader import (
     load_sam,
     load_specialized_sam,
 )
+
+
+def extract_category(filepath: str) -> str:
+    """Extract super-category from COD10K filename.
+
+    Filenames follow: COD10K-{CAM/NonCAM}-{super}-{Category}-{sub}-{Species}-{id}.jpg
+    E.g. COD10K-CAM-1-Aquatic-1-BatFish-2.jpg -> Aquatic
+    """
+    name = Path(filepath).stem
+    match = re.match(r"COD10K-\w+-\d+-(\w+)-", name)
+    if match:
+        return match.group(1)
+    return "Unknown"
 
 
 def evaluate_model(
@@ -78,6 +92,7 @@ def evaluate_model(
     print(f"\nEvaluating {model_type.upper()} model on {len(test_pairs)} samples")
 
     results = []
+    cat_results = []
 
     for strategy_key in prompt_strategies:
         if strategy_key not in PROMPT_CONFIGS:
@@ -93,6 +108,7 @@ def evaluate_model(
         ious, dices, f1s = [], [], []
         boundary_precs, boundary_recalls, boundary_f1s = [], [], []
         s_alphas, e_phis, f_beta_ws, maes = [], [], [], []
+        categories = []
 
         for idx, (img_path, mask_path) in enumerate(test_pairs):
             img = cv2.imread(img_path)
@@ -151,6 +167,7 @@ def evaluate_model(
                 maes.append(SegmentationMetrics.mae(
                     pred_binary.astype(float), gt_binary.astype(float)
                 ))
+                categories.append(extract_category(img_path))
 
             except Exception as e:
                 print(f"    Error on sample {idx}: {e}")
@@ -183,7 +200,23 @@ def evaluate_model(
                   f"S-alpha={result['s_alpha_mean']:.4f}, "
                   f"MAE={result['mae_mean']:.4f}")
 
-    return pd.DataFrame(results)
+            # Per-category breakdown
+            if categories:
+                cat_arr = np.array(categories)
+                iou_arr = np.array(ious)
+                for cat in sorted(set(categories)):
+                    mask = cat_arr == cat
+                    cat_results.append({
+                        "prompt_strategy": cfg["name"],
+                        "category": cat,
+                        "iou_mean": np.mean(iou_arr[mask]),
+                        "dice_mean": np.mean(np.array(dices)[mask]),
+                        "s_alpha_mean": np.mean(np.array(s_alphas)[mask]),
+                        "mae_mean": np.mean(np.array(maes)[mask]),
+                        "num_samples": int(mask.sum()),
+                    })
+
+    return pd.DataFrame(results), pd.DataFrame(cat_results)
 
 
 def run_comparison(config: dict) -> pd.DataFrame:
@@ -195,19 +228,27 @@ def run_comparison(config: dict) -> pd.DataFrame:
     Returns:
         Combined DataFrame with results from both models.
     """
-    base_results = evaluate_model("base", config)
+    base_results, base_cat = evaluate_model("base", config)
     base_results["model"] = "Base SAM ViT-H"
+    base_cat["model"] = "Base SAM ViT-H"
 
-    spec_results = evaluate_model("specialized", config)
+    spec_results, spec_cat = evaluate_model("specialized", config)
     spec_results["model"] = "Specialized SAM ViT-H"
+    spec_cat["model"] = "Specialized SAM ViT-H"
 
     combined = pd.concat([base_results, spec_results], ignore_index=True)
 
-    # Save CSV
+    # Save main CSV
     output_path = Path(config["output"]["results_csv"])
     output_path.parent.mkdir(parents=True, exist_ok=True)
     combined.to_csv(str(output_path), index=False)
     print(f"\nResults saved to {output_path}")
+
+    # Save per-category CSV
+    combined_cat = pd.concat([base_cat, spec_cat], ignore_index=True)
+    cat_path = output_path.parent / "per_category_results.csv"
+    combined_cat.to_csv(str(cat_path), index=False)
+    print(f"Per-category results saved to {cat_path}")
 
     return combined
 

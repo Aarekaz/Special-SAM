@@ -61,6 +61,7 @@ def train(config: dict) -> None:
     optimizer = torch.optim.AdamW(
         model.mask_decoder.parameters(),
         lr=config["training"]["learning_rate"],
+        weight_decay=config["training"].get("weight_decay", 0.01),
     )
 
     # Load pre-computed embeddings
@@ -73,7 +74,18 @@ def train(config: dict) -> None:
     bce_w = config["training"]["loss"]["bce_weight"]
     dice_w = config["training"]["loss"]["dice_weight"]
 
+    # Learning rate scheduler
+    scheduler = None
+    lr_sched_type = config["training"].get("lr_scheduler")
+    warmup_epochs = config["training"].get("warmup_epochs", 0)
+    if lr_sched_type == "cosine":
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+            optimizer, T_max=epochs - warmup_epochs, eta_min=1e-6
+        )
+
     print(f"Training for {epochs} epochs on {len(train_ds)} samples...")
+    if scheduler:
+        print(f"  LR scheduler: {lr_sched_type}, warmup: {warmup_epochs} epochs")
 
     for epoch in range(epochs):
         total_loss = 0.0
@@ -117,7 +129,11 @@ def train(config: dict) -> None:
             total_loss += loss.item()
 
         avg_loss = total_loss / len(train_loader)
-        print(f"Epoch {epoch + 1}/{epochs} | Loss: {avg_loss:.4f}")
+        lr = optimizer.param_groups[0]["lr"]
+        print(f"Epoch {epoch + 1}/{epochs} | Loss: {avg_loss:.4f} | LR: {lr:.2e}")
+
+        if scheduler and epoch >= warmup_epochs:
+            scheduler.step()
 
     # Save decoder weights
     output_path = Path(config["output"]["decoder_path"])

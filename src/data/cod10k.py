@@ -59,9 +59,11 @@ def get_image_mask_pairs(
 
     print(f"Matched {len(pairs)} image-mask pairs")
 
-    # Limit samples if requested
+    # Limit samples if requested (0 or None = use all)
     if max_samples is not None and max_samples > 0:
         pairs = pairs[:max_samples]
         print(f"Using {len(pairs)} samples (max_samples={max_samples})")
+    else:
+        print(f"Using all {len(pairs)} samples")
 
     return pairs

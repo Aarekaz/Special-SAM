@@ -10,7 +10,7 @@ data:
   test_mask_dir: data/cod10k/COD10K-v3/Test/GT_Object
 
 evaluation:
-  max_samples: 200
+  max_samples: 0  # 0 = use all test samples
   target_size: 1024
   boundary_threshold: 5
   prompt_strategies:
