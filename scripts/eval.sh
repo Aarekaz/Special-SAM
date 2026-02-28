@@ -11,7 +11,8 @@
 module load miniconda/23.11.0-2
 module load cuda/12.9
 
-source activate specialsam
+eval "$(conda shell.bash hook)"
+conda activate specialsam
 
 cd "$SLURM_SUBMIT_DIR" || exit 1
 mkdir -p logs
