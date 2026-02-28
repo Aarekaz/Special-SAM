@@ -3,7 +3,7 @@
 #SBATCH --output=logs/eval_%j.out
 #SBATCH --error=logs/eval_%j.err
 #SBATCH --partition=gpu
-#SBATCH --gres=gpu:A100:1
+#SBATCH --gres=gpu:a100:1
 #SBATCH --mem=32G
 #SBATCH --cpus-per-task=4
 #SBATCH --time=03:00:00
