@@ -8,12 +8,12 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --time=02:00:00
 
-module load python cuda
+module load miniconda/23.11.0-2
 
 cd "$SLURM_SUBMIT_DIR" || exit 1
 mkdir -p logs
 
-source venv/bin/activate 2>/dev/null || true
+conda activate specialsam
 
 echo "Starting decoder training at $(date)"
 echo "GPU: $(nvidia-smi --query-gpu=name --format=csv,noheader)"
