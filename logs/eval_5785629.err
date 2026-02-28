@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/gpfs/automountdir/gpfs/homes/SEAS/home/g37014071/Special-SAM/src/evaluation/evaluate.py", line 22, in <module>
+    from src.models.sam_loader import (
+  File "/gpfs/automountdir/gpfs/homes/SEAS/home/g37014071/Special-SAM/src/models/sam_loader.py", line 12, in <module>
+    from segment_anything import sam_model_registry, SamPredictor
+ModuleNotFoundError: No module named 'segment_anything'

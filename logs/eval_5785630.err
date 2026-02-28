@@ -1,0 +1,48 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/gpfs/automountdir/gpfs/homes/SEAS/home/g37014071/Special-SAM/src/evaluation/evaluate.py", line 232, in <module>
+    main()
+  File "/gpfs/automountdir/gpfs/homes/SEAS/home/g37014071/Special-SAM/src/evaluation/evaluate.py", line 228, in main
+    run_comparison(config)
+  File "/gpfs/automountdir/gpfs/homes/SEAS/home/g37014071/Special-SAM/src/evaluation/evaluate.py", line 198, in run_comparison
+    base_results = evaluate_model("base", config)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/gpfs/automountdir/gpfs/homes/SEAS/home/g37014071/Special-SAM/src/evaluation/evaluate.py", line 117, in evaluate_model
+    predictor.set_image(img_resized)
+  File "/SEAS/home/g37014071/.conda/envs/specialsam/lib/python3.12/site-packages/segment_anything/predictor.py", line 60, in set_image
+    self.set_torch_image(input_image_torch, image.shape[:2])
+  File "/SEAS/home/g37014071/.conda/envs/specialsam/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/SEAS/home/g37014071/.conda/envs/specialsam/lib/python3.12/site-packages/segment_anything/predictor.py", line 89, in set_torch_image
+    self.features = self.model.image_encoder(input_image)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/SEAS/home/g37014071/.conda/envs/specialsam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/SEAS/home/g37014071/.conda/envs/specialsam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/SEAS/home/g37014071/.conda/envs/specialsam/lib/python3.12/site-packages/segment_anything/modeling/image_encoder.py", line 112, in forward
+    x = blk(x)
+        ^^^^^^
+  File "/SEAS/home/g37014071/.conda/envs/specialsam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/SEAS/home/g37014071/.conda/envs/specialsam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/SEAS/home/g37014071/.conda/envs/specialsam/lib/python3.12/site-packages/segment_anything/modeling/image_encoder.py", line 174, in forward
+    x = self.attn(x)
+        ^^^^^^^^^^^^
+  File "/SEAS/home/g37014071/.conda/envs/specialsam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/SEAS/home/g37014071/.conda/envs/specialsam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/SEAS/home/g37014071/.conda/envs/specialsam/lib/python3.12/site-packages/segment_anything/modeling/image_encoder.py", line 231, in forward
+    attn = (q * self.scale) @ k.transpose(-2, -1)
+           ~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~
+RuntimeError: CUDA error: CUBLAS_STATUS_INVALID_VALUE when calling `cublasSgemmStridedBatched( handle, opa, opb, m, n, k, &alpha, a, lda, stridea, b, ldb, strideb, &beta, c, ldc, stridec, num_batches)`

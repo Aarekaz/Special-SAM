@@ -1,0 +1,66 @@
+Starting comprehensive evaluation at Sat Feb 28 16:28:42 EST 2026
+GPU: NVIDIA A100 80GB PCIe
+Python: /SEAS/home/g37014071/.conda/envs/specialsam/bin/python
+Found 4000 images in data/cod10k/COD10K-v3/Test/Image
+Found 4000 masks in data/cod10k/COD10K-v3/Test/GT_Object
+Matched 4000 image-mask pairs
+Using 200 samples (max_samples=200)
+
+Evaluating BASE model on 200 samples
+  Testing: Center-of-Mass (Single)
+    Processed 50/200
+    Processed 100/200
+    Processed 150/200
+    Processed 200/200
+    mIoU=0.4752, S-alpha=0.6313, MAE=0.1485
+  Testing: Edge (Single)
+    Processed 50/200
+    Processed 100/200
+    Processed 150/200
+    Processed 200/200
+    mIoU=0.2272, S-alpha=0.4979, MAE=0.1672
+  Testing: Multi-Point Grid (4 pts)
+    Processed 50/200
+    Processed 100/200
+    Processed 150/200
+    Processed 200/200
+    mIoU=0.6080, S-alpha=0.7409, MAE=0.0895
+  Testing: Multi-Point Random (3 pts)
+    Processed 50/200
+    Processed 100/200
+    Processed 150/200
+    Processed 200/200
+    mIoU=0.7472, S-alpha=0.8374, MAE=0.0421
+Found 4000 images in data/cod10k/COD10K-v3/Test/Image
+Found 4000 masks in data/cod10k/COD10K-v3/Test/GT_Object
+Matched 4000 image-mask pairs
+Using 200 samples (max_samples=200)
+
+Evaluating SPECIALIZED model on 200 samples
+  Testing: Center-of-Mass (Single)
+    Processed 50/200
+    Processed 100/200
+    Processed 150/200
+    Processed 200/200
+    mIoU=0.6573, S-alpha=0.7805, MAE=0.0510
+  Testing: Edge (Single)
+    Processed 50/200
+    Processed 100/200
+    Processed 150/200
+    Processed 200/200
+    mIoU=0.6463, S-alpha=0.7748, MAE=0.0469
+  Testing: Multi-Point Grid (4 pts)
+    Processed 50/200
+    Processed 100/200
+    Processed 150/200
+    Processed 200/200
+    mIoU=0.6681, S-alpha=0.7932, MAE=0.0475
+  Testing: Multi-Point Random (3 pts)
+    Processed 50/200
+    Processed 100/200
+    Processed 150/200
+    Processed 200/200
+    mIoU=0.7331, S-alpha=0.8479, MAE=0.0331
+
+Results saved to results/comprehensive_evaluation_results.csv
+Finished at Sat Feb 28 16:46:18 EST 2026
