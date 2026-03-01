@@ -176,7 +176,29 @@ Performance varies across camouflage super-categories, revealing where specializ
 
 The largest improvement (+30.2%) is on terrestrial animals, which exhibit the most challenging camouflage patterns (insects on bark, lizards on rocks). Aquatic animals also show substantial gains (+24.7%), consistent with the difficulty of detecting fish and octopuses against coral/seabed textures. Amphibians show the smallest relative improvement (+14.8%) because base SAM already performs reasonably on them (0.680 mIoU), likely due to their more distinct body shapes.
 
-### 5.4 Qualitative Results
+### 5.5 Comparison with Existing Methods
+
+We compare our approach against dedicated COD architectures and SAM-based adaptation methods on the COD10K test set (2,026 images). For dedicated methods, we report numbers from their original publications; all use the standard COD10K train/test protocol.
+
+**Table 5: Comparison with dedicated COD methods (COD10K test set)**
+
+| Method | Venue | Backbone | S-alpha | E-phi | F-beta-w | MAE |
+|--------|-------|----------|---------|-------|----------|-----|
+| SINet [6] | CVPR 2020 | ResNet-50 | 0.776 | 0.864 | 0.631 | 0.043 |
+| PFNet [7] | AAAI 2021 | ResNet-50 | 0.800 | 0.877 | 0.660 | 0.040 |
+| SINet-V2 [15] | TPAMI 2022 | Res2Net-50 | 0.815 | 0.887 | 0.680 | 0.037 |
+| SegMaR [16] | CVPR 2022 | ResNet-50 | 0.833 | 0.899 | 0.724 | 0.034 |
+| ZoomNet [8] | CVPR 2022 | ResNet-50 | 0.838 | 0.911 | 0.729 | 0.029 |
+| SAM-Adapter [4] | ICCVW 2023 | SAM ViT-B | 0.883 | 0.918 | 0.801 | 0.025 |
+| COMPrompter [5] | SCIS 2024 | SAM | 0.889 | 0.949 | 0.821 | 0.023 |
+| **Ours (Center-of-Mass)** | — | SAM ViT-H | **0.835** | **0.933** | **0.816** | **0.031** |
+| **Ours (Multi-Point Grid)** | — | SAM ViT-H | **0.843** | **0.939** | **0.826** | **0.028** |
+
+Our decoder-only approach achieves S-alpha comparable to ZoomNet (0.843 vs 0.838) and higher E-phi (0.939 vs 0.911), despite using no architectural modifications. However, methods with specialized adapters (SAM-Adapter, COMPrompter) achieve higher absolute performance by modifying the encoder itself. This motivates our planned learnable preprocessing module (Section 7).
+
+Note that our method uses ground truth prompt points, while the dedicated COD methods are fully automatic (no prompts needed). SAM-Adapter and COMPrompter are also fully automatic after training. A direct comparison should account for this difference — our approach trades full automation for the flexibility of interactive, promptable segmentation.
+
+### 5.6 Qualitative Results
 
 Visual comparisons reveal consistent qualitative patterns:
 
@@ -211,7 +233,8 @@ This approach has attractive practical properties:
 
 - **Single domain:** We evaluate only on COD10K. Generalization to other camouflage datasets (CAMO, CHAMELEON, NC4K) remains to be validated.
 - **Single backbone:** We use only ViT-H. Whether the approach works with smaller SAM backbones (ViT-B, ViT-L) or MobileSAM is an open question — preliminary experiments with MobileSAM on other domains showed limited gains, suggesting model capacity matters.
-- **No comparison to specialized COD architectures:** We compare only base vs. specialized SAM, not against dedicated COD methods (SINet, PFNet, ZoomNet) which may achieve higher absolute performance.
+- **Prompt dependency:** Unlike dedicated COD methods which are fully automatic, our approach requires user-provided point prompts at inference time. This is inherent to SAM's architecture.
+- **No encoder adaptation:** We only modify the decoder; methods that also adapt the encoder (SAM-Adapter, COMPrompter) achieve higher absolute performance.
 
 ## 7. Conclusion
 
@@ -250,3 +273,7 @@ This suggests a broader principle: when adapting foundation segmentation models 
 [13] D. Fan et al., "Enhanced-alignment Measure for Binary Foreground Map Evaluation," IJCAI 2018.
 
 [14] R. Margolin et al., "How to Evaluate Foreground Maps," CVPR 2014.
+
+[15] D. Fan et al., "Concealed Object Detection," TPAMI 2022.
+
+[16] Q. Jia et al., "Segment, Magnify and Reiterate: Detecting Camouflaged Objects the Hard Way," CVPR 2022.
