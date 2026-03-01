@@ -1,0 +1,46 @@
+# Ablation study: Dice loss only (no BCE component)
+# Tests the contribution of Dice loss in isolation
+
+seed: 42
+
+model:
+  type: vit_h
+  checkpoint: weights/sam_vit_h_4b8939.pth
+  weights_url: https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth
+
+data:
+  dataset: cod10k
+  train_img_dir: data/cod10k/COD10K-v3/Train/Image
+  train_mask_dir: data/cod10k/COD10K-v3/Train/GT_Object
+  kaggle_dataset: aarekaz/cod10k
+
+preprocessing:
+  target_size: 1024
+  augmentation:
+    horizontal_flip: true
+
+embeddings:
+  dir: data/embeddings/camo_embeddings_vith
+  metadata_csv: data/embeddings/camo_train_meta_vith.csv
+
+training:
+  epochs: 15
+  learning_rate: 1.0e-4
+  optimizer: AdamW
+  batch_size: 1
+  weight_decay: 0.01
+  lr_scheduler: cosine
+  warmup_epochs: 1
+  loss:
+    bce_weight: 0.0
+    dice_weight: 1.0
+  prompt_type: random
+
+output:
+  decoder_path: checkpoints/ablation/camo_decoder_dice_only.pth
+
+huggingface:
+  repo_id: AAREKAZ/SpecialSAM
+  upload_embeddings: false
+  upload_metadata: false
+  upload_model: false
