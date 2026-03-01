@@ -1,10 +1,15 @@
 """COD10K dataset loading utilities.
 
-Provides functions to load image-mask pairs from the COD10K dataset structure.
+Provides functions to load image-mask pairs from the COD10K dataset structure,
+and a Dataset class for loading pre-computed embeddings during training.
 """
 
 from pathlib import Path
 from typing import Optional
+
+import numpy as np
+import torch
+from torch.utils.data import Dataset
 
 
 def get_image_mask_pairs(
@@ -67,3 +72,43 @@ def get_image_mask_pairs(
         print(f"Using all {len(pairs)} samples")
 
     return pairs
+
+
+class CamoDataset(Dataset):
+    """Dataset for loading pre-computed SAM embeddings with prompts.
+
+    Used by decoder-only training where the frozen encoder's outputs
+    are cached as .npy files to avoid recomputing each epoch.
+
+    Args:
+        df: DataFrame with columns from precompute metadata CSV:
+            embed_path, mask_path, prompt_x, prompt_y,
+            box_xmin, box_ymin, box_xmax, box_ymax.
+        device: Target device for tensors.
+    """
+
+    def __init__(self, df, device=None):
+        self.df = df.reset_index(drop=True)
+        self.device = device or torch.device("cpu")
+
+    def __len__(self):
+        return len(self.df)
+
+    def __getitem__(self, idx):
+        row = self.df.iloc[idx]
+
+        emb = torch.from_numpy(np.load(row["embed_path"])).to(self.device)
+        mask = np.load(row["mask_path"])
+        mask = (mask > 128).astype(np.float32)
+        mask = torch.from_numpy(mask).unsqueeze(0).to(self.device)
+
+        point = torch.tensor(
+            [[row["prompt_x"], row["prompt_y"]]], dtype=torch.float32
+        ).to(self.device)
+        label = torch.tensor([1], dtype=torch.int64).to(self.device)
+        box = torch.tensor(
+            [[row["box_xmin"], row["box_ymin"], row["box_xmax"], row["box_ymax"]]],
+            dtype=torch.float32,
+        ).to(self.device)
+
+        return emb, mask, point, label, box

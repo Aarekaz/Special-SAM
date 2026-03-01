@@ -1,7 +1,7 @@
 # Session Summary: Special-SAM on GWU Pegasus HPC
 
 **Last Updated:** 2026-02-28
-**Status:** Evaluation complete (200 samples), full test set + retraining in progress
+**Status:** Full eval complete (4000 images), training failed (CamoDataset fix applied, needs re-run)
 
 ---
 
@@ -26,63 +26,79 @@
 - No external CUDA module needed (PyTorch bundles its own)
 - Train script includes auto-precompute step for embeddings
 
-### Evaluation Complete (200 samples)
-- Ran successfully on A100 GPU in ~17 minutes
-- All 4 prompt strategies tested
-- All 8+ metrics computed (IoU, Dice, F1, Boundary F1, S-alpha, E-phi, F-beta-w, MAE)
-- Results saved to `results/comprehensive_evaluation_results.csv`
+### Full Evaluation Complete (4000 images) - Job 5785644
+- Ran on A100 GPU in ~3 hours (17:21 - 20:20)
+- All 4 prompt strategies tested on full COD10K test set
+- All 8+ metrics computed
+- Per-category results saved
+- Results: `results/comprehensive_evaluation_results.csv` + `results/per_category_results.csv`
 
-### Key Results (200 samples)
+### Key Results (4000 images, full test set)
 
 | Prompt Strategy | Base SAM mIoU | Specialized mIoU | Improvement |
 |---|---|---|---|
-| Center-of-Mass | 0.4752 | **0.6573** | +38.3% |
-| Edge (Single) | 0.2272 | **0.6463** | +184.4% |
-| Multi-Point Grid | 0.6080 | **0.6681** | +9.9% |
-| Multi-Point Random | **0.7472** | 0.7331 | -1.9% |
+| Center-of-Mass | 0.5724 | **0.7138** | +24.7% |
+| Edge (Single) | 0.2052 | **0.6563** | +219.8% |
+| Multi-Point Grid | 0.6815 | **0.7227** | +6.0% |
+| Multi-Point Random | 0.7303 | **0.7449** | +2.0% |
+
+Additional metrics (specialized model):
+
+| Prompt Strategy | S-alpha | MAE |
+|---|---|---|
+| Center-of-Mass | 0.8353 | 0.0305 |
+| Edge (Single) | 0.7900 | 0.0364 |
+| Multi-Point Grid | 0.8429 | 0.0281 |
+| Multi-Point Random | 0.8577 | 0.0250 |
+
+**Key improvement over 200-sample eval**: Multi-Point Random now shows +2.0% improvement (was -1.9% on 200 samples). Specialized model wins on ALL 4 strategies.
+
+### Embedding Precompute Complete - Job 5785646
+- 6000 training images processed with augmentation -> 6080 embeddings
+- Saved to `data/embeddings/camo_embeddings_vith/`
+- Metadata: `data/embeddings/camo_train_meta_vith.csv`
+
+### CamoDataset Bug Fixed
+- `train.py` imported `CamoDataset` from `src.data.cod10k` but the class didn't exist there
+- Training job 5785646 failed with ImportError after precompute completed
+- Fix applied: `CamoDataset` class added to `src/data/cod10k.py`
+- **Training needs to be re-run** (embeddings are cached, so it will skip precompute)
 
 ### Paper Updated
-- All 3 tables now include COD metrics (S-alpha, E-phi, F-beta-w, MAE)
-- Multi-Point Random results added to all tables
-- `update_paper_tables.py` fixed to write markdown files to `results/tables/`
+- All 3 tables include COD metrics (S-alpha, E-phi, F-beta-w, MAE)
+- Multi-Point Random results in all tables
+- `update_paper_tables.py` fixed to write files to `results/tables/`
+- Paper tables still need update to full 4000-image results
+
+### Future Plan Designed
+- Learnable Local Preprocessing Module (LLPM) - novel boundary-aware module before SAM encoder
+- Video-based camouflage dataset pipeline - use SAM failures as camouflage proxy
+- Full plan saved to `plans/llpm-video-pipeline-plan.md`
 
 ---
 
-## What's In Progress
+## What Needs to Be Done Next
 
-### 1. Full Test Set Evaluation (4000 images)
-- `configs/eval.yaml` updated: `max_samples: 0` (all samples)
-- `eval.sh` time limit increased to 6 hours
-- Per-category analysis added (extracts Aquatic/Terrestrial/Flying from filenames)
-- Outputs: `results/comprehensive_evaluation_results.csv` + `results/per_category_results.csv`
-- **Status:** Ready to submit on cluster
+### Immediate (on HPC)
+- [ ] Pull latest code (has CamoDataset fix)
+- [ ] Re-run training: `sbatch scripts/train.sh` (will skip precompute, just train 15 epochs)
+- [ ] Push eval CSV results to git
 
-### 2. Retrain Decoder (15 epochs + cosine LR)
-- `configs/train.yaml` updated: 15 epochs, cosine LR scheduler, warmup
-- `train.sh` updated for A100, auto-precompute embeddings
-- `src/training/train.py` updated with LR scheduler support
-- **Status:** Ready to submit after eval completes
-
----
-
-## What's Remaining
-
-### High Priority
-- [ ] Run full 4000-image eval and update paper tables
-- [ ] Retrain decoder with improved config, eval with new checkpoint
+### After Training Completes
+- [ ] Evaluate retrained decoder on full test set
+- [ ] Update paper tables with full 4000-image results + new decoder results
 - [ ] Per-category analysis discussion in paper
 
-### Medium Priority (from paper-readiness-gaps.md)
-- [ ] Cross-dataset evaluation (CAMO, CHAMELEON, NC4K)
-- [ ] Ablation studies (loss function, prompt strategy, training config)
-- [ ] Baseline comparisons (SAM ViT-B/L, cite dedicated COD method numbers)
-- [ ] Qualitative figure grid (12 examples)
+### Future Work (from plan)
+- [ ] Implement LLPM module and training pipeline
+- [ ] Implement video-based dataset creation pipeline
+- [ ] Combined training on COD10K + video data
 
-### Lower Priority
-- [ ] Multiple seed evaluation (3-5 seeds with std dev)
-- [ ] Failure case analysis
-- [ ] Architecture diagram
-- [ ] LaTeX formatting for submission
+### Medium Priority
+- [ ] Cross-dataset evaluation (CAMO, CHAMELEON, NC4K)
+- [ ] Ablation studies
+- [ ] Baseline comparisons
+- [ ] Qualitative figure grid
 
 ---
 
@@ -97,26 +113,24 @@ module load miniconda/23.11.0-2
 conda activate specialsam
 cd ~/Special-SAM
 
-# Pull latest changes
+# Pull latest (includes CamoDataset fix)
 git pull
 
-# Submit evaluation (full test set, ~60-90 min on A100)
-sbatch scripts/eval.sh
-
-# Submit training (precompute + 15 epochs, ~3-4 hours on A100)
+# Re-run training (embeddings cached, just trains 15 epochs ~30 min)
 sbatch scripts/train.sh
 
-# Monitor jobs
+# Monitor
 squeue -u g37014071
+sacct -j <jobid> --format=JobID,JobName,State,ExitCode,Elapsed,MaxRSS
 
 # Check logs
-cat logs/eval_<jobid>.out
-cat logs/eval_<jobid>.err
+cat logs/train_<jobid>.out
+cat logs/train_<jobid>.err
 ```
 
 ---
 
-## File Changes Made This Session
+## File Changes This Session
 
 | File | Change |
 |---|---|
@@ -126,6 +140,7 @@ cat logs/eval_<jobid>.err
 | `configs/train.yaml` | 15 epochs, cosine LR, warmup, weight decay |
 | `src/training/train.py` | Added LR scheduler support |
 | `src/evaluation/evaluate.py` | Added per-category analysis |
-| `src/data/cod10k.py` | Handle max_samples=0 as "use all" |
+| `src/data/cod10k.py` | Handle max_samples=0; added CamoDataset class |
 | `paper/paper.md` | Full COD metrics + Multi-Point Random in all tables |
 | `scripts/update_paper_tables.py` | Writes files to results/tables/ |
+| `plans/llpm-video-pipeline-plan.md` | LLPM + video pipeline implementation plan |
