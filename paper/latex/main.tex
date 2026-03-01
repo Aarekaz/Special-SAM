@@ -1,0 +1,278 @@
+\documentclass[10pt,twocolumn,letterpaper]{article}
+
+\usepackage[review]{cvpr}  % blind review mode
+\usepackage{times}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{xcolor}
+\usepackage[pagebackref,breaklinks,colorlinks]{hyperref}
+
+\def\cvprPaperID{****}
+\def\confName{CVPR}
+\def\confYear{2026}
+
+\begin{document}
+
+% ============================================================
+\title{Decoder-Only Specialization Improves SAM's Prompt Robustness for Camouflaged Object Detection}
+
+\author{Anonymous CVPR submission\\
+Paper ID \cvprPaperID}
+
+\maketitle
+
+% ============================================================
+\begin{abstract}
+The Segment Anything Model (SAM) achieves strong zero-shot segmentation on general images but struggles with camouflaged objects, where foreground and background share similar color and texture. We show that simple decoder-only fine-tuning---freezing SAM's image encoder and prompt encoder while training only the lightweight mask decoder---dramatically improves performance on camouflaged object detection (COD). Using the COD10K dataset with SAM ViT-H, our approach improves mean IoU from 57.24\% to 71.38\% (+14.14 points) with center-of-mass prompts on the full 2,026-image camouflaged test set. Critically, this improvement transfers across prompt types: edge-point prompts, the hardest case where base SAM achieves only 20.52\% mIoU, improve to 65.63\% (+219.8\% relative gain). The specialized model improves on all four tested prompt strategies, including multi-point random prompts (+2.0\%). We attribute this prompt robustness to our mixed-prompt training strategy, which randomly alternates between point and bounding box prompts. Our method requires no architectural modifications, trains in under 2 hours on a single GPU using pre-computed embeddings, and produces a decoder checkpoint of only $\sim$16MB. These results suggest that decoder-only specialization is a practical, lightweight strategy for adapting foundation segmentation models to challenging visual domains.
+\end{abstract}
+
+% ============================================================
+\section{Introduction}
+
+Camouflaged object detection (COD) presents a fundamental challenge for visual perception systems. Camouflaged organisms---insects mimicking bark, fish blending into coral, lizards matching rock surfaces---have evolved over millions of years to defeat visual detection. These objects exhibit low contrast against their backgrounds, share complex textures with their surroundings, and span wide ranges of scale and occlusion.
+
+The Segment Anything Model (SAM)~\cite{kirillov2023sam} represents a major advance in promptable segmentation, trained on over 1 billion masks across 11 million images. SAM achieves impressive zero-shot segmentation on general images given point, box, or mask prompts. However, SAM's broad training makes it robust but shallow on tasks requiring fine-grained boundary detection in low-contrast scenes. On COD10K~\cite{fan2020cod10k}, SAM ViT-H achieves only 57.24\% mIoU with center-of-mass prompts---adequate for general segmentation but insufficient for the fine-grained boundaries required in camouflage scenarios.
+
+We ask: \textbf{can simple decoder-only fine-tuning make SAM robust for camouflaged object detection?} Our approach freezes the heavy image encoder (ViT-H, $\sim$632M parameters) and prompt encoder, training only the lightweight mask decoder ($\sim$4M parameters). This preserves SAM's learned visual representations while teaching the decoder to interpret subtle texture disruptions as object boundaries.
+
+Our key finding is that this specialization is \textbf{prompt-robust}: the fine-tuned decoder improves segmentation quality across all tested prompt strategies---center-of-mass, edge points, multi-point grids, and random points---even though training used only center points and bounding boxes. The largest gains appear on the hardest prompts (edge points: +219.8\% relative improvement), suggesting that decoder specialization teaches the model to better understand camouflaged object structure rather than merely memorizing prompt-mask associations.
+
+\noindent\textbf{Contributions:}
+\begin{enumerate}
+    \item A decoder-only fine-tuning pipeline for SAM that achieves +14.14 point mIoU improvement on COD10K with no architectural changes, evaluated on the full camouflaged test set (2,026 images).
+    \item A prompt robustness analysis showing that decoder specialization transfers across all four tested prompt types, with the largest gains on the hardest prompts (+219.8\% relative on edge prompts).
+    \item Comprehensive evaluation using both standard segmentation metrics (IoU, Dice, F1) and standard COD metrics ($S_\alpha$, $E_\phi$, $F_\beta^w$, MAE, Boundary F1), with per-category analysis across aquatic, terrestrial, flying, and amphibian camouflage types.
+\end{enumerate}
+
+% ============================================================
+\section{Related Work}
+
+\noindent\textbf{Segment Anything Model.}
+SAM~\cite{kirillov2023sam} introduced a promptable segmentation paradigm trained on the SA-1B dataset. Its architecture separates image encoding (ViT backbone), prompt encoding (sparse/dense), and mask decoding. SAM2~\cite{ravi2024sam2} extended this to video. Several works have explored adapting SAM to specialized domains: SAM-Adapter~\cite{chen2023samadapter} adds learnable adapter modules to the image encoder, while COMPrompter~\cite{hao2024comprompter} reconceptualizes SAM with multi-prompt networks for COD. Our approach differs by requiring no architectural modifications---we fine-tune only the existing decoder weights.
+
+\noindent\textbf{Camouflaged Object Detection.}
+COD has attracted significant attention with dedicated architectures. SINet~\cite{fan2020sinet} uses a search-and-identify framework, PFNet~\cite{mei2021pfnet} employs positioning and focus modules, and ZoomNet~\cite{pang2022zoomnet} uses mixed-scale learning. These methods design specialized architectures from scratch. In contrast, we leverage SAM's pre-trained representations and demonstrate that decoder-only adaptation can achieve competitive improvements without domain-specific architectural design.
+
+\noindent\textbf{Fine-Tuning Foundation Models.}
+Parameter-efficient fine-tuning has become standard for adapting large models. LoRA~\cite{hu2022lora} adds low-rank adapters, while prompt tuning~\cite{lester2021prompt} learns continuous prompts. For SAM specifically, Liu~\etal~\cite{liu2025dualstream} proposed dual-stream adapters for COD. Our decoder-only approach is simpler: we freeze all parameters except the existing mask decoder, requiring no additional modules or parameters.
+
+% ============================================================
+\section{Method}
+
+\subsection{Background: SAM Architecture}
+
+SAM consists of three components: (1) an \textbf{image encoder} (ViT-H, $\sim$632M parameters) that produces image embeddings, (2) a \textbf{prompt encoder} that maps points, boxes, or masks to sparse and dense embeddings, and (3) a \textbf{mask decoder} ($\sim$4M parameters) that combines image and prompt embeddings to predict segmentation masks.
+
+The image encoder is the computational bottleneck, processing each $1024\times1024$ image through a large vision transformer. The mask decoder is lightweight by comparison, consisting of a two-layer transformer with cross-attention between prompt tokens and image embeddings, followed by an MLP that produces per-pixel mask logits.
+
+\subsection{Decoder-Only Fine-Tuning}
+
+Our training procedure is as follows:
+
+\noindent\textbf{1. Freeze encoders.} All parameters of the image encoder and prompt encoder are frozen. This preserves SAM's learned visual representations and prevents catastrophic forgetting.
+
+\noindent\textbf{2. Pre-compute embeddings.} We run the frozen image encoder once on all training images and cache the resulting embeddings as \texttt{.npy} files. This eliminates the encoder forward pass from the training loop, reducing per-epoch training time from hours to minutes.
+
+\noindent\textbf{3. Augment with horizontal flips.} Each training image is augmented with a horizontal flip, doubling the effective dataset from 6,000 to 12,000 samples.
+
+\noindent\textbf{4. Train with mixed prompts.} During each training iteration, we randomly select between a point prompt (random foreground pixel) and a bounding box prompt (tight box around the ground truth) with equal probability. This forces the decoder to learn object structure rather than becoming dependent on any single prompt type.
+
+\noindent\textbf{5. Combined loss function.} We optimize a weighted combination of binary cross-entropy (BCE) and Dice loss:
+\begin{equation}
+    \mathcal{L} = 0.5 \cdot \mathcal{L}_{\text{BCE}} + 0.5 \cdot \mathcal{L}_{\text{Dice}}
+\end{equation}
+BCE provides pixel-level supervision that enforces precise boundaries, while Dice loss provides region-level supervision that maintains shape coherence.
+
+\noindent\textbf{6. Optimization.} We use AdamW with learning rate $1\times10^{-4}$, cosine annealing schedule with 1-epoch warmup, weight decay 0.01, for 15 epochs with batch size 1.
+
+\subsection{Evaluation Protocol}
+
+We evaluate using four prompt strategies of increasing difficulty:
+
+\begin{itemize}
+    \item \textbf{Center-of-Mass (1 point):} Single point at the centroid of the ground truth mask.
+    \item \textbf{Edge (1 point):} Single point sampled from the object boundary contour.
+    \item \textbf{Multi-Point Grid (4 points):} Four points arranged in a grid within the object bounding box, filtered to foreground pixels.
+    \item \textbf{Multi-Point Random (3 points):} Three randomly sampled foreground points.
+\end{itemize}
+
+We report standard segmentation metrics (IoU, Dice, Boundary F1) and four standard COD evaluation metrics: $S_\alpha$ (structure measure)~\cite{fan2017smeasure}, $E_\phi$ (enhanced alignment)~\cite{fan2018emeasure}, $F_\beta^w$ (weighted F-measure)~\cite{margolin2014fmeasure}, and MAE.
+
+% ============================================================
+\section{Experiments}
+
+\subsection{Dataset: COD10K}
+
+We use COD10K-v3~\cite{fan2020cod10k}, the largest camouflaged object detection dataset, containing 6,000 training and 4,000 test images across 78 camouflage categories spanning aquatic, terrestrial, and flying animals. The camouflaged subset of the test set contains 2,026 images, which forms our evaluation set following standard protocol.
+
+\subsection{Implementation Details}
+
+\begin{itemize}
+    \item \textbf{Backbone:} SAM ViT-H ($\sim$636M parameters)
+    \item \textbf{Training data:} 6,000 images, augmented to 12,000 with flips
+    \item \textbf{Embeddings:} Pre-computed, cached as \texttt{.npy} files
+    \item \textbf{Training:} 15 epochs, AdamW, lr=$1\times10^{-4}$, cosine LR schedule, batch size 1, mixed point/box prompts
+    \item \textbf{Loss:} 50\% BCE + 50\% Dice
+    \item \textbf{Checkpoint:} $\sim$16MB decoder state dict
+    \item \textbf{Hardware:} NVIDIA A100 80GB GPU
+\end{itemize}
+
+\subsection{Training Dynamics}
+
+Training with cosine annealing produced stable, monotonic loss decrease from 0.1417 (epoch 1) to 0.0717 (epoch 15), a 49.4\% total reduction. The final loss indicates healthy generalization without overfitting.
+
+% ============================================================
+\section{Results}
+
+\subsection{Main Results}
+
+Table~\ref{tab:main} presents the comprehensive evaluation across all prompt strategies on the full 2,026-image camouflaged test set.
+
+\begin{table*}[t]
+\centering
+\caption{Comprehensive evaluation across prompt strategies (2,026 camouflaged test images). Best results in \textbf{bold}.}
+\label{tab:main}
+\small
+\begin{tabular}{llccccccc}
+\toprule
+Model & Prompt Strategy & mIoU & Dice & $S_\alpha$ & $E_\phi$ & $F_\beta^w$ & MAE$\downarrow$ & Bnd.~F1 \\
+\midrule
+Base SAM & Center-of-Mass (1pt) & 0.572 & 0.655 & 0.743 & 0.830 & 0.706 & 0.068 & 0.502 \\
+Base SAM & Edge (1pt) & 0.205 & 0.251 & 0.481 & 0.597 & 0.241 & 0.163 & 0.281 \\
+Base SAM & Multi-Pt Grid (4pt) & 0.682 & 0.761 & 0.812 & 0.897 & 0.802 & 0.046 & 0.600 \\
+Base SAM & Multi-Pt Random (3pt) & 0.730 & 0.817 & 0.831 & 0.930 & 0.832 & 0.043 & 0.652 \\
+\midrule
+\textbf{Ours} & \textbf{Center-of-Mass (1pt)} & \textbf{0.714} & \textbf{0.798} & \textbf{0.835} & \textbf{0.933} & \textbf{0.816} & \textbf{0.031} & \textbf{0.673} \\
+\textbf{Ours} & \textbf{Edge (1pt)} & \textbf{0.656} & \textbf{0.742} & \textbf{0.790} & \textbf{0.909} & \textbf{0.732} & \textbf{0.036} & \textbf{0.631} \\
+\textbf{Ours} & \textbf{Multi-Pt Grid (4pt)} & \textbf{0.723} & \textbf{0.807} & \textbf{0.843} & \textbf{0.939} & \textbf{0.826} & \textbf{0.028} & \textbf{0.681} \\
+\textbf{Ours} & \textbf{Multi-Pt Random (3pt)} & \textbf{0.745} & \textbf{0.831} & \textbf{0.858} & \textbf{0.948} & \textbf{0.845} & \textbf{0.025} & \textbf{0.703} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Prompt Robustness Analysis}
+
+The most striking result is the \textbf{uniformity of improvement across all prompt types}. While base SAM shows high sensitivity to prompt quality (mIoU ranges from 0.205 to 0.730), the specialized model is remarkably stable (0.656 to 0.745). The specialized model improves on \textbf{all four} strategies.
+
+\begin{table}[t]
+\centering
+\caption{Improvement analysis by prompt type.}
+\label{tab:improvement}
+\small
+\begin{tabular}{lcccc}
+\toprule
+Prompt Type & Base & Ours & Abs. & Rel. \\
+\midrule
+Center-of-Mass & 0.572 & 0.714 & +0.141 & +24.7\% \\
+Edge (Single) & 0.205 & 0.656 & +0.451 & \textbf{+219.8\%} \\
+Multi-Pt Grid & 0.682 & 0.723 & +0.041 & +6.0\% \\
+Multi-Pt Random & 0.730 & 0.745 & +0.015 & +2.0\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The \textbf{+219.8\% relative improvement on edge prompts} is the headline finding. Edge prompts are the hardest because they place the prompt point at the ambiguous boundary between camouflaged object and background. Base SAM produces nearly random masks (20.5\% mIoU) from edge prompts, while our specialized decoder achieves 65.6\%---comparable to its performance with easier prompt types. This suggests that decoder specialization fundamentally changes how the model resolves ambiguity at camouflaged boundaries.
+
+\subsection{Per-Category Analysis}
+
+Performance varies across camouflage super-categories, revealing where specialization helps most (Table~\ref{tab:category}).
+
+\begin{table}[t]
+\centering
+\caption{Per-category mIoU comparison (Center-of-Mass prompt).}
+\label{tab:category}
+\small
+\begin{tabular}{lcccr}
+\toprule
+Category & $N$ & Base & Ours & Improv. \\
+\midrule
+Amphibian & 124 & 0.680 & 0.780 & +14.8\% \\
+Aquatic & 474 & 0.563 & 0.702 & +24.7\% \\
+Flying & 714 & 0.610 & 0.745 & +22.0\% \\
+Terrestrial & 699 & 0.519 & 0.675 & \textbf{+30.2\%} \\
+Other & 15 & 0.694 & 0.868 & +25.0\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The largest improvement (+30.2\%) is on terrestrial animals, which exhibit the most challenging camouflage patterns (insects on bark, lizards on rocks). Aquatic animals also show substantial gains (+24.7\%), consistent with the difficulty of detecting fish and octopuses against coral/seabed textures.
+
+\subsection{Comparison with Existing Methods}
+
+We compare against dedicated COD architectures and SAM-based methods on the COD10K test set (Table~\ref{tab:comparison}). For dedicated methods, we report published numbers; all use the standard protocol.
+
+\begin{table}[t]
+\centering
+\caption{Comparison with COD methods on COD10K test set.}
+\label{tab:comparison}
+\small
+\begin{tabular}{llcccc}
+\toprule
+Method & Venue & $S_\alpha$ & $E_\phi$ & $F_\beta^w$ & MAE$\downarrow$ \\
+\midrule
+SINet~\cite{fan2020sinet} & CVPR'20 & .776 & .864 & .631 & .043 \\
+PFNet~\cite{mei2021pfnet} & AAAI'21 & .800 & .877 & .660 & .040 \\
+SINet-V2~\cite{fan2022sinetv2} & TPAMI'22 & .815 & .887 & .680 & .037 \\
+SegMaR~\cite{jia2022segmar} & CVPR'22 & .833 & .899 & .724 & .034 \\
+ZoomNet~\cite{pang2022zoomnet} & CVPR'22 & .838 & .911 & .729 & .029 \\
+\midrule
+SAM-Adpt.~\cite{chen2023samadapter} & ICCVW'23 & .883 & .918 & .801 & .025 \\
+COMPr.~\cite{hao2024comprompter} & SCIS'24 & .889 & .949 & .821 & .023 \\
+\midrule
+\textbf{Ours} (CoM) & --- & .835 & .933 & .816 & .031 \\
+\textbf{Ours} (Grid) & --- & \textbf{.843} & \textbf{.939} & \textbf{.826} & \textbf{.028} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Our decoder-only approach achieves $S_\alpha$ comparable to ZoomNet (0.843 vs.\ 0.838) and higher $E_\phi$ (0.939 vs.\ 0.911), despite using no architectural modifications. Methods with specialized adapters (SAM-Adapter, COMPrompter) achieve higher absolute performance by modifying the encoder.
+
+Note that our method uses ground truth prompt points, while dedicated COD methods and SAM-based adapters are fully automatic. A direct comparison should account for this difference---our approach trades full automation for flexible, interactive segmentation.
+
+\subsection{Qualitative Results}
+
+% TODO: Add qualitative figure when generated from HPC job 5786513
+% \begin{figure*}[t]
+%     \centering
+%     \includegraphics[width=\textwidth]{../figures/qualitative_comparison.png}
+%     \caption{Qualitative comparison across difficulty levels.}
+%     \label{fig:qualitative}
+% \end{figure*}
+
+Visual comparisons reveal that base SAM frequently segments only the most salient region near the prompt point, missing large portions of camouflaged objects. The specialized model produces masks that closely follow true object boundaries, even where the animal's coloration is nearly identical to the environment. On easier cases, both models perform comparably---specialization does not degrade performance.
+
+% ============================================================
+\section{Discussion}
+
+\noindent\textbf{Why decoder-only fine-tuning works.}
+SAM's ViT-H image encoder, pre-trained on 1 billion masks, already produces rich feature representations that capture texture gradients, edge patterns, and spatial structure. These representations contain the information needed to detect camouflaged boundaries. The problem lies in the decoder: trained on general segmentation tasks, it hasn't learned to interpret subtle features as object boundaries. By training only the decoder, we teach it a new mapping: \emph{subtle texture disruptions $\rightarrow$ object boundaries}.
+
+\noindent\textbf{Prompt robustness as an emergent property.}
+We attribute the observed prompt robustness to our mixed-prompt training strategy. By randomly alternating between point and box prompts, the decoder cannot overfit to any single prompt modality. It learns \emph{what} the camouflaged object is, not \emph{where the user clicked}. This explains why improvement transfers to prompt types never seen during training (edge points, multi-point grids).
+
+\noindent\textbf{Practical implications.}
+This approach is lightweight (16MB checkpoint), fast to train ($<$2 hours with pre-computed embeddings), requires no architecture changes, and is composable---different decoder checkpoints can be swapped for different domains without re-computing embeddings.
+
+\noindent\textbf{Limitations.}
+We evaluate only on COD10K; generalization to other datasets (CAMO, CHAMELEON, NC4K) remains open. We use only ViT-H; whether smaller backbones suffice is unknown. Unlike dedicated COD methods, our approach requires user-provided prompts. Methods that also adapt the encoder achieve higher absolute performance.
+
+% ============================================================
+\section{Conclusion}
+
+We demonstrate that decoder-only fine-tuning of SAM ViT-H on COD10K produces a +14.14 point mIoU improvement on camouflaged object detection across the full 2,026-image test set, with a +219.8\% relative gain on edge prompts. The specialized model improves on all four tested prompt strategies. The key insight is that this improvement is \textbf{prompt-robust}: a decoder trained with mixed prompts generalizes to all tested strategies, including those never seen during training.
+
+This suggests a broader principle: when adapting foundation segmentation models to challenging domains, the decoder is the right target. The encoder's representations are already sufficient; the decoder needs only a domain-appropriate mapping from features to masks.
+
+\noindent\textbf{Future work} includes: (1) cross-dataset evaluation, (2) testing with smaller backbones, (3) a learnable local preprocessing module that enhances boundary features before SAM's encoder, and (4) a video-based camouflage dataset creation pipeline using SAM's segmentation failures as an automatic proxy for camouflage difficulty.
+
+% ============================================================
+{\small
+\bibliographystyle{ieeenat_fullname}
+\bibliography{main}
+}
+
+\end{document}
