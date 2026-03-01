@@ -1,0 +1,355 @@
+Starting comprehensive evaluation at Sat Feb 28 17:21:57 EST 2026
+GPU: NVIDIA A100 80GB PCIe
+Python: /SEAS/home/g37014071/.conda/envs/specialsam/bin/python
+Found 4000 images in data/cod10k/COD10K-v3/Test/Image
+Found 4000 masks in data/cod10k/COD10K-v3/Test/GT_Object
+Matched 4000 image-mask pairs
+Using all 4000 samples
+
+Evaluating BASE model on 4000 samples
+  Testing: Center-of-Mass (Single)
+    Processed 50/4000
+    Processed 100/4000
+    Processed 150/4000
+    Processed 200/4000
+    Processed 250/4000
+    Processed 300/4000
+    Processed 350/4000
+    Processed 400/4000
+    Processed 450/4000
+    Processed 500/4000
+    Processed 550/4000
+    Processed 600/4000
+    Processed 650/4000
+    Processed 700/4000
+    Processed 750/4000
+    Processed 800/4000
+    Processed 850/4000
+    Processed 900/4000
+    Processed 950/4000
+    Processed 1000/4000
+    Processed 1050/4000
+    Processed 1100/4000
+    Processed 1150/4000
+    Processed 1200/4000
+    Processed 1250/4000
+    Processed 1300/4000
+    Processed 1350/4000
+    Processed 1400/4000
+    Processed 1450/4000
+    Processed 1500/4000
+    Processed 1550/4000
+    Processed 1600/4000
+    Processed 1650/4000
+    Processed 1700/4000
+    Processed 1750/4000
+    Processed 1800/4000
+    Processed 1850/4000
+    Processed 1900/4000
+    Processed 1950/4000
+    Processed 2000/4000
+    mIoU=0.5724, S-alpha=0.7426, MAE=0.0677
+  Testing: Edge (Single)
+    Processed 50/4000
+    Processed 100/4000
+    Processed 150/4000
+    Processed 200/4000
+    Processed 250/4000
+    Processed 300/4000
+    Processed 350/4000
+    Processed 400/4000
+    Processed 450/4000
+    Processed 500/4000
+    Processed 550/4000
+    Processed 600/4000
+    Processed 650/4000
+    Processed 700/4000
+    Processed 750/4000
+    Processed 800/4000
+    Processed 850/4000
+    Processed 900/4000
+    Processed 950/4000
+    Processed 1000/4000
+    Processed 1050/4000
+    Processed 1100/4000
+    Processed 1150/4000
+    Processed 1200/4000
+    Processed 1250/4000
+    Processed 1300/4000
+    Processed 1350/4000
+    Processed 1400/4000
+    Processed 1450/4000
+    Processed 1500/4000
+    Processed 1550/4000
+    Processed 1600/4000
+    Processed 1650/4000
+    Processed 1700/4000
+    Processed 1750/4000
+    Processed 1800/4000
+    Processed 1850/4000
+    Processed 1900/4000
+    Processed 1950/4000
+    Processed 2000/4000
+    mIoU=0.2052, S-alpha=0.4811, MAE=0.1631
+  Testing: Multi-Point Grid (4 pts)
+    Processed 50/4000
+    Processed 100/4000
+    Processed 150/4000
+    Processed 200/4000
+    Processed 250/4000
+    Processed 300/4000
+    Processed 350/4000
+    Processed 400/4000
+    Processed 450/4000
+    Processed 500/4000
+    Processed 550/4000
+    Processed 600/4000
+    Processed 650/4000
+    Processed 700/4000
+    Processed 750/4000
+    Processed 800/4000
+    Processed 850/4000
+    Processed 900/4000
+    Processed 950/4000
+    Processed 1000/4000
+    Processed 1050/4000
+    Processed 1100/4000
+    Processed 1150/4000
+    Processed 1200/4000
+    Processed 1250/4000
+    Processed 1300/4000
+    Processed 1350/4000
+    Processed 1400/4000
+    Processed 1450/4000
+    Processed 1500/4000
+    Processed 1550/4000
+    Processed 1600/4000
+    Processed 1650/4000
+    Processed 1700/4000
+    Processed 1750/4000
+    Processed 1800/4000
+    Processed 1850/4000
+    Processed 1900/4000
+    Processed 1950/4000
+    Processed 2000/4000
+    mIoU=0.6815, S-alpha=0.8120, MAE=0.0459
+  Testing: Multi-Point Random (3 pts)
+    Processed 50/4000
+    Processed 100/4000
+    Processed 150/4000
+    Processed 200/4000
+    Processed 250/4000
+    Processed 300/4000
+    Processed 350/4000
+    Processed 400/4000
+    Processed 450/4000
+    Processed 500/4000
+    Processed 550/4000
+    Processed 600/4000
+    Processed 650/4000
+    Processed 700/4000
+    Processed 750/4000
+    Processed 800/4000
+    Processed 850/4000
+    Processed 900/4000
+    Processed 950/4000
+    Processed 1000/4000
+    Processed 1050/4000
+    Processed 1100/4000
+    Processed 1150/4000
+    Processed 1200/4000
+    Processed 1250/4000
+    Processed 1300/4000
+    Processed 1350/4000
+    Processed 1400/4000
+    Processed 1450/4000
+    Processed 1500/4000
+    Processed 1550/4000
+    Processed 1600/4000
+    Processed 1650/4000
+    Processed 1700/4000
+    Processed 1750/4000
+    Processed 1800/4000
+    Processed 1850/4000
+    Processed 1900/4000
+    Processed 1950/4000
+    Processed 2000/4000
+    mIoU=0.7303, S-alpha=0.8312, MAE=0.0433
+Found 4000 images in data/cod10k/COD10K-v3/Test/Image
+Found 4000 masks in data/cod10k/COD10K-v3/Test/GT_Object
+Matched 4000 image-mask pairs
+Using all 4000 samples
+
+Evaluating SPECIALIZED model on 4000 samples
+  Testing: Center-of-Mass (Single)
+    Processed 50/4000
+    Processed 100/4000
+    Processed 150/4000
+    Processed 200/4000
+    Processed 250/4000
+    Processed 300/4000
+    Processed 350/4000
+    Processed 400/4000
+    Processed 450/4000
+    Processed 500/4000
+    Processed 550/4000
+    Processed 600/4000
+    Processed 650/4000
+    Processed 700/4000
+    Processed 750/4000
+    Processed 800/4000
+    Processed 850/4000
+    Processed 900/4000
+    Processed 950/4000
+    Processed 1000/4000
+    Processed 1050/4000
+    Processed 1100/4000
+    Processed 1150/4000
+    Processed 1200/4000
+    Processed 1250/4000
+    Processed 1300/4000
+    Processed 1350/4000
+    Processed 1400/4000
+    Processed 1450/4000
+    Processed 1500/4000
+    Processed 1550/4000
+    Processed 1600/4000
+    Processed 1650/4000
+    Processed 1700/4000
+    Processed 1750/4000
+    Processed 1800/4000
+    Processed 1850/4000
+    Processed 1900/4000
+    Processed 1950/4000
+    Processed 2000/4000
+    mIoU=0.7138, S-alpha=0.8353, MAE=0.0305
+  Testing: Edge (Single)
+    Processed 50/4000
+    Processed 100/4000
+    Processed 150/4000
+    Processed 200/4000
+    Processed 250/4000
+    Processed 300/4000
+    Processed 350/4000
+    Processed 400/4000
+    Processed 450/4000
+    Processed 500/4000
+    Processed 550/4000
+    Processed 600/4000
+    Processed 650/4000
+    Processed 700/4000
+    Processed 750/4000
+    Processed 800/4000
+    Processed 850/4000
+    Processed 900/4000
+    Processed 950/4000
+    Processed 1000/4000
+    Processed 1050/4000
+    Processed 1100/4000
+    Processed 1150/4000
+    Processed 1200/4000
+    Processed 1250/4000
+    Processed 1300/4000
+    Processed 1350/4000
+    Processed 1400/4000
+    Processed 1450/4000
+    Processed 1500/4000
+    Processed 1550/4000
+    Processed 1600/4000
+    Processed 1650/4000
+    Processed 1700/4000
+    Processed 1750/4000
+    Processed 1800/4000
+    Processed 1850/4000
+    Processed 1900/4000
+    Processed 1950/4000
+    Processed 2000/4000
+    mIoU=0.6563, S-alpha=0.7900, MAE=0.0364
+  Testing: Multi-Point Grid (4 pts)
+    Processed 50/4000
+    Processed 100/4000
+    Processed 150/4000
+    Processed 200/4000
+    Processed 250/4000
+    Processed 300/4000
+    Processed 350/4000
+    Processed 400/4000
+    Processed 450/4000
+    Processed 500/4000
+    Processed 550/4000
+    Processed 600/4000
+    Processed 650/4000
+    Processed 700/4000
+    Processed 750/4000
+    Processed 800/4000
+    Processed 850/4000
+    Processed 900/4000
+    Processed 950/4000
+    Processed 1000/4000
+    Processed 1050/4000
+    Processed 1100/4000
+    Processed 1150/4000
+    Processed 1200/4000
+    Processed 1250/4000
+    Processed 1300/4000
+    Processed 1350/4000
+    Processed 1400/4000
+    Processed 1450/4000
+    Processed 1500/4000
+    Processed 1550/4000
+    Processed 1600/4000
+    Processed 1650/4000
+    Processed 1700/4000
+    Processed 1750/4000
+    Processed 1800/4000
+    Processed 1850/4000
+    Processed 1900/4000
+    Processed 1950/4000
+    Processed 2000/4000
+    mIoU=0.7227, S-alpha=0.8429, MAE=0.0281
+  Testing: Multi-Point Random (3 pts)
+    Processed 50/4000
+    Processed 100/4000
+    Processed 150/4000
+    Processed 200/4000
+    Processed 250/4000
+    Processed 300/4000
+    Processed 350/4000
+    Processed 400/4000
+    Processed 450/4000
+    Processed 500/4000
+    Processed 550/4000
+    Processed 600/4000
+    Processed 650/4000
+    Processed 700/4000
+    Processed 750/4000
+    Processed 800/4000
+    Processed 850/4000
+    Processed 900/4000
+    Processed 950/4000
+    Processed 1000/4000
+    Processed 1050/4000
+    Processed 1100/4000
+    Processed 1150/4000
+    Processed 1200/4000
+    Processed 1250/4000
+    Processed 1300/4000
+    Processed 1350/4000
+    Processed 1400/4000
+    Processed 1450/4000
+    Processed 1500/4000
+    Processed 1550/4000
+    Processed 1600/4000
+    Processed 1650/4000
+    Processed 1700/4000
+    Processed 1750/4000
+    Processed 1800/4000
+    Processed 1850/4000
+    Processed 1900/4000
+    Processed 1950/4000
+    Processed 2000/4000
+    mIoU=0.7449, S-alpha=0.8577, MAE=0.0250
+
+Results saved to results/comprehensive_evaluation_results.csv
+Per-category results saved to results/per_category_results.csv
+Finished at Sat Feb 28 20:20:31 EST 2026
