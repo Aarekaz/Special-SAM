@@ -56,13 +56,21 @@ venv/
 # Misc
 *.zip
 *.tar.gz
-*.csv
-*.png
-*.jpg
-!paper/figures/*.png
-!paper/figures/*.jpg
 
 # Conductor workspace
 .context/
+
+# --- Exceptions: things we DO want to track ---
+
+# Logs (small text files, valuable for reproducibility)
+!logs/
+!logs/**
+
+# Results CSVs and tables
 !results/*.csv
 !results/tables/
+!results/ablation/
+
+# Paper figures
+!paper/figures/*.png
+!paper/figures/*.jpg
