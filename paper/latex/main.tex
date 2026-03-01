@@ -63,6 +63,13 @@ Parameter-efficient fine-tuning has become standard for adapting large models. L
 % ============================================================
 \section{Method}
 
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\textwidth]{../figures/architecture_diagram.pdf}
+    \caption{\textbf{Overview of our decoder-only fine-tuning approach.} (a)~\textbf{Training:} Image embeddings are pre-computed offline using the frozen ViT-H encoder and cached as \texttt{.npy} files. During training, only the lightweight mask decoder ($\sim$4M parameters) is updated using a mixed-prompt strategy (50\% point, 50\% box) with BCE + Dice loss. (b)~\textbf{Inference:} A test image passes through the frozen encoder, and user-provided prompts are encoded by the frozen prompt encoder. The specialized mask decoder produces the final segmentation mask. No architectural modifications are made to SAM.}
+    \label{fig:architecture}
+\end{figure*}
+
 \subsection{Background: SAM Architecture}
 
 SAM consists of three components: (1) an \textbf{image encoder} (ViT-H, $\sim$632M parameters) that produces image embeddings, (2) a \textbf{prompt encoder} that maps points, boxes, or masks to sparse and dense embeddings, and (3) a \textbf{mask decoder} ($\sim$4M parameters) that combines image and prompt embeddings to predict segmentation masks.
@@ -71,7 +78,7 @@ The image encoder is the computational bottleneck, processing each $1024\times10
 
 \subsection{Decoder-Only Fine-Tuning}
 
-Our training procedure is as follows:
+Figure~\ref{fig:architecture} illustrates our approach. Our training procedure is as follows:
 
 \noindent\textbf{1. Freeze encoders.} All parameters of the image encoder and prompt encoder are frozen. This preserves SAM's learned visual representations and prevents catastrophic forgetting.
 
