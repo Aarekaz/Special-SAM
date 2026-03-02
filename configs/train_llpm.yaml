@@ -1,0 +1,48 @@
+# Training configuration for LLPM + SAM decoder joint fine-tuning
+#
+# Key differences from decoder-only training (train.yaml):
+# - No pre-computed embeddings; encoder runs every forward pass
+# - LLPM module preprocesses images before the frozen encoder
+# - Lower learning rate (5e-5 vs 1e-4) for stability
+# - Decoder warm-started from decoder-only checkpoint
+
+seed: 42
+
+model:
+  type: vit_h
+  checkpoint: weights/sam_vit_h_4b8939.pth
+  weights_url: https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth
+  decoder_init_path: checkpoints/camo_decoder_vith.pth  # warm-start decoder
+
+llpm:
+  edge_channels: 32
+  enhance_channels: 64
+  alpha_init: 0.1
+
+data:
+  dataset: cod10k
+  train_img_dir: data/cod10k/COD10K-v3/Train/Image
+  train_mask_dir: data/cod10k/COD10K-v3/Train/GT_Object
+
+preprocessing:
+  target_size: 1024
+  augmentation:
+    horizontal_flip: true
+
+training:
+  epochs: 15
+  learning_rate: 5.0e-5
+  optimizer: AdamW
+  batch_size: 1
+  weight_decay: 0.01
+  lr_scheduler: cosine
+  warmup_epochs: 1
+  num_workers: 4
+  loss:
+    bce_weight: 0.5
+    dice_weight: 0.5
+  prompt_type: random
+
+output:
+  llpm_path: checkpoints/llpm_vith.pth
+  decoder_path: checkpoints/camo_decoder_llpm_vith.pth

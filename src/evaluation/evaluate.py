@@ -23,6 +23,7 @@ from src.evaluation.prompt_strategies import PROMPT_CONFIGS
 from src.models.sam_loader import (
     get_device,
     get_predictor,
+    load_llpm_sam,
     load_sam,
     load_specialized_sam,
 )
@@ -39,6 +40,85 @@ def extract_category(filepath: str) -> str:
     if match:
         return match.group(1)
     return "Unknown"
+
+
+def predict_with_llpm(
+    image: np.ndarray,
+    point_coords: np.ndarray,
+    point_labels: np.ndarray,
+    model: "torch.nn.Module",
+    llpm: "torch.nn.Module",
+    device: "torch.device",
+) -> np.ndarray:
+    """Run prediction through LLPM -> encoder -> decoder, bypassing SamPredictor.
+
+    SamPredictor.set_image() applies its own normalization, so we bypass it
+    and manually run the full pipeline.
+
+    Args:
+        image: RGB image (H, W, 3) uint8.
+        point_coords: Point prompts (N, 2) as numpy array.
+        point_labels: Point labels (N,) as numpy array.
+        model: SAM model.
+        llpm: LLPM module.
+        device: Torch device.
+
+    Returns:
+        Binary mask (H, W) as numpy bool array.
+    """
+    import torch
+    import torch.nn.functional as F
+
+    h, w = image.shape[:2]
+
+    # Image to tensor: (1, 3, H, W) float32 [0, 255]
+    image_t = torch.from_numpy(
+        image.transpose(2, 0, 1).copy()
+    ).float().unsqueeze(0).to(device)
+
+    with torch.no_grad():
+        # LLPM preprocessing
+        enhanced = llpm(image_t).clamp(0, 255)
+
+        # SAM normalization
+        pixel_mean = model.pixel_mean.unsqueeze(0)
+        pixel_std = model.pixel_std.unsqueeze(0)
+        normalized = (enhanced - pixel_mean) / pixel_std
+
+        # Encoder
+        image_embedding = model.image_encoder(normalized)
+
+        # Prompt encoder
+        points_t = torch.tensor(
+            point_coords, dtype=torch.float32, device=device
+        ).unsqueeze(0)
+        labels_t = torch.tensor(
+            point_labels, dtype=torch.int64, device=device
+        ).unsqueeze(0)
+
+        sparse, dense = model.prompt_encoder(
+            points=(points_t, labels_t), boxes=None, masks=None
+        )
+
+        # Decoder
+        low_res_masks, _ = model.mask_decoder(
+            image_embeddings=image_embedding,
+            image_pe=model.prompt_encoder.get_dense_pe(),
+            sparse_prompt_embeddings=sparse,
+            dense_prompt_embeddings=dense,
+            multimask_output=False,
+        )
+
+        # Upsample to original resolution
+        pred = F.interpolate(
+            low_res_masks,
+            size=(h, w),
+            mode="bilinear",
+            align_corners=False,
+        )
+        mask = (pred.squeeze().sigmoid() > 0.5).cpu().numpy()
+
+    return mask
 
 
 def evaluate_model(
@@ -65,22 +145,36 @@ def evaluate_model(
         prompt_strategies = config["evaluation"]["prompt_strategies"]
 
     # Load model
-    if model_type == "specialized":
+    llpm = None
+    if model_type == "llpm":
+        model, llpm = load_llpm_sam(
+            model_type=config["model"]["type"],
+            checkpoint=config["model"]["base_checkpoint"],
+            decoder_path=config["model"].get("llpm_decoder"),
+            llpm_path=config["model"].get("llpm_path"),
+            llpm_config=config.get("llpm"),
+            device=device,
+        )
+        model.eval()
+        llpm.eval()
+        predictor = None
+    elif model_type == "specialized":
         model = load_specialized_sam(
             model_type=config["model"]["type"],
             checkpoint=config["model"]["base_checkpoint"],
             decoder_path=config["model"]["specialized_decoder"],
             device=device,
         )
+        model.eval()
+        predictor = get_predictor(model)
     else:
         model = load_sam(
             model_type=config["model"]["type"],
             checkpoint=config["model"]["base_checkpoint"],
             device=device,
         )
-
-    model.eval()
-    predictor = get_predictor(model)
+        model.eval()
+        predictor = get_predictor(model)
 
     # Get test data
     test_pairs = get_image_mask_pairs(
@@ -130,20 +224,31 @@ def evaluate_model(
             if point_coords is None:
                 continue
 
-            predictor.set_image(img_resized)
-
             try:
-                masks, _, _ = predictor.predict(
-                    point_coords=point_coords,
-                    point_labels=point_labels,
-                    multimask_output=False,
-                )
-
-                pred_resized = cv2.resize(
-                    masks[0].astype(np.uint8),
-                    (w_orig, h_orig),
-                    interpolation=cv2.INTER_NEAREST,
-                )
+                if model_type == "llpm":
+                    pred_binary = predict_with_llpm(
+                        img_resized, point_coords, point_labels,
+                        model, llpm, device,
+                    )
+                    # predict_with_llpm returns at input resolution (1024x1024),
+                    # resize to original for metric computation
+                    pred_resized = cv2.resize(
+                        pred_binary.astype(np.uint8),
+                        (w_orig, h_orig),
+                        interpolation=cv2.INTER_NEAREST,
+                    )
+                else:
+                    predictor.set_image(img_resized)
+                    masks, _, _ = predictor.predict(
+                        point_coords=point_coords,
+                        point_labels=point_labels,
+                        multimask_output=False,
+                    )
+                    pred_resized = cv2.resize(
+                        masks[0].astype(np.uint8),
+                        (w_orig, h_orig),
+                        interpolation=cv2.INTER_NEAREST,
+                    )
 
                 pred_binary = pred_resized > 0.5
                 gt_binary = mask > 128
@@ -236,7 +341,18 @@ def run_comparison(config: dict) -> pd.DataFrame:
     spec_results["model"] = "Specialized SAM ViT-H"
     spec_cat["model"] = "Specialized SAM ViT-H"
 
-    combined = pd.concat([base_results, spec_results], ignore_index=True)
+    all_results = [base_results, spec_results]
+    all_cat = [base_cat, spec_cat]
+
+    # Include LLPM evaluation if configured
+    if config["model"].get("llpm_path"):
+        llpm_results, llpm_cat = evaluate_model("llpm", config)
+        llpm_results["model"] = "LLPM + SAM ViT-H"
+        llpm_cat["model"] = "LLPM + SAM ViT-H"
+        all_results.append(llpm_results)
+        all_cat.append(llpm_cat)
+
+    combined = pd.concat(all_results, ignore_index=True)
 
     # Save main CSV
     output_path = Path(config["output"]["results_csv"])
@@ -245,7 +361,7 @@ def run_comparison(config: dict) -> pd.DataFrame:
     print(f"\nResults saved to {output_path}")
 
     # Save per-category CSV
-    combined_cat = pd.concat([base_cat, spec_cat], ignore_index=True)
+    combined_cat = pd.concat(all_cat, ignore_index=True)
     cat_path = output_path.parent / "per_category_results.csv"
     combined_cat.to_csv(str(cat_path), index=False)
     print(f"Per-category results saved to {cat_path}")

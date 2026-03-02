@@ -4,6 +4,13 @@ model:
   type: vit_h
   base_checkpoint: weights/sam_vit_h_4b8939.pth
   specialized_decoder: checkpoints/camo_decoder_vith.pth
+  # LLPM evaluation (uncomment after LLPM training)
+  # llpm_path: checkpoints/llpm_vith.pth
+  # llpm_decoder: checkpoints/camo_decoder_llpm_vith.pth
+
+llpm:
+  edge_channels: 32
+  enhance_channels: 64
 
 data:
   test_img_dir: data/cod10k/COD10K-v3/Test/Image
