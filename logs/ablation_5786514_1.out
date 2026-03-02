@@ -1,0 +1,101 @@
+============================================
+Ablation Study: dice_only
+Config: configs/ablation/dice_only.yaml
+Started at Sun Mar  1 14:44:17 EST 2026
+GPU: NVIDIA A100 80GB PCIe
+Python: /SEAS/home/g37014071/.conda/envs/specialsam/bin/python
+============================================
+
+[Step 1/2] Training decoder: dice_only
+Training for 15 epochs on 6080 samples...
+  LR scheduler: cosine, warmup: 1 epochs
+Epoch 1/15 | Loss: 0.1810 | LR: 1.00e-04
+Epoch 2/15 | Loss: 0.1693 | LR: 1.00e-04
+Epoch 3/15 | Loss: 0.1593 | LR: 9.88e-05
+Epoch 4/15 | Loss: 0.1543 | LR: 9.51e-05
+Epoch 5/15 | Loss: 0.1462 | LR: 8.92e-05
+Epoch 6/15 | Loss: 0.1431 | LR: 8.14e-05
+Epoch 7/15 | Loss: 0.1384 | LR: 7.20e-05
+Epoch 8/15 | Loss: 0.1296 | LR: 6.15e-05
+Epoch 9/15 | Loss: 0.1271 | LR: 5.05e-05
+Epoch 10/15 | Loss: 0.1210 | LR: 3.95e-05
+Epoch 11/15 | Loss: 0.1168 | LR: 2.90e-05
+Epoch 12/15 | Loss: 0.1109 | LR: 1.96e-05
+Epoch 13/15 | Loss: 0.1086 | LR: 1.18e-05
+Epoch 14/15 | Loss: 0.1059 | LR: 5.90e-06
+Epoch 15/15 | Loss: 0.1057 | LR: 2.24e-06
+Saved decoder to checkpoints/ablation/camo_decoder_dice_only.pth
+Training complete. Decoder saved to: checkpoints/ablation/camo_decoder_dice_only.pth
+
+[Step 2/2] Evaluating decoder: dice_only
+
+============================================================
+Evaluating: dice_only
+  Decoder:  checkpoints/ablation/camo_decoder_dice_only.pth
+  Samples:  500
+============================================================
+Found 4000 images in data/cod10k/COD10K-v3/Test/Image
+Found 4000 masks in data/cod10k/COD10K-v3/Test/GT_Object
+Matched 4000 image-mask pairs
+Using 500 samples (max_samples=500)
+
+Evaluating SPECIALIZED model on 500 samples
+  Testing: Center-of-Mass (Single)
+    Processed 50/500
+    Processed 100/500
+    Processed 150/500
+    Processed 200/500
+    Processed 250/500
+    Processed 300/500
+    Processed 350/500
+    Processed 400/500
+    Processed 450/500
+    Processed 500/500
+    mIoU=0.7123, S-alpha=0.8151, MAE=0.0463
+  Testing: Multi-Point Grid (4 pts)
+    Processed 50/500
+    Processed 100/500
+    Processed 150/500
+    Processed 200/500
+    Processed 250/500
+    Processed 300/500
+    Processed 350/500
+    Processed 400/500
+    Processed 450/500
+    Processed 500/500
+    mIoU=0.7360, S-alpha=0.8340, MAE=0.0386
+
+Results saved to: results/ablation/dice_only_results.csv
+
+==========================================================================================
+ABLATION STUDY: Loss Function Configuration Comparison
+==========================================================================================
+
+Prompt Strategy: Center-of-Mass (Single)
+------------------------------------------------------------------------------------------
+Variant                BCE  Dice    mIoU    Dice  S-alpha   E-phi F-beta-w     MAE   BndF1
+------------------------------------------------------------------------------------------
+dice_only                ?     ?  0.7123  0.7927   0.8151  0.9228   0.7781  0.0463  0.6659
+
+
+Prompt Strategy: Multi-Point Grid (4 pts)
+------------------------------------------------------------------------------------------
+Variant                BCE  Dice    mIoU    Dice  S-alpha   E-phi F-beta-w     MAE   BndF1
+------------------------------------------------------------------------------------------
+dice_only                ?     ?  0.7360  0.8154   0.8340  0.9351   0.8073  0.0386  0.6872
+
+==========================================================================================
+BEST VARIANTS (first prompt strategy)
+------------------------------------------------------------------------------------------
+  mIoU        : dice_only            (0.7123)
+  Dice        : dice_only            (0.7927)
+  S-alpha     : dice_only            (0.8151)
+  E-phi       : dice_only            (0.9228)
+  F-beta-w    : dice_only            (0.7781)
+  MAE         : dice_only            (0.0463)
+==========================================================================================
+Comparison table saved to: results/ablation/ablation_comparison_table.txt
+
+============================================
+Ablation dice_only finished at Sun Mar  1 16:18:42 EST 2026
+============================================

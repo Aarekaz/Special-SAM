@@ -1,0 +1,47 @@
+Starting qualitative figure generation at Sun Mar  1 14:25:46 EST 2026
+GPU: NVIDIA A100 80GB PCIe
+Python: /SEAS/home/g37014071/.conda/envs/specialsam/bin/python
+======================================================================
+Qualitative Figure Generation
+======================================================================
+  Config:       configs/eval.yaml
+  Num examples: 12
+  Output:       paper/figures/qualitative_comparison.png
+
+Loading base SAM for candidate selection...
+Found 4000 images in data/cod10k/COD10K-v3/Test/Image
+Found 4000 masks in data/cod10k/COD10K-v3/Test/GT_Object
+Matched 4000 image-mask pairs
+Using all 4000 samples
+Scoring 4000 test images with base SAM...
+  Scored 100/4000
+  Scored 200/4000
+  Scored 300/4000
+  Scored 400/4000
+  Scored 500/4000
+  Scored 600/4000
+  Scored 700/4000
+  Scored 800/4000
+  Scored 900/4000
+  Scored 1000/4000
+  Scored 1100/4000
+  Scored 1200/4000
+  Scored 1300/4000
+  Scored 1400/4000
+  Scored 1500/4000
+  Scored 1600/4000
+  Scored 1700/4000
+  Scored 1800/4000
+  Scored 1900/4000
+  Scored 2000/4000
+Collected 2026 valid candidates
+Candidate pool: 1011 easy, 480 medium, 535 hard
+Selected 12 examples for figure
+Loading base SAM for figure generation...
+Loading specialized SAM for figure generation...
+
+Figure saved to: paper/figures/qualitative_comparison.png
+  Resolution: 4200 x 11100 px
+
+Done.
+Finished at Sun Mar  1 14:43:47 EST 2026
