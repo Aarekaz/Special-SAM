@@ -133,7 +133,7 @@ Tracks all SLURM jobs, their purpose, status, and results.
 
 - **Path:** `data/embeddings/camo_embeddings_vith/`
 - **Created by:** Job 5785646 (precompute step)
-- **Samples:** 6,080 (6,000 images x2 with horizontal flip augmentation)
+- **Samples:** 6,080 (3,040 camouflaged images x2 with horizontal flip augmentation)
 - **Metadata:** `data/embeddings/camo_train_meta_vith.csv`
 - **Size:** ~45GB
 - **Reused by:** All training jobs (train.sh skips precompute if dir exists)
