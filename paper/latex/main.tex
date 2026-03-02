@@ -39,7 +39,7 @@ The Segment Anything Model (SAM)~\cite{kirillov2023sam} represents a major advan
 
 We ask: \textbf{can simple decoder-only fine-tuning make SAM robust for camouflaged object detection?} Our approach freezes the heavy image encoder (ViT-H, $\sim$632M parameters) and prompt encoder, training only the lightweight mask decoder ($\sim$4M parameters). This preserves SAM's learned visual representations while teaching the decoder to interpret subtle texture disruptions as object boundaries.
 
-Our key finding is that this specialization is \textbf{prompt-robust}: the fine-tuned decoder improves segmentation quality across all tested prompt strategies---center-of-mass, edge points, multi-point grids, and random points---even though training used only center points and bounding boxes. The largest gains appear on the hardest prompts (edge points: +238.1\% relative improvement), suggesting that decoder specialization teaches the model to better understand camouflaged object structure rather than merely memorizing prompt-mask associations.
+Our key finding is that this specialization is \textbf{prompt-robust}: the fine-tuned decoder improves segmentation quality across all tested prompt strategies---center-of-mass, edge points, multi-point grids, and random points---even though training used only single random foreground points and bounding boxes. The largest gains appear on the hardest prompts (edge points: +238.1\% relative improvement), suggesting that decoder specialization teaches the model to better understand camouflaged object structure rather than merely memorizing prompt-mask associations.
 
 \noindent\textbf{Contributions:}
 \begin{enumerate}
