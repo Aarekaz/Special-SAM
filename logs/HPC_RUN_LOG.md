@@ -65,12 +65,29 @@ Tracks all SLURM jobs, their purpose, status, and results.
 - **Script:** `scripts/eval.sh`
 - **Submitted:** 2026-03-01
 - **GPU:** A100 80GB
-- **Status:** RUNNING
+- **Runtime:** ~3 hours (14:25 - 17:27 EST)
+- **Status:** COMPLETED
 - **Config:** `configs/eval.yaml` (max_samples=0, all test images)
 - **Decoder:** `checkpoints/camo_decoder_vith.pth` (15-epoch, cosine LR)
-- **Expected output:** `results/comprehensive_evaluation_results.csv`, `results/per_category_results.csv`
-- **Expected log:** `logs/eval_5786512.out`
-- **Purpose:** Evaluate improved decoder; expect better numbers than job 5785644
+- **Output:** `results/comprehensive_evaluation_results.csv`, `results/per_category_results.csv`
+- **Log:** `logs/eval_5786512.out`
+- **Results (15-epoch decoder, 2,026 camouflaged test images):**
+
+| Prompt Strategy | Base mIoU | Specialized mIoU | Improvement |
+|---|---|---|---|
+| Center-of-Mass | 0.5724 | 0.7381 | +28.9% |
+| Edge (Single) | 0.2052 | 0.6938 | +238.1% |
+| Multi-Point Grid | 0.6815 | 0.7556 | +10.9% |
+| Multi-Point Random | 0.7293 | 0.7751 | +6.3% |
+
+- **Improvement over 7-epoch decoder (Job 5785644):**
+
+| Prompt Strategy | 7-epoch mIoU | 15-epoch mIoU | Gain |
+|---|---|---|---|
+| Center-of-Mass | 0.7138 | 0.7381 | +2.4 pts |
+| Edge (Single) | 0.6563 | 0.6938 | +3.8 pts |
+| Multi-Point Grid | 0.7227 | 0.7556 | +3.3 pts |
+| Multi-Point Random | 0.7449 | 0.7751 | +3.0 pts |
 
 ---
 
@@ -78,11 +95,12 @@ Tracks all SLURM jobs, their purpose, status, and results.
 - **Script:** `scripts/qualitative.sh`
 - **Submitted:** 2026-03-01
 - **GPU:** A100 80GB
-- **Status:** RUNNING
+- **Runtime:** ~18 min (14:25 - 14:43 EST)
+- **Status:** COMPLETED
 - **Config:** `configs/eval.yaml`
-- **Expected output:** `paper/figures/qualitative_comparison.png`
-- **Expected log:** `logs/qualitative_5786513.out`
-- **Purpose:** Generate 12-example comparison grid (4 hard, 4 medium, 4 easy)
+- **Output:** `paper/figures/qualitative_comparison.png` (4200 x 11100 px, ~21MB)
+- **Log:** `logs/qualitative_5786513.out`
+- **Details:** Scored all 4000 test images, selected 12 examples (535 hard, 480 medium, 1011 easy candidates). Generated 12-row comparison grid with columns: Image, GT, Base SAM, Specialized SAM.
 
 ---
 
@@ -90,15 +108,24 @@ Tracks all SLURM jobs, their purpose, status, and results.
 - **Script:** `scripts/ablation.sh` (SLURM array job, 4 tasks)
 - **Submitted:** 2026-03-01
 - **GPU:** A100 80GB x4 (parallel array)
-- **Status:** RUNNING
+- **Status:** COMPLETED
 - **Configs:**
   - Task 0: `configs/ablation/bce_only.yaml` (BCE=1.0, Dice=0.0)
   - Task 1: `configs/ablation/dice_only.yaml` (BCE=0.0, Dice=1.0)
   - Task 2: `configs/ablation/bce_heavy.yaml` (BCE=0.7, Dice=0.3)
   - Task 3: `configs/ablation/dice_heavy.yaml` (BCE=0.3, Dice=0.7)
-- **Expected output:** `checkpoints/ablation/camo_decoder_*.pth`, `results/ablation/*_results.csv`
-- **Expected log:** `logs/ablation_5786514_*.out`
-- **Purpose:** Show which loss components matter; paper ablation table
+- **Output:** `checkpoints/ablation/camo_decoder_*.pth`, `results/ablation/*_results.csv`
+- **Logs:** `logs/ablation_5786514_0.out` through `logs/ablation_5786514_3.out`
+- **Results (Center-of-Mass prompt, 500 test images):**
+
+| Variant | BCE | Dice | mIoU | S-alpha | E-phi | MAE |
+|---|---|---|---|---|---|---|
+| BCE only | 1.0 | 0.0 | 0.7134 | 0.8234 | 0.9259 | 0.0420 |
+| Dice only | 0.0 | 1.0 | 0.7123 | 0.8151 | 0.9228 | 0.0463 |
+| BCE-heavy | 0.7 | 0.3 | 0.7076 | 0.8175 | 0.9246 | 0.0443 |
+| **Dice-heavy** | **0.3** | **0.7** | **0.7285** | **0.8291** | **0.9319** | **0.0427** |
+
+- **Key finding:** Dice-heavy (0.3/0.7) performs best among ablation variants. All variants are competitive, showing robustness to loss configuration. Our default 0.5/0.5 on full test set achieves 0.7381 mIoU.
 
 ---
 
