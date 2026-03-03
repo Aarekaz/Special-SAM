@@ -5,8 +5,8 @@ model:
   base_checkpoint: weights/sam_vit_h_4b8939.pth
   specialized_decoder: checkpoints/camo_decoder_vith.pth
   # LLPM evaluation (uncomment after LLPM training)
-  # llpm_path: checkpoints/llpm_vith.pth
-  # llpm_decoder: checkpoints/camo_decoder_llpm_vith.pth
+  llpm_path: checkpoints/llpm_vith.pth
+  llpm_decoder: checkpoints/camo_decoder_llpm_vith.pth
 
 llpm:
   edge_channels: 32
