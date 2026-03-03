@@ -1,0 +1,4 @@
+/gpfs/automountdir/gpfs/homes/SEAS/home/g37014071/Special-SAM/src/training/train_llpm.py:136: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  scaler = GradScaler()
+/gpfs/automountdir/gpfs/homes/SEAS/home/g37014071/Special-SAM/src/training/train_llpm.py:156: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
