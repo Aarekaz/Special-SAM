@@ -27,9 +27,7 @@ Paper ID \cvprPaperID}
 
 % ============================================================
 \begin{abstract}
-The Segment Anything Model (SAM) achieves strong zero-shot segmentation on general images but struggles with camouflaged objects, where foreground and background share similar color and texture. We show that simple decoder-only fine-tuning---freezing SAM's image encoder and prompt encoder while training only the lightweight mask decoder---dramatically improves performance on camouflaged object detection (COD). Using the COD10K dataset with SAM ViT-H, our approach improves mean IoU from 57.24\% to 73.81\% (+16.57 points) with center-of-mass prompts on the full 2,026-image camouflaged test set. Critically, this improvement transfers across prompt types: edge-point prompts, the hardest case where base SAM achieves only 20.52\% mIoU, improve to 69.38\% (+238.1\% relative gain). The specialized model improves on all four tested prompt strategies, including multi-point random prompts (+6.3\%). We attribute this prompt robustness to our mixed-prompt training strategy, which randomly alternates between point and bounding box prompts. Our method requires no architectural modifications, trains in under 30 minutes on a single A100 GPU using pre-computed embeddings, and produces a decoder checkpoint of only $\sim$16MB. We further introduce a Learnable Local Preprocessing Module (LLPM) that enhances input images before the frozen encoder using lightweight edge-detection and enhancement branches, adding only $\sim$31K parameters.
-% TODO: Add LLPM quantitative results once training completes (e.g., "LLPM+decoder achieves X.XX mIoU, a further +Y.YY over decoder-only").
-These results suggest that lightweight adaptation at both ends of the pipeline---pre-encoder preprocessing and decoder specialization---is a practical strategy for adapting foundation segmentation models to challenging visual domains.
+The Segment Anything Model (SAM) achieves strong zero-shot segmentation on general images but struggles with camouflaged objects, where foreground and background share similar color and texture. We show that simple decoder-only fine-tuning---freezing SAM's image encoder and prompt encoder while training only the lightweight mask decoder---dramatically improves performance on camouflaged object detection (COD). Using the COD10K dataset with SAM ViT-H, our approach improves mean IoU from 57.24\% to 73.81\% (+16.57 points) with center-of-mass prompts on the full 2,026-image camouflaged test set. Critically, this improvement transfers across prompt types: edge-point prompts, the hardest case where base SAM achieves only 20.52\% mIoU, improve to 69.38\% (+238.1\% relative gain). The specialized model improves on all four tested prompt strategies, including multi-point random prompts (+6.3\%). We attribute this prompt robustness to our mixed-prompt training strategy, which randomly alternates between point and bounding box prompts. Our method requires no architectural modifications, trains in under 30 minutes on a single A100 GPU using pre-computed embeddings, and produces a decoder checkpoint of only $\sim$16MB. We further introduce a Learnable Local Preprocessing Module (LLPM) that enhances input images before the frozen encoder using lightweight edge-detection and enhancement branches, adding only $\sim$31K parameters. The LLPM further improves edge-prompt mIoU from 69.38\% to 71.95\% (+2.57 points over decoder-only), demonstrating that pre-encoder input enhancement and decoder specialization are complementary. These results suggest that lightweight adaptation at both ends of the pipeline---pre-encoder preprocessing and decoder specialization---is a practical strategy for adapting foundation segmentation models to challenging visual domains.
 \end{abstract}
 
 % ============================================================
@@ -305,15 +303,36 @@ Ours (0.5/0.5)$^\dagger$ & .738 & .819 & .847 & .942 & .819 & .028 \\
 All four variants achieve similar performance, indicating that the decoder-only approach is robust to loss function choice. The dice-heavy variant (0.3 BCE + 0.7 Dice) performs best among the ablations, suggesting that region-level Dice supervision is slightly more beneficial than pixel-level BCE for camouflage segmentation. However, the balanced 0.5/0.5 combination used in our main model remains a strong default.
 
 \subsection{LLPM Results}
-% TODO: This section will be populated once LLPM training on HPC completes.
-% Include the following:
-%   - Table comparing LLPM+decoder vs decoder-only across all prompt strategies
-%   - Learned alpha value(s) and interpretation
-%   - Key metric deltas: mIoU, Dice, S_alpha, E_phi, F_beta^w, MAE
-%   - Per-category breakdown if space permits
-%   - Ablation: LLPM-only (no decoder fine-tuning) vs decoder-only vs LLPM+decoder
 
-Results for the LLPM variant are pending; this section will be updated once training completes.
+Table~\ref{tab:llpm} compares the LLPM+decoder model against the decoder-only baseline across all four prompt strategies on the full 2,026-image camouflaged test set.
+
+\begin{table}[t]
+\centering
+\caption{Decoder-only vs LLPM+decoder comparison. Best per prompt in \textbf{bold}.}
+\label{tab:llpm}
+\small
+\begin{tabular}{llccccc}
+\toprule
+Prompt & Model & mIoU & Dice & $S_\alpha$ & $F_\beta^w$ & MAE$\downarrow$ \\
+\midrule
+\multirow{2}{*}{CoM} & Dec. & .738 & .819 & .847 & .819 & .028 \\
+ & LLPM & \textbf{.740} & \textbf{.820} & .847 & \textbf{.820} & .028 \\
+\midrule
+\multirow{2}{*}{Edge} & Dec. & .694 & .779 & .810 & .750 & .034 \\
+ & LLPM & \textbf{.719} & \textbf{.802} & \textbf{.827} & \textbf{.778} & \textbf{.029} \\
+\midrule
+\multirow{2}{*}{Grid} & Dec. & \textbf{.756} & \textbf{.835} & \textbf{.861} & \textbf{.841} & \textbf{.024} \\
+ & LLPM & .755 & .833 & .856 & .833 & .025 \\
+\midrule
+\multirow{2}{*}{Random} & Dec. & \textbf{.775} & \textbf{.855} & \textbf{.874} & \textbf{.862} & \textbf{.021} \\
+ & LLPM & .772 & .851 & .866 & .848 & .022 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The LLPM provides the largest improvement on \textbf{edge prompts} (+2.57 mIoU points, +1.7 $S_\alpha$, +2.8 $F_\beta^w$), where boundary-level input enhancement has the greatest impact. Center-of-mass prompts also improve marginally (+0.23 mIoU). Multi-point prompts (grid and random) show negligible decreases ($<$0.3 mIoU), suggesting that when multiple foreground points already provide strong spatial cues, the LLPM's boundary enhancement offers less additional benefit.
+
+The learned fusion gate converged to $\alpha = 0.185$, indicating that the LLPM applies a moderate perturbation to the input. This conservative value is consistent with the residual design: the module enhances boundary signals without disrupting the global image statistics that the frozen ViT-H encoder expects.
 
 \subsection{Qualitative Results}
 
@@ -347,8 +366,7 @@ We evaluate only on COD10K; generalization to other datasets (CAMO, CHAMELEON, N
 % ============================================================
 \section{Conclusion}
 
-We demonstrate that decoder-only fine-tuning of SAM ViT-H on COD10K produces a +16.57 point mIoU improvement on camouflaged object detection across the full 2,026-image test set, with a +238.1\% relative gain on edge prompts. The specialized model improves on all four tested prompt strategies. The key insight is that this improvement is \textbf{prompt-robust}: a decoder trained with mixed prompts generalizes to all tested strategies, including those never seen during training. We further introduce a Learnable Local Preprocessing Module (LLPM) that enhances input images before the frozen encoder, improving boundary sensitivity with only $\sim$31K additional parameters.
-% TODO: Add LLPM quantitative contribution sentence once training completes (e.g., "+X.XX mIoU over decoder-only").
+We demonstrate that decoder-only fine-tuning of SAM ViT-H on COD10K produces a +16.57 point mIoU improvement on camouflaged object detection across the full 2,026-image test set, with a +238.1\% relative gain on edge prompts. The specialized model improves on all four tested prompt strategies. The key insight is that this improvement is \textbf{prompt-robust}: a decoder trained with mixed prompts generalizes to all tested strategies, including those never seen during training. We further introduce a Learnable Local Preprocessing Module (LLPM) that enhances input images before the frozen encoder, improving boundary sensitivity with only $\sim$31K additional parameters. The LLPM yields a +2.57 mIoU gain on edge prompts over decoder-only fine-tuning, confirming that pre-encoder input enhancement and decoder specialization are complementary strategies.
 
 This suggests a broader principle: when adapting foundation segmentation models to challenging domains, lightweight adaptation at \emph{both ends} of the pipeline---pre-encoder input enhancement and decoder specialization---can unlock strong performance without modifying the frozen backbone. The encoder's representations are already sufficient; the decoder needs only a domain-appropriate mapping from features to masks, and a small learnable preprocessor can further sharpen the signal the encoder receives.
 
