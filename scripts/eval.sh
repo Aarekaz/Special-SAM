@@ -9,6 +9,7 @@
 #SBATCH --time=06:00:00
 
 export PATH="/SEAS/home/g37014071/.conda/envs/specialsam/bin:$PATH"
+export PYTHONUNBUFFERED=1
 
 cd "$SLURM_SUBMIT_DIR" || exit 1
 mkdir -p logs
