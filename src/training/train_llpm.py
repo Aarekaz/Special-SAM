@@ -105,11 +105,16 @@ def train_llpm(config: dict) -> None:
     )
 
     # Dataset
+    aug_cfg = config["preprocessing"].get("augmentation", {})
     train_ds = CamoImageDataset(
         img_dir=config["data"]["train_img_dir"],
         mask_dir=config["data"]["train_mask_dir"],
         target_size=config["preprocessing"]["target_size"],
-        augment=config["preprocessing"]["augmentation"].get("horizontal_flip", True),
+        augment=aug_cfg.get("horizontal_flip", True),
+        rotation=aug_cfg.get("rotation", False),
+        max_rotation=aug_cfg.get("max_rotation", 5.0),
+        shift=aug_cfg.get("pixel_shift", False),
+        max_shift=aug_cfg.get("max_shift", 16),
     )
     train_loader = DataLoader(
         train_ds,
@@ -166,7 +171,15 @@ def train_llpm(config: dict) -> None:
                 image_embedding = model.image_encoder(normalized)
 
                 # Prompt encoder — no gradient path back to LLPM
-                use_box = random.random() > 0.5
+                prompt_mix = config["training"].get("prompt_mix", "mixed")
+                if prompt_mix == "point_only":
+                    use_box = False
+                elif prompt_mix == "box_only":
+                    use_box = True
+                elif isinstance(prompt_mix, (int, float)):
+                    use_box = random.random() < float(prompt_mix)
+                else:  # "mixed" or default
+                    use_box = random.random() > 0.5
                 with torch.no_grad():
                     if use_box:
                         sparse, dense = model.prompt_encoder(

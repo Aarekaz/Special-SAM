@@ -17,6 +17,10 @@ preprocessing:
   target_size: 1024
   augmentation:
     horizontal_flip: true
+    rotation: false       # set true for rotation augmentation
+    max_rotation: 5.0     # degrees
+    pixel_shift: false    # set true for translation augmentation
+    max_shift: 16         # pixels (half of ViT's 32px patch)
 
 embeddings:
   dir: data/embeddings/camo_embeddings_vith
@@ -34,6 +38,7 @@ training:
     bce_weight: 0.5
     dice_weight: 0.5
   prompt_type: random  # random switch between point and box prompts
+  # save_every_n_epochs: 5  # uncomment for epoch ablation (saves at 5, 10, 15)
 
 output:
   decoder_path: checkpoints/camo_decoder_vith.pth

@@ -28,6 +28,10 @@ preprocessing:
   target_size: 1024
   augmentation:
     horizontal_flip: true
+    rotation: false
+    max_rotation: 5.0
+    pixel_shift: false
+    max_shift: 16
 
 training:
   epochs: 15

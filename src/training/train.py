@@ -93,8 +93,16 @@ def train(config: dict) -> None:
         for emb, gt_mask, point, label, box in train_loader:
             emb = emb.squeeze(1)
 
-            # Randomly switch between point and box prompts
-            use_box = random.random() > 0.5
+            # Prompt mixing: configurable via config
+            prompt_mix = config["training"].get("prompt_mix", "mixed")
+            if prompt_mix == "point_only":
+                use_box = False
+            elif prompt_mix == "box_only":
+                use_box = True
+            elif isinstance(prompt_mix, (int, float)):
+                use_box = random.random() < float(prompt_mix)
+            else:  # "mixed" or default
+                use_box = random.random() > 0.5
 
             with torch.no_grad():
                 if use_box:
@@ -134,6 +142,14 @@ def train(config: dict) -> None:
 
         if scheduler and epoch >= warmup_epochs:
             scheduler.step()
+
+        # Save intermediate checkpoints
+        save_every = config["training"].get("save_every_n_epochs")
+        if save_every and (epoch + 1) % save_every == 0:
+            ckpt_dir = Path(config["output"]["decoder_path"]).parent
+            ckpt_path = ckpt_dir / f"decoder_epoch{epoch + 1}.pth"
+            torch.save(model.mask_decoder.state_dict(), str(ckpt_path))
+            print(f"  Saved intermediate checkpoint: {ckpt_path}")
 
     # Save decoder weights
     output_path = Path(config["output"]["decoder_path"])

@@ -1,0 +1,40 @@
+# Ablation: Flip + rotation + pixel shift augmentation
+
+seed: 42
+
+model:
+  type: vit_h
+  checkpoint: weights/sam_vit_h_4b8939.pth
+
+data:
+  dataset: cod10k
+  train_img_dir: data/cod10k/COD10K-v3/Train/Image
+  train_mask_dir: data/cod10k/COD10K-v3/Train/GT_Object
+
+preprocessing:
+  target_size: 1024
+  augmentation:
+    horizontal_flip: true
+    rotation: true
+    max_rotation: 5.0
+    pixel_shift: true
+    max_shift: 16
+
+embeddings:
+  dir: data/embeddings/camo_embeddings_vith_aug_full
+  metadata_csv: data/embeddings/camo_train_meta_vith_aug_full.csv
+
+training:
+  epochs: 15
+  learning_rate: 1.0e-4
+  optimizer: AdamW
+  batch_size: 1
+  weight_decay: 0.01
+  lr_scheduler: cosine
+  warmup_epochs: 1
+  loss:
+    bce_weight: 0.5
+    dice_weight: 0.5
+
+output:
+  decoder_path: checkpoints/ablation/camo_decoder_flip_rot_shift.pth

@@ -38,5 +38,6 @@ metrics:
 
 output:
   results_csv: results/comprehensive_evaluation_results.csv
+  per_image_csv: results/per_image_results.csv
   comparison_plot: results/comprehensive_evaluation_comparison.png
   visualization_dir: results/visualizations

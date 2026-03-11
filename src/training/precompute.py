@@ -18,7 +18,7 @@ import pandas as pd
 import yaml
 
 from src.data.cod10k import get_image_mask_pairs
-from src.data.transforms import horizontal_flip, resize_image_mask
+from src.data.transforms import horizontal_flip, pixel_shift, random_rotation, resize_image_mask
 from src.models.sam_loader import get_device, load_sam, get_predictor
 
 
@@ -84,10 +84,22 @@ def precompute_embeddings(config: dict) -> pd.DataFrame:
         img_resized, mask_resized = resize_image_mask(img, mask, target_size)
         img_flipped, mask_flipped = horizontal_flip(img_resized, mask_resized)
 
-        for aug_idx, (curr_img, curr_mask) in enumerate(
-            [(img_resized, mask_resized), (img_flipped, mask_flipped)]
-        ):
-            aug_suffix = "_flip" if aug_idx == 1 else ""
+        # Build list of augmented variants
+        aug_cfg = config.get("preprocessing", {}).get("augmentation", {})
+        aug_pairs = [
+            ("", img_resized, mask_resized),
+            ("_flip", img_flipped, mask_flipped),
+        ]
+        if aug_cfg.get("rotation", False):
+            max_angle = aug_cfg.get("max_rotation", 5.0)
+            img_rot, mask_rot = random_rotation(img_resized, mask_resized, max_angle)
+            aug_pairs.append(("_rot", img_rot, mask_rot))
+        if aug_cfg.get("pixel_shift", False):
+            max_shift = aug_cfg.get("max_shift", 16)
+            img_shift, mask_shift = pixel_shift(img_resized, mask_resized, max_shift)
+            aug_pairs.append(("_shift", img_shift, mask_shift))
+
+        for aug_suffix, curr_img, curr_mask in aug_pairs:
             embed_path = embed_dir / f"train_{i:04d}{aug_suffix}_embed.npy"
             mask_save_path = embed_dir / f"train_{i:04d}{aug_suffix}_mask.npy"
 

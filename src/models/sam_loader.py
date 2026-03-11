@@ -137,6 +137,7 @@ def load_llpm_sam(
         edge_channels=llpm_config.get("edge_channels", 32),
         enhance_channels=llpm_config.get("enhance_channels", 64),
         alpha_init=llpm_config.get("alpha_init", 0.1),
+        mode=llpm_config.get("mode", "full"),
     )
 
     if llpm_path is not None:

@@ -1,0 +1,41 @@
+# Ablation: LLPM enhancement branch only (no edge gating)
+
+seed: 42
+
+model:
+  type: vit_h
+  checkpoint: weights/sam_vit_h_4b8939.pth
+  decoder_init_path: checkpoints/camo_decoder_vith.pth
+
+llpm:
+  edge_channels: 32
+  enhance_channels: 64
+  alpha_init: 0.1
+  mode: enhance_only
+
+data:
+  dataset: cod10k
+  train_img_dir: data/cod10k/COD10K-v3/Train/Image
+  train_mask_dir: data/cod10k/COD10K-v3/Train/GT_Object
+
+preprocessing:
+  target_size: 1024
+  augmentation:
+    horizontal_flip: true
+
+training:
+  epochs: 15
+  learning_rate: 5.0e-5
+  optimizer: AdamW
+  batch_size: 1
+  weight_decay: 0.01
+  lr_scheduler: cosine
+  warmup_epochs: 1
+  num_workers: 4
+  loss:
+    bce_weight: 0.5
+    dice_weight: 0.5
+
+output:
+  llpm_path: checkpoints/ablation/llpm_enhance_only.pth
+  decoder_path: checkpoints/ablation/camo_decoder_llpm_enhance_only.pth

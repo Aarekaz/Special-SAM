@@ -121,11 +121,50 @@ def predict_with_llpm(
     return mask
 
 
+def compute_image_metadata(
+    img: np.ndarray, gt_binary: np.ndarray
+) -> dict:
+    """Compute per-image metadata for error analysis.
+
+    Args:
+        img: Original RGB image (H, W, 3) uint8.
+        gt_binary: Binary ground truth mask (H, W).
+
+    Returns:
+        Dict with fg_pixel_count, fg_pixel_ratio, image_brightness,
+        aspect_ratio (of GT bounding box).
+    """
+    h, w = gt_binary.shape
+    total_pixels = h * w
+    fg_count = int(gt_binary.sum())
+    fg_ratio = fg_count / total_pixels if total_pixels > 0 else 0.0
+
+    # Mean brightness of the image (grayscale)
+    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY) if img.ndim == 3 else img
+    brightness = float(gray.mean())
+
+    # GT bounding box aspect ratio
+    ys, xs = np.where(gt_binary)
+    if len(xs) > 0:
+        box_w = int(xs.max() - xs.min()) + 1
+        box_h = int(ys.max() - ys.min()) + 1
+        aspect_ratio = max(box_w, box_h) / max(min(box_w, box_h), 1)
+    else:
+        aspect_ratio = 1.0
+
+    return {
+        "fg_pixel_count": fg_count,
+        "fg_pixel_ratio": fg_ratio,
+        "image_brightness": brightness,
+        "gt_aspect_ratio": aspect_ratio,
+    }
+
+
 def evaluate_model(
     model_type: str,
     config: dict,
     prompt_strategies: list[str] | None = None,
-) -> pd.DataFrame:
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Evaluate one model across all prompt strategies and metrics.
 
     Args:
@@ -134,7 +173,7 @@ def evaluate_model(
         prompt_strategies: List of strategy keys. Uses config default if None.
 
     Returns:
-        DataFrame with one row per prompt strategy containing all metrics.
+        Tuple of (aggregate_df, per_category_df, per_image_df).
     """
     device = get_device()
     target_size = config["evaluation"]["target_size"]
@@ -187,6 +226,7 @@ def evaluate_model(
 
     results = []
     cat_results = []
+    per_image_records = []
 
     for strategy_key in prompt_strategies:
         if strategy_key not in PROMPT_CONFIGS:
@@ -254,25 +294,56 @@ def evaluate_model(
                 gt_binary = mask > 128
 
                 # Compute all metrics
-                ious.append(SegmentationMetrics.iou(pred_binary, gt_binary))
-                dices.append(SegmentationMetrics.dice_coefficient(pred_binary, gt_binary))
-                f1s.append(SegmentationMetrics.f1_score(pred_binary, gt_binary))
+                iou_val = SegmentationMetrics.iou(pred_binary, gt_binary)
+                dice_val = SegmentationMetrics.dice_coefficient(pred_binary, gt_binary)
+                f1_val = SegmentationMetrics.f1_score(pred_binary, gt_binary)
 
                 boundary = SegmentationMetrics.boundary_precision(
                     pred_binary, gt_binary, boundary_threshold
                 )
-                boundary_precs.append(boundary["precision"])
-                boundary_recalls.append(boundary["recall"])
-                boundary_f1s.append(boundary["f1"])
+                bp = boundary["precision"]
+                br = boundary["recall"]
+                bf1 = boundary["f1"]
 
-                # New COD metrics
-                s_alphas.append(SegmentationMetrics.s_alpha(pred_binary, gt_binary))
-                e_phis.append(SegmentationMetrics.e_phi(pred_binary, gt_binary))
-                f_beta_ws.append(SegmentationMetrics.f_beta_w(pred_binary, gt_binary))
-                maes.append(SegmentationMetrics.mae(
+                sa = SegmentationMetrics.s_alpha(pred_binary, gt_binary)
+                ep = SegmentationMetrics.e_phi(pred_binary, gt_binary)
+                fbw = SegmentationMetrics.f_beta_w(pred_binary, gt_binary)
+                mae_val = SegmentationMetrics.mae(
                     pred_binary.astype(float), gt_binary.astype(float)
-                ))
-                categories.append(extract_category(img_path))
+                )
+                cat = extract_category(img_path)
+
+                ious.append(iou_val)
+                dices.append(dice_val)
+                f1s.append(f1_val)
+                boundary_precs.append(bp)
+                boundary_recalls.append(br)
+                boundary_f1s.append(bf1)
+                s_alphas.append(sa)
+                e_phis.append(ep)
+                f_beta_ws.append(fbw)
+                maes.append(mae_val)
+                categories.append(cat)
+
+                # Per-image metadata for error analysis
+                meta = compute_image_metadata(img, gt_binary)
+                per_image_records.append({
+                    "image_path": img_path,
+                    "category": cat,
+                    "prompt_strategy": cfg["name"],
+                    "model": model_type,
+                    "iou": iou_val,
+                    "dice": dice_val,
+                    "f1": f1_val,
+                    "boundary_prec": bp,
+                    "boundary_recall": br,
+                    "boundary_f1": bf1,
+                    "s_alpha": sa,
+                    "e_phi": ep,
+                    "f_beta_w": fbw,
+                    "mae": mae_val,
+                    **meta,
+                })
 
             except Exception as e:
                 print(f"    Error on sample {idx}: {e}")
@@ -310,18 +381,22 @@ def evaluate_model(
                 cat_arr = np.array(categories)
                 iou_arr = np.array(ious)
                 for cat in sorted(set(categories)):
-                    mask = cat_arr == cat
+                    cmask = cat_arr == cat
                     cat_results.append({
                         "prompt_strategy": cfg["name"],
                         "category": cat,
-                        "iou_mean": np.mean(iou_arr[mask]),
-                        "dice_mean": np.mean(np.array(dices)[mask]),
-                        "s_alpha_mean": np.mean(np.array(s_alphas)[mask]),
-                        "mae_mean": np.mean(np.array(maes)[mask]),
-                        "num_samples": int(mask.sum()),
+                        "iou_mean": np.mean(iou_arr[cmask]),
+                        "dice_mean": np.mean(np.array(dices)[cmask]),
+                        "s_alpha_mean": np.mean(np.array(s_alphas)[cmask]),
+                        "mae_mean": np.mean(np.array(maes)[cmask]),
+                        "num_samples": int(cmask.sum()),
                     })
 
-    return pd.DataFrame(results), pd.DataFrame(cat_results)
+    return (
+        pd.DataFrame(results),
+        pd.DataFrame(cat_results),
+        pd.DataFrame(per_image_records),
+    )
 
 
 def run_comparison(config: dict) -> pd.DataFrame:
@@ -333,24 +408,26 @@ def run_comparison(config: dict) -> pd.DataFrame:
     Returns:
         Combined DataFrame with results from both models.
     """
-    base_results, base_cat = evaluate_model("base", config)
+    base_results, base_cat, base_per_img = evaluate_model("base", config)
     base_results["model"] = "Base SAM ViT-H"
     base_cat["model"] = "Base SAM ViT-H"
 
-    spec_results, spec_cat = evaluate_model("specialized", config)
+    spec_results, spec_cat, spec_per_img = evaluate_model("specialized", config)
     spec_results["model"] = "Specialized SAM ViT-H"
     spec_cat["model"] = "Specialized SAM ViT-H"
 
     all_results = [base_results, spec_results]
     all_cat = [base_cat, spec_cat]
+    all_per_img = [base_per_img, spec_per_img]
 
     # Include LLPM evaluation if configured
     if config["model"].get("llpm_path"):
-        llpm_results, llpm_cat = evaluate_model("llpm", config)
+        llpm_results, llpm_cat, llpm_per_img = evaluate_model("llpm", config)
         llpm_results["model"] = "LLPM + SAM ViT-H"
         llpm_cat["model"] = "LLPM + SAM ViT-H"
         all_results.append(llpm_results)
         all_cat.append(llpm_cat)
+        all_per_img.append(llpm_per_img)
 
     combined = pd.concat(all_results, ignore_index=True)
 
@@ -365,6 +442,17 @@ def run_comparison(config: dict) -> pd.DataFrame:
     cat_path = output_path.parent / "per_category_results.csv"
     combined_cat.to_csv(str(cat_path), index=False)
     print(f"Per-category results saved to {cat_path}")
+
+    # Save per-image CSV
+    combined_per_img = pd.concat(all_per_img, ignore_index=True)
+    per_img_path = config["output"].get(
+        "per_image_csv", "results/per_image_results.csv"
+    )
+    per_img_path = Path(per_img_path)
+    per_img_path.parent.mkdir(parents=True, exist_ok=True)
+    combined_per_img.to_csv(str(per_img_path), index=False)
+    print(f"Per-image results saved to {per_img_path} "
+          f"({len(combined_per_img)} rows)")
 
     return combined
 

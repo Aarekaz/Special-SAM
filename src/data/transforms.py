@@ -65,3 +65,78 @@ def horizontal_flip(
     mask_flipped = cv2.flip(mask, 1)
 
     return img_flipped, mask_flipped
+
+
+def random_rotation(
+    image: np.ndarray,
+    mask: np.ndarray,
+    max_angle: float = 5.0,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Rotate image and mask by a random angle for data augmentation.
+
+    Uses BORDER_REFLECT_101 for image and INTER_NEAREST for mask to
+    preserve binary values.
+
+    Args:
+        image: Input image (H, W, 3) in RGB format.
+        mask: Ground truth mask (H, W) with values 0-255.
+        max_angle: Maximum rotation angle in degrees (symmetric).
+
+    Returns:
+        Tuple of (rotated_image, rotated_mask).
+    """
+    h, w = image.shape[:2]
+    angle = np.random.uniform(-max_angle, max_angle)
+    center = (w / 2, h / 2)
+    M = cv2.getRotationMatrix2D(center, angle, 1.0)
+
+    img_rot = cv2.warpAffine(
+        image, M, (w, h),
+        flags=cv2.INTER_LINEAR,
+        borderMode=cv2.BORDER_REFLECT_101,
+    )
+    mask_rot = cv2.warpAffine(
+        mask, M, (w, h),
+        flags=cv2.INTER_NEAREST,
+        borderMode=cv2.BORDER_CONSTANT,
+        borderValue=0,
+    )
+
+    return img_rot, mask_rot
+
+
+def pixel_shift(
+    image: np.ndarray,
+    mask: np.ndarray,
+    max_shift: int = 16,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Translate image and mask by a random pixel offset.
+
+    Shift up to half of ViT's 32px patch size to test sub-patch robustness.
+
+    Args:
+        image: Input image (H, W, 3) in RGB format.
+        mask: Ground truth mask (H, W) with values 0-255.
+        max_shift: Maximum shift in pixels (symmetric, both axes).
+
+    Returns:
+        Tuple of (shifted_image, shifted_mask).
+    """
+    h, w = image.shape[:2]
+    dx = np.random.randint(-max_shift, max_shift + 1)
+    dy = np.random.randint(-max_shift, max_shift + 1)
+    M = np.float32([[1, 0, dx], [0, 1, dy]])
+
+    img_shifted = cv2.warpAffine(
+        image, M, (w, h),
+        flags=cv2.INTER_LINEAR,
+        borderMode=cv2.BORDER_REFLECT_101,
+    )
+    mask_shifted = cv2.warpAffine(
+        mask, M, (w, h),
+        flags=cv2.INTER_NEAREST,
+        borderMode=cv2.BORDER_CONSTANT,
+        borderValue=0,
+    )
+
+    return img_shifted, mask_shifted

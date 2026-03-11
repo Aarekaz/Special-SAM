@@ -75,15 +75,26 @@ class LLPM(nn.Module):
         edge_channels: Hidden channels in EdgeBranch (default 32).
         enhance_channels: Hidden channels in EnhancementBranch (default 64).
         alpha_init: Initial value for the learnable fusion weight (default 0.1).
+        mode: Operating mode for ablation studies.
+            - "full": Default, both branches with learnable alpha.
+            - "edge_only": Only edge branch (enhancement is identity).
+            - "enhance_only": Only enhancement branch (no edge gating).
+            - "no_gate": Both branches but alpha fixed to 1.0.
     """
+
+    VALID_MODES = ("full", "edge_only", "enhance_only", "no_gate")
 
     def __init__(
         self,
         edge_channels: int = 32,
         enhance_channels: int = 64,
         alpha_init: float = 0.1,
+        mode: str = "full",
     ):
         super().__init__()
+        if mode not in self.VALID_MODES:
+            raise ValueError(f"Invalid mode '{mode}'. Must be one of {self.VALID_MODES}")
+        self.mode = mode
         self.edge_branch = EdgeBranch(in_channels=3, mid_channels=edge_channels)
         self.enhance_branch = EnhancementBranch(in_channels=3, mid_channels=enhance_channels)
         self.alpha = nn.Parameter(torch.tensor(alpha_init))
@@ -97,9 +108,20 @@ class LLPM(nn.Module):
         Returns:
             Enhanced image tensor (B, 3, H, W), same range.
         """
-        edge_map = self.edge_branch(x)           # (B, 1, H, W)
-        enhancement = self.enhance_branch(x)      # (B, 3, H, W)
-        return x + self.alpha * (enhancement * edge_map)
+        if self.mode == "edge_only":
+            edge_map = self.edge_branch(x)
+            return x + self.alpha * (x * edge_map)
+        elif self.mode == "enhance_only":
+            enhancement = self.enhance_branch(x)
+            return x + self.alpha * enhancement
+        elif self.mode == "no_gate":
+            edge_map = self.edge_branch(x)
+            enhancement = self.enhance_branch(x)
+            return x + 1.0 * (enhancement * edge_map)
+        else:  # "full"
+            edge_map = self.edge_branch(x)
+            enhancement = self.enhance_branch(x)
+            return x + self.alpha * (enhancement * edge_map)
 
     def count_parameters(self) -> int:
         """Return total number of trainable parameters."""

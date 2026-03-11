@@ -14,7 +14,7 @@ import torch
 from torch.utils.data import Dataset
 
 from src.data.cod10k import get_image_mask_pairs
-from src.data.transforms import resize_image_mask
+from src.data.transforms import pixel_shift, random_rotation, resize_image_mask
 
 
 class CamoImageDataset(Dataset):
@@ -30,6 +30,10 @@ class CamoImageDataset(Dataset):
         target_size: Resize dimension (default 1024).
         max_samples: Limit number of samples (None = all).
         augment: Whether to apply random horizontal flip.
+        rotation: Whether to apply random rotation.
+        max_rotation: Maximum rotation angle in degrees.
+        shift: Whether to apply random pixel shift.
+        max_shift: Maximum pixel shift amount.
     """
 
     def __init__(
@@ -39,10 +43,18 @@ class CamoImageDataset(Dataset):
         target_size: int = 1024,
         max_samples: int | None = None,
         augment: bool = True,
+        rotation: bool = False,
+        max_rotation: float = 5.0,
+        shift: bool = False,
+        max_shift: int = 16,
     ):
         self.pairs = get_image_mask_pairs(img_dir, mask_dir, max_samples)
         self.target_size = target_size
         self.augment = augment
+        self.rotation = rotation
+        self.max_rotation = max_rotation
+        self.shift = shift
+        self.max_shift = max_shift
 
     def __len__(self):
         return len(self.pairs)
@@ -60,6 +72,14 @@ class CamoImageDataset(Dataset):
         if self.augment and random.random() > 0.5:
             img = cv2.flip(img, 1)
             mask = cv2.flip(mask, 1)
+
+        # Random rotation
+        if self.rotation and random.random() > 0.5:
+            img, mask = random_rotation(img, mask, self.max_rotation)
+
+        # Random pixel shift
+        if self.shift and random.random() > 0.5:
+            img, mask = pixel_shift(img, mask, self.max_shift)
 
         # Binarize mask
         mask_bin = (mask > 128).astype(np.float32)
