@@ -9,6 +9,23 @@
 | 5787790   | scripts/train_llpm.sh   | LLPM + decoder joint training   | Completed | 2026-03-02 13:48 EST | 2026-03-02 21:14 EST | 15 epochs, final loss 0.0421, alpha 0.1847             |
 | 5787867   | scripts/eval.sh         | Full eval (decoder + LLPM)      | Completed | 2026-03-02 ~21:15 EST | 2026-03-03 02:41 EST | 3 models × 4 prompts × 2026 images                    |
 
+## Planned Jobs (2026-03-11)
+
+| Priority | Script                          | Description                        | Depends On | Est. Time | GPU? | Status  |
+|----------|---------------------------------|------------------------------------|------------|-----------|------|---------|
+| 1        | scripts/eval.sh                 | Re-eval with per-image CSV saving  | —          | ~6 hrs    | Yes  | Pending |
+| 1        | scripts/ablation_prompt.sh      | Prompt-type ablation (2 tasks)     | —          | ~2 hrs    | Yes  | Pending |
+| 2        | scripts/error_analysis.sh       | Failure categorization + montages  | Job P1-eval | ~30 min  | No   | Pending |
+| 3        | scripts/ablation_augmentation.sh| Augmentation ablation (2 tasks)    | —          | ~8 hrs    | Yes  | Pending |
+| 4        | scripts/ablation_llpm.sh        | LLPM component ablation (3 tasks)  | —          | ~30 hrs   | Yes  | Deferred |
+
+### Expected Outputs
+- `results/per_image_results.csv` — per-image metrics + metadata (from eval)
+- `results/error_analysis/` — failure_list.csv, failure_summary.csv, montage PNGs
+- `results/ablation/point_only_results.csv`, `box_only_results.csv` (from prompt ablation)
+- `checkpoints/ablation/camo_decoder_point_only.pth`, `camo_decoder_box_only.pth`
+- `checkpoints/ablation/camo_decoder_flip_rot.pth`, `camo_decoder_flip_rot_shift.pth`
+
 ## Checkpoints
 
 | File                                  | Description                          | Size   |
