@@ -2,7 +2,7 @@
 #SBATCH --job-name=error-analysis
 #SBATCH --output=logs/error_analysis_%j.out
 #SBATCH --error=logs/error_analysis_%j.err
-#SBATCH --partition=general
+#SBATCH --partition=gpu
 #SBATCH --mem=16G
 #SBATCH --cpus-per-task=4
 #SBATCH --time=01:00:00
