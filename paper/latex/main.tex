@@ -214,9 +214,26 @@ To understand \emph{where} our model still fails, we analyze the worst-performin
     \item \textbf{General}: none of the above
 \end{itemize}
 
-% TODO: Replace with actual numbers after running error analysis (Job 2)
+\begin{table}[t]
+\centering
+\caption{\textbf{Error analysis.} Mean IoU on the 400 worst-performing images, grouped by failure category. LLPM improves on all categories except the rare thin/elongated case ($N\!=\!2$).}
+\label{tab:error_analysis}
+\small
+\begin{tabular}{lrccc}
+\toprule
+Category & $N$ & Base & Spec. & LLPM \\
+\midrule
+Disjoint & 175 & .213 & .303 & \textbf{.371} \\
+Dark & 104 & .316 & .326 & \textbf{.366} \\
+General & 65 & .352 & .342 & \textbf{.413} \\
+Tiny & 54 & .289 & .261 & \textbf{.292} \\
+Thin/elongated & 2 & .004 & \textbf{.346} & .222 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \noindent\textbf{Key findings.}
-The failure distribution is non-uniform: tiny objects and dark images account for a disproportionate share of errors, while boundary-ambiguous cases---where the object boundary is nearly invisible---are specifically where the LLPM provides its largest gains. This structured failure analysis informs targeted improvements and demonstrates that the remaining errors are interpretable rather than random.
+Failures are structured, not random (Table~\ref{tab:error_analysis}). Disjoint objects (multiple connected components, 44\% of failures) and dark images (26\%) dominate. The LLPM improves over decoder-only on all major failure categories: +6.8 mIoU on disjoint objects, +7.1 on general failures, and +4.0 on dark images. This demonstrates that the LLPM's boundary enhancement benefits extend beyond edge prompts to the model's hardest cases overall. Tiny objects ($<$1\% foreground pixels) remain the most challenging category (mean IoU 0.29), suggesting that scale-aware augmentation or multi-scale features are needed for further improvement.
 
 \subsection{Comparison with Existing Methods}
 
