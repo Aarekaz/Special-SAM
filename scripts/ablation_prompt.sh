@@ -6,7 +6,7 @@
 #SBATCH --gres=gpu:a100:1
 #SBATCH --mem=32G
 #SBATCH --cpus-per-task=4
-#SBATCH --time=02:00:00
+#SBATCH --time=08:00:00
 #SBATCH --array=0-1
 
 # ============================================================================
@@ -71,7 +71,7 @@ echo "[Step 2/2] Evaluating decoder: ${NAME}"
 python scripts/eval_ablation.py \
     --decoders "${DECODER}" \
     --names "${NAME}" \
-    --max-samples 0 \
+    --max-samples 500 \
     --output-csv "results/ablation/${NAME}_results.csv" \
     --prompt-strategies center edge_single multi_grid multi_random
 
