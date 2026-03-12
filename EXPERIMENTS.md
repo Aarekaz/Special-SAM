@@ -14,9 +14,9 @@
 | Priority | Script                          | Description                        | Depends On | Est. Time | GPU? | Status  |
 |----------|---------------------------------|------------------------------------|------------|-----------|------|---------|
 | 1        | scripts/eval.sh                 | Re-eval with per-image CSV saving  | —          | ~6 hrs    | Yes  | **Completed** (5803621) |
-| 1        | scripts/ablation_prompt.sh      | Prompt-type ablation (2 tasks)     | —          | ~8 hrs    | Yes  | Running (5804070), prev timeout 5803622 |
-| 2        | scripts/error_analysis.sh       | Failure categorization + montages  | Job P1-eval | ~30 min  | No   | Running (5804069) |
-| 3        | scripts/ablation_augmentation.sh| Augmentation ablation (2 tasks)    | —          | ~8 hrs    | Yes  | Running (5804072) |
+| 1        | scripts/ablation_prompt.sh      | Prompt-type ablation (2 tasks)     | —          | ~8 hrs    | Yes  | **Completed** (5804070) |
+| 2        | scripts/error_analysis.sh       | Failure categorization + montages  | Job P1-eval | ~30 min  | No   | **Completed** (5804069) |
+| 3        | scripts/ablation_augmentation.sh| Augmentation ablation (2 tasks)    | —          | ~16 hrs   | Yes  | TIMEOUT (5804072), resubmit |
 | 4        | scripts/ablation_llpm.sh        | LLPM component ablation (3 tasks)  | —          | ~30 hrs   | Yes  | Deferred |
 
 ### Expected Outputs

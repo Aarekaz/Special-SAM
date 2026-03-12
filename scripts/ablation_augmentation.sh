@@ -6,7 +6,7 @@
 #SBATCH --gres=gpu:a100:1
 #SBATCH --mem=32G
 #SBATCH --cpus-per-task=4
-#SBATCH --time=08:00:00
+#SBATCH --time=16:00:00
 #SBATCH --array=0-1
 
 # ============================================================================
@@ -68,7 +68,7 @@ DECODER="checkpoints/ablation/camo_decoder_${NAME}.pth"
 python scripts/eval_ablation.py \
     --decoders "${DECODER}" \
     --names "${NAME}" \
-    --max-samples 0 \
+    --max-samples 500 \
     --output-csv "results/ablation/${NAME}_results.csv" \
     --prompt-strategies center edge_single multi_grid multi_random
 
