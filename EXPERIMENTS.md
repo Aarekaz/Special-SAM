@@ -17,7 +17,7 @@
 | 1        | scripts/ablation_prompt.sh      | Prompt-type ablation (2 tasks)     | —          | ~8 hrs    | Yes  | **Completed** (5804070) |
 | 2        | scripts/error_analysis.sh       | Failure categorization + montages  | Job P1-eval | ~30 min  | No   | **Completed** (5804069) |
 | 3        | scripts/ablation_augmentation.sh| Augmentation ablation (2 tasks)    | —          | ~16 hrs   | Yes  | **Completed** (5807623, resubmit of 5804072) |
-| 4        | scripts/ablation_llpm.sh        | LLPM component ablation (3 tasks)  | —          | ~30 hrs   | Yes  | Deferred |
+| 4        | scripts/ablation_llpm.sh        | LLPM component ablation (3 tasks)  | —          | ~16 hrs   | Yes  | **Submitted** (5808865) |
 
 ### Expected Outputs
 - `results/per_image_results.csv` — per-image metrics + metadata (from eval)
