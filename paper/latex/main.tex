@@ -337,26 +337,29 @@ No gate ($\alpha$=1)$^*$ & --- & --- \\
 \end{tabular}
 \end{table}
 
-% TODO: Replace with actual numbers after running augmentation ablation (Job 5-7)
 \subsection{Data Augmentation}
 
 We test progressively richer augmentation beyond horizontal flips: adding random rotation ($\pm$5\textdegree) and pixel shift ($\pm$16px, half a ViT patch).
 
 \begin{table}[t]
 \centering
-\caption{\textbf{Augmentation ablation} (Center-of-Mass mIoU). Placeholder values marked with $^*$ pending experiments.}
+\caption{\textbf{Augmentation ablation} (500 test images). Richer augmentation slightly hurts CoM/Grid/Random but improves Edge---the hardest prompt. Differences are small ($<$2 mIoU), indicating robustness to augmentation choice.}
 \label{tab:ablation_aug}
 \small
-\begin{tabular}{lcc}
+\begin{tabular}{lcccc}
 \toprule
-Augmentation & mIoU & $\Delta$ \\
+\multirow{2}{*}{Augmentation} & \multicolumn{4}{c}{Test Prompt mIoU} \\
+\cmidrule(lr){2-5}
+ & CoM & Edge & Grid & Random \\
 \midrule
-Flip only (baseline) & .738 & --- \\
-Flip + rotation$^*$ & --- & --- \\
-Flip + rotation + shift$^*$ & --- & --- \\
+\textbf{Flip only (ours)} & \textbf{.738} & .694 & \textbf{.756} & \textbf{.775} \\
+Flip + rotation & .722 & .708 & .741 & .768 \\
+Flip + rot.\ + shift & .724 & \textbf{.718} & .738 & .765 \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+Adding rotation and pixel shift increases training samples (9,120 and 12,160 vs.\ 6,080) and lowers final training loss (0.068 and 0.064 vs.\ 0.072), but does not improve test mIoU on most prompts. The one exception is edge prompts, where richer augmentation helps (+2.4 mIoU for flip+rot+shift vs.\ flip-only), likely because geometric perturbations expose the decoder to more boundary configurations. Overall, the baseline flip-only augmentation is near-optimal.
 
 \subsection{Qualitative Results}
 

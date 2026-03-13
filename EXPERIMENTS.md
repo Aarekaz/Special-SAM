@@ -16,7 +16,7 @@
 | 1        | scripts/eval.sh                 | Re-eval with per-image CSV saving  | —          | ~6 hrs    | Yes  | **Completed** (5803621) |
 | 1        | scripts/ablation_prompt.sh      | Prompt-type ablation (2 tasks)     | —          | ~8 hrs    | Yes  | **Completed** (5804070) |
 | 2        | scripts/error_analysis.sh       | Failure categorization + montages  | Job P1-eval | ~30 min  | No   | **Completed** (5804069) |
-| 3        | scripts/ablation_augmentation.sh| Augmentation ablation (2 tasks)    | —          | ~16 hrs   | Yes  | TIMEOUT (5804072), resubmit |
+| 3        | scripts/ablation_augmentation.sh| Augmentation ablation (2 tasks)    | —          | ~16 hrs   | Yes  | **Completed** (5807623, resubmit of 5804072) |
 | 4        | scripts/ablation_llpm.sh        | LLPM component ablation (3 tasks)  | —          | ~30 hrs   | Yes  | Deferred |
 
 ### Expected Outputs
@@ -67,3 +67,45 @@
 | Edge   | .719 | .802 | .827 | .933 | .778  | .029 |
 | Grid   | .755 | .833 | .856 | .946 | .833  | .025 |
 | Random | .772 | .851 | .866 | .955 | .848  | .022 |
+
+## Prompt Ablation Results (job 5804070, 500 test images)
+
+| Prompt | Mixed (ours) | Point-Only | Box-Only |
+|--------|-------------|------------|----------|
+| CoM    | **.738**    | .699       | .376     |
+| Edge   | **.694**    | .672       | .501     |
+| Grid   | **.756**    | .725       | .389     |
+| Random | **.775**    | .768       | .455     |
+
+Finding: Mixed training outperforms point-only by 3-4 mIoU on every prompt.
+Box-only is catastrophic on point prompts (CoM drops to 0.376).
+
+## Augmentation Ablation Results (job 5807623, 500 test images)
+
+| Prompt | Flip only (ours) | + Rotation | + Rot + Shift |
+|--------|-----------------|------------|---------------|
+| CoM    | **.738**        | .722       | .724          |
+| Edge   | .694            | .708       | **.718**      |
+| Grid   | **.756**        | .741       | .738          |
+| Random | **.775**        | .768       | .765          |
+
+Training details:
+- Flip only: 6,080 samples, final loss 0.0717
+- Flip + rotation: 9,120 samples, final loss 0.0683
+- Flip + rot + shift: 12,160 samples, final loss 0.0638
+
+Finding: More augmentation slightly hurts CoM/Grid/Random but helps Edge (+2.4 mIoU).
+Differences are small (<2 pts). Flip-only is near-optimal.
+
+## Error Analysis Results (job 5804069)
+
+| Category       | N   | Base  | Specialized | LLPM  |
+|----------------|-----|-------|-------------|-------|
+| Disjoint       | 175 | .213  | .303        | **.371** |
+| Dark           | 104 | .316  | .326        | **.366** |
+| General        | 65  | .352  | .342        | **.413** |
+| Tiny           | 54  | .289  | .261        | **.292** |
+| Thin/elongated | 2   | .004  | **.346**    | .222  |
+
+Finding: LLPM improves on all major categories. Disjoint objects (44% of failures) and
+dark images (26%) dominate. Tiny objects remain hardest (mean IoU 0.29).

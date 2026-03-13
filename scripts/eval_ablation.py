@@ -144,7 +144,7 @@ def evaluate_single_decoder(
     print(f"  Samples:  {max_samples if max_samples > 0 else 'all'}")
     print(f"{'='*60}")
 
-    results_df, _ = evaluate_model("specialized", config, prompt_strategies)
+    results_df, _, _ = evaluate_model("specialized", config, prompt_strategies)
 
     if results_df.empty:
         print(f"WARNING: No results for '{name}'")
