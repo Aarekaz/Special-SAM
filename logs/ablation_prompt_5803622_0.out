@@ -1,0 +1,17 @@
+============================================
+Prompt Ablation: point_only
+Config: configs/ablation/prompt_point_only.yaml
+Started at Wed Mar 11 17:06:21 EDT 2026
+GPU: NVIDIA A100 80GB PCIe
+============================================
+[Step 1/2] Training decoder: point_only
+Training for 15 epochs on 6080 samples...
+  LR scheduler: cosine, warmup: 1 epochs
+Epoch 1/15 | Loss: 0.1662 | LR: 1.00e-04
+Epoch 2/15 | Loss: 0.1477 | LR: 1.00e-04
+Epoch 3/15 | Loss: 0.1367 | LR: 9.88e-05
+Epoch 4/15 | Loss: 0.1257 | LR: 9.51e-05
+Epoch 5/15 | Loss: 0.1187 | LR: 8.92e-05
+Epoch 6/15 | Loss: 0.1093 | LR: 8.14e-05
+Epoch 7/15 | Loss: 0.1011 | LR: 7.20e-05
+Epoch 8/15 | Loss: 0.0947 | LR: 6.15e-05

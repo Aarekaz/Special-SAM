@@ -1,0 +1,12 @@
+[2026-03-12T01:45:26.948] error: IPMI failure detected, energy reading for this step will not be accurate.
+Traceback (most recent call last):
+  File "/gpfs/automountdir/gpfs/homes/SEAS/home/g37014071/Special-SAM/scripts/eval_ablation.py", line 376, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/gpfs/automountdir/gpfs/homes/SEAS/home/g37014071/Special-SAM/scripts/eval_ablation.py", line 340, in main
+    result_df = evaluate_single_decoder(
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/gpfs/automountdir/gpfs/homes/SEAS/home/g37014071/Special-SAM/scripts/eval_ablation.py", line 147, in evaluate_single_decoder
+    results_df, _ = evaluate_model("specialized", config, prompt_strategies)
+    ^^^^^^^^^^^^^
+ValueError: too many values to unpack (expected 2)

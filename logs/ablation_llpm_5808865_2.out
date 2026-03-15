@@ -1,0 +1,94 @@
+============================================
+LLPM Ablation: llpm_no_gate
+Config: configs/ablation/llpm_no_gate.yaml
+Started at Fri Mar 13 10:11:56 EDT 2026
+GPU: NVIDIA A100 80GB PCIe
+============================================
+[Step 1/2] Training LLPM variant: llpm_no_gate...
+LLPM parameters: 30,981
+Decoder parameters: 4,058,340
+Found 6000 images in data/cod10k/COD10K-v3/Train/Image
+Found 6000 masks in data/cod10k/COD10K-v3/Train/GT_Object
+Matched 6000 image-mask pairs
+Using all 6000 samples
+
+Training LLPM+decoder for 15 epochs on 6000 samples...
+  LR scheduler: cosine, warmup: 1 epochs
+  Decoder warm-start from: checkpoints/camo_decoder_vith.pth
+Epoch 1/15 | Loss: 0.1062 | LR: 5.00e-05 | alpha: 0.1000 | alpha_grad: 0.000000
+Epoch 2/15 | Loss: 0.0703 | LR: 5.00e-05 | alpha: 0.1000 | alpha_grad: 0.000000
+Epoch 3/15 | Loss: 0.0608 | LR: 4.94e-05 | alpha: 0.1000 | alpha_grad: 0.000000
+Epoch 4/15 | Loss: 0.0587 | LR: 4.76e-05 | alpha: 0.1000 | alpha_grad: 0.000000
+Epoch 5/15 | Loss: 0.0569 | LR: 4.47e-05 | alpha: 0.1000 | alpha_grad: 0.000000
+Epoch 6/15 | Loss: 0.0516 | LR: 4.08e-05 | alpha: 0.1000 | alpha_grad: 0.000000
+Epoch 7/15 | Loss: 0.0553 | LR: 3.61e-05 | alpha: 0.1000 | alpha_grad: 0.000000
+Epoch 8/15 | Loss: 0.0485 | LR: 3.10e-05 | alpha: 0.1000 | alpha_grad: 0.000000
+Epoch 9/15 | Loss: 0.0483 | LR: 2.55e-05 | alpha: 0.1000 | alpha_grad: 0.000000
+Epoch 10/15 | Loss: 0.0467 | LR: 2.00e-05 | alpha: 0.1000 | alpha_grad: 0.000000
+Epoch 11/15 | Loss: 0.0464 | LR: 1.49e-05 | alpha: 0.1000 | alpha_grad: 0.000000
+Epoch 12/15 | Loss: 0.0436 | LR: 1.02e-05 | alpha: 0.1000 | alpha_grad: 0.000000
+Epoch 13/15 | Loss: 0.0443 | LR: 6.35e-06 | alpha: 0.1000 | alpha_grad: 0.000000
+Epoch 14/15 | Loss: 0.0431 | LR: 3.43e-06 | alpha: 0.1000 | alpha_grad: 0.000000
+Epoch 15/15 | Loss: 0.0419 | LR: 1.61e-06 | alpha: 0.1000 | alpha_grad: 0.000000
+Saved LLPM to checkpoints/ablation/llpm_no_gate.pth
+Saved decoder to checkpoints/ablation/camo_decoder_llpm_no_gate.pth
+
+[Step 2/2] Evaluating LLPM variant: llpm_no_gate...
+  LLPM:    checkpoints/ablation/llpm_no_gate.pth
+  Decoder: checkpoints/ablation/camo_decoder_llpm_no_gate.pth
+Found 4000 images in data/cod10k/COD10K-v3/Test/Image
+Found 4000 masks in data/cod10k/COD10K-v3/Test/GT_Object
+Matched 4000 image-mask pairs
+Using 500 samples (max_samples=500)
+
+Evaluating LLPM model on 500 samples
+  Testing: Center-of-Mass (Single)
+    Processed 50/500
+    Processed 100/500
+    Processed 150/500
+    Processed 200/500
+    Processed 250/500
+    Processed 300/500
+    Processed 350/500
+    Processed 400/500
+    Processed 450/500
+    Processed 500/500
+    mIoU=0.7217, S-alpha=0.8244, MAE=0.0422
+  Testing: Edge (Single)
+    Processed 50/500
+    Processed 100/500
+    Processed 150/500
+    Processed 200/500
+    Processed 250/500
+    Processed 300/500
+    Processed 350/500
+    Processed 400/500
+    Processed 450/500
+    Processed 500/500
+    mIoU=0.7088, S-alpha=0.8153, MAE=0.0408
+  Testing: Multi-Point Grid (4 pts)
+    Processed 50/500
+    Processed 100/500
+    Processed 150/500
+    Processed 200/500
+    Processed 250/500
+    Processed 300/500
+    Processed 350/500
+    Processed 400/500
+    Processed 450/500
+    Processed 500/500
+    mIoU=0.7380, S-alpha=0.8375, MAE=0.0364
+  Testing: Multi-Point Random (3 pts)
+    Processed 50/500
+    Processed 100/500
+    Processed 150/500
+    Processed 200/500
+    Processed 250/500
+    Processed 300/500
+    Processed 350/500
+    Processed 400/500
+    Processed 450/500
+    Processed 500/500
+    mIoU=0.7608, S-alpha=0.8540, MAE=0.0327
+Results saved to results/ablation/llpm_no_gate_results.csv
+LLPM ablation llpm_no_gate finished at Fri Mar 13 17:56:35 EDT 2026

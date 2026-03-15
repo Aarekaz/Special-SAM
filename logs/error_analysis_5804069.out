@@ -1,0 +1,32 @@
+Starting error analysis at Wed Mar 11 23:23:42 EDT 2026
+Loaded 24312 per-image records from results/per_image_results.csv
+Models: ['base', 'specialized', 'llpm']
+Strategies: ['Center-of-Mass (Single)', 'Edge (Single)', 'Multi-Point Grid (4 pts)', 'Multi-Point Random (3 pts)']
+
+Top 400 failures (worst IoU):
+  IoU range: 0.0000 - 0.5668
+  Saved failure list to results/error_analysis/failure_list.csv
+
+Failure category breakdown:
+  disjoint: 175 images, mean IoU=0.3033
+  dark: 104 images, mean IoU=0.3259
+  general: 65 images, mean IoU=0.3419
+  tiny: 54 images, mean IoU=0.2610
+  thin_elongated: 2 images, mean IoU=0.3461
+
+Saved failure summary to results/error_analysis/failure_summary.csv
+
+Mean IoU by failure category and model:
+model              base   llpm  specialized
+failure_category                           
+dark             0.3156 0.3658       0.3259
+disjoint         0.2127 0.3705       0.3033
+general          0.3519 0.4126       0.3419
+thin_elongated   0.0041 0.2220       0.3461
+tiny             0.2894 0.2918       0.2610
+  Montage for 'dark': results/error_analysis/montage_dark.png (104 images)
+  Montage for 'disjoint': results/error_analysis/montage_disjoint.png (175 images)
+  Montage for 'general': results/error_analysis/montage_general.png (65 images)
+  Montage for 'thin_elongated': results/error_analysis/montage_thin_elongated.png (2 images)
+  Montage for 'tiny': results/error_analysis/montage_tiny.png (54 images)
+Finished at Wed Mar 11 23:24:12 EDT 2026

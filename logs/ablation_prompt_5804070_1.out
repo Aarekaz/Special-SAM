@@ -1,0 +1,87 @@
+============================================
+Prompt Ablation: box_only
+Config: configs/ablation/prompt_box_only.yaml
+Started at Wed Mar 11 23:23:57 EDT 2026
+GPU: NVIDIA A100 80GB PCIe
+============================================
+[Step 1/2] Training decoder: box_only
+Training for 15 epochs on 6080 samples...
+  LR scheduler: cosine, warmup: 1 epochs
+Epoch 1/15 | Loss: 0.1061 | LR: 1.00e-04
+Epoch 2/15 | Loss: 0.0936 | LR: 1.00e-04
+Epoch 3/15 | Loss: 0.0862 | LR: 9.88e-05
+Epoch 4/15 | Loss: 0.0822 | LR: 9.51e-05
+Epoch 5/15 | Loss: 0.0769 | LR: 8.92e-05
+Epoch 6/15 | Loss: 0.0729 | LR: 8.14e-05
+Epoch 7/15 | Loss: 0.0698 | LR: 7.20e-05
+Epoch 8/15 | Loss: 0.0659 | LR: 6.15e-05
+Epoch 9/15 | Loss: 0.0625 | LR: 5.05e-05
+Epoch 10/15 | Loss: 0.0595 | LR: 3.95e-05
+Epoch 11/15 | Loss: 0.0569 | LR: 2.90e-05
+Epoch 12/15 | Loss: 0.0548 | LR: 1.96e-05
+Epoch 13/15 | Loss: 0.0530 | LR: 1.18e-05
+Epoch 14/15 | Loss: 0.0518 | LR: 5.90e-06
+Epoch 15/15 | Loss: 0.0511 | LR: 2.24e-06
+Saved decoder to checkpoints/ablation/camo_decoder_box_only.pth
+[Step 2/2] Evaluating decoder: box_only
+
+============================================================
+Evaluating: box_only
+  Decoder:  checkpoints/ablation/camo_decoder_box_only.pth
+  Samples:  500
+============================================================
+Found 4000 images in data/cod10k/COD10K-v3/Test/Image
+Found 4000 masks in data/cod10k/COD10K-v3/Test/GT_Object
+Matched 4000 image-mask pairs
+Using 500 samples (max_samples=500)
+
+Evaluating SPECIALIZED model on 500 samples
+  Testing: Center-of-Mass (Single)
+    Processed 50/500
+    Processed 100/500
+    Processed 150/500
+    Processed 200/500
+    Processed 250/500
+    Processed 300/500
+    Processed 350/500
+    Processed 400/500
+    Processed 450/500
+    Processed 500/500
+    mIoU=0.3763, S-alpha=0.6347, MAE=0.0943
+  Testing: Edge (Single)
+    Processed 50/500
+    Processed 100/500
+    Processed 150/500
+    Processed 200/500
+    Processed 250/500
+    Processed 300/500
+    Processed 350/500
+    Processed 400/500
+    Processed 450/500
+    Processed 500/500
+    mIoU=0.5014, S-alpha=0.6983, MAE=0.0699
+  Testing: Multi-Point Grid (4 pts)
+    Processed 50/500
+    Processed 100/500
+    Processed 150/500
+    Processed 200/500
+    Processed 250/500
+    Processed 300/500
+    Processed 350/500
+    Processed 400/500
+    Processed 450/500
+    Processed 500/500
+    mIoU=0.3886, S-alpha=0.6471, MAE=0.0903
+  Testing: Multi-Point Random (3 pts)
+    Processed 50/500
+    Processed 100/500
+    Processed 150/500
+    Processed 200/500
+    Processed 250/500
+    Processed 300/500
+    Processed 350/500
+    Processed 400/500
+    Processed 450/500
+    Processed 500/500
+    mIoU=0.4550, S-alpha=0.6854, MAE=0.0805
+Prompt ablation box_only finished at Thu Mar 12 03:16:21 EDT 2026

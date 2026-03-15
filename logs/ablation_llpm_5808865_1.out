@@ -1,0 +1,94 @@
+============================================
+LLPM Ablation: llpm_enhance_only
+Config: configs/ablation/llpm_enhance_only.yaml
+Started at Fri Mar 13 08:47:37 EDT 2026
+GPU: NVIDIA A100 80GB PCIe
+============================================
+[Step 1/2] Training LLPM variant: llpm_enhance_only...
+LLPM parameters: 30,981
+Decoder parameters: 4,058,340
+Found 6000 images in data/cod10k/COD10K-v3/Train/Image
+Found 6000 masks in data/cod10k/COD10K-v3/Train/GT_Object
+Matched 6000 image-mask pairs
+Using all 6000 samples
+
+Training LLPM+decoder for 15 epochs on 6000 samples...
+  LR scheduler: cosine, warmup: 1 epochs
+  Decoder warm-start from: checkpoints/camo_decoder_vith.pth
+Epoch 1/15 | Loss: 0.1120 | LR: 5.00e-05 | alpha: 0.1024 | alpha_grad: -0.000095
+Epoch 2/15 | Loss: 0.0681 | LR: 5.00e-05 | alpha: 0.1170 | alpha_grad: -0.000542
+Epoch 3/15 | Loss: 0.0598 | LR: 4.94e-05 | alpha: 0.1279 | alpha_grad: 0.000014
+Epoch 4/15 | Loss: 0.0577 | LR: 4.76e-05 | alpha: 0.1417 | alpha_grad: 0.000000
+Epoch 5/15 | Loss: 0.0558 | LR: 4.47e-05 | alpha: 0.1532 | alpha_grad: -0.000046
+Epoch 6/15 | Loss: 0.0509 | LR: 4.08e-05 | alpha: 0.1659 | alpha_grad: 0.000000
+Epoch 7/15 | Loss: 0.0539 | LR: 3.61e-05 | alpha: 0.1780 | alpha_grad: 0.000000
+Epoch 8/15 | Loss: 0.0483 | LR: 3.10e-05 | alpha: 0.1851 | alpha_grad: 0.000001
+Epoch 9/15 | Loss: 0.0485 | LR: 2.55e-05 | alpha: 0.1943 | alpha_grad: 0.001885
+Epoch 10/15 | Loss: 0.0453 | LR: 2.00e-05 | alpha: 0.2020 | alpha_grad: 0.000014
+Epoch 11/15 | Loss: 0.0445 | LR: 1.49e-05 | alpha: 0.2067 | alpha_grad: 0.000607
+Epoch 12/15 | Loss: 0.0437 | LR: 1.02e-05 | alpha: 0.2084 | alpha_grad: -0.016174
+Epoch 13/15 | Loss: 0.0442 | LR: 6.35e-06 | alpha: 0.2098 | alpha_grad: 0.038971
+Epoch 14/15 | Loss: 0.0429 | LR: 3.43e-06 | alpha: 0.2106 | alpha_grad: -0.000812
+Epoch 15/15 | Loss: 0.0416 | LR: 1.61e-06 | alpha: 0.2112 | alpha_grad: -0.000052
+Saved LLPM to checkpoints/ablation/llpm_enhance_only.pth
+Saved decoder to checkpoints/ablation/camo_decoder_llpm_enhance_only.pth
+
+[Step 2/2] Evaluating LLPM variant: llpm_enhance_only...
+  LLPM:    checkpoints/ablation/llpm_enhance_only.pth
+  Decoder: checkpoints/ablation/camo_decoder_llpm_enhance_only.pth
+Found 4000 images in data/cod10k/COD10K-v3/Test/Image
+Found 4000 masks in data/cod10k/COD10K-v3/Test/GT_Object
+Matched 4000 image-mask pairs
+Using 500 samples (max_samples=500)
+
+Evaluating LLPM model on 500 samples
+  Testing: Center-of-Mass (Single)
+    Processed 50/500
+    Processed 100/500
+    Processed 150/500
+    Processed 200/500
+    Processed 250/500
+    Processed 300/500
+    Processed 350/500
+    Processed 400/500
+    Processed 450/500
+    Processed 500/500
+    mIoU=0.7230, S-alpha=0.8229, MAE=0.0419
+  Testing: Edge (Single)
+    Processed 50/500
+    Processed 100/500
+    Processed 150/500
+    Processed 200/500
+    Processed 250/500
+    Processed 300/500
+    Processed 350/500
+    Processed 400/500
+    Processed 450/500
+    Processed 500/500
+    mIoU=0.7129, S-alpha=0.8147, MAE=0.0419
+  Testing: Multi-Point Grid (4 pts)
+    Processed 50/500
+    Processed 100/500
+    Processed 150/500
+    Processed 200/500
+    Processed 250/500
+    Processed 300/500
+    Processed 350/500
+    Processed 400/500
+    Processed 450/500
+    Processed 500/500
+    mIoU=0.7390, S-alpha=0.8370, MAE=0.0371
+  Testing: Multi-Point Random (3 pts)
+    Processed 50/500
+    Processed 100/500
+    Processed 150/500
+    Processed 200/500
+    Processed 250/500
+    Processed 300/500
+    Processed 350/500
+    Processed 400/500
+    Processed 450/500
+    Processed 500/500
+    mIoU=0.7612, S-alpha=0.8535, MAE=0.0326
+Results saved to results/ablation/llpm_enhance_only_results.csv
+LLPM ablation llpm_enhance_only finished at Fri Mar 13 16:21:40 EDT 2026
