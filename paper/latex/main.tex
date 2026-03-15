@@ -318,24 +318,25 @@ All four loss variants achieve similar performance ($\pm$2.1 mIoU), indicating r
 
 To validate that both LLPM branches contribute, we train variants with individual branches disabled.
 
-% TODO: Replace with actual numbers after running ablation (Job 8)
 \begin{table}[t]
 \centering
-\caption{\textbf{LLPM component ablation} (Edge prompt mIoU). Placeholder values marked with $^*$ pending experiments.}
+\caption{\textbf{LLPM component ablation} (500 test images, Edge prompt mIoU). Both branches and the learnable gate contribute; removing any component degrades performance.}
 \label{tab:ablation_llpm}
 \small
-\begin{tabular}{lcc}
+\begin{tabular}{lccc}
 \toprule
-LLPM Variant & Edge mIoU & $\Delta$ vs.\ No LLPM \\
+LLPM Variant & Edge mIoU & $\Delta$ & $\alpha_{\text{final}}$ \\
 \midrule
-No LLPM (decoder-only) & .694 & --- \\
-Edge branch only$^*$ & --- & --- \\
-Enhancement only$^*$ & --- & --- \\
-No gate ($\alpha$=1)$^*$ & --- & --- \\
-\textbf{Full LLPM (ours)} & \textbf{.719} & \textbf{+2.5} \\
+No LLPM (decoder-only) & .694 & --- & --- \\
+Edge branch only & .713 & +1.9 & 0.091 \\
+Enhancement only & .713 & +1.9 & 0.211 \\
+No gate ($\alpha\!=\!1$) & .709 & +1.5 & 1.0 (fixed) \\
+\textbf{Full LLPM (ours)} & \textbf{.719} & \textbf{+2.5} & 0.185 \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+Both individual branches achieve similar gains (+1.9 Edge mIoU), but the full LLPM outperforms either alone (+2.5), confirming that edge detection and feature enhancement are complementary. The learnable gate is also important: fixing $\alpha\!=\!1$ removes the model's ability to regulate enhancement strength, yielding the worst variant (+1.5). Notably, the edge-only variant's $\alpha$ barely grows from initialization (0.091 vs.\ 0.185 for full LLPM), suggesting that without the enhancement branch, the edge attention map alone provides limited value.
 
 \subsection{Data Augmentation}
 

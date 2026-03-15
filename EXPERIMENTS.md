@@ -17,7 +17,7 @@
 | 1        | scripts/ablation_prompt.sh      | Prompt-type ablation (2 tasks)     | —          | ~8 hrs    | Yes  | **Completed** (5804070) |
 | 2        | scripts/error_analysis.sh       | Failure categorization + montages  | Job P1-eval | ~30 min  | No   | **Completed** (5804069) |
 | 3        | scripts/ablation_augmentation.sh| Augmentation ablation (2 tasks)    | —          | ~16 hrs   | Yes  | **Completed** (5807623, resubmit of 5804072) |
-| 4        | scripts/ablation_llpm.sh        | LLPM component ablation (3 tasks)  | —          | ~16 hrs   | Yes  | **Submitted** (5808865) |
+| 4        | scripts/ablation_llpm.sh        | LLPM component ablation (3 tasks)  | —          | ~16 hrs   | Yes  | **Completed** (5808865) |
 
 ### Expected Outputs
 - `results/per_image_results.csv` — per-image metrics + metadata (from eval)
@@ -109,3 +109,22 @@ Differences are small (<2 pts). Flip-only is near-optimal.
 
 Finding: LLPM improves on all major categories. Disjoint objects (44% of failures) and
 dark images (26%) dominate. Tiny objects remain hardest (mean IoU 0.29).
+
+## LLPM Component Ablation Results (job 5808865, 500 test images)
+
+| Variant | CoM | Edge | Grid | Random | α final |
+|---------|-----|------|------|--------|---------|
+| No LLPM (decoder-only) | .738 | .694 | .756 | .775 | — |
+| Edge branch only | .723 | .713 | .738 | .767 | 0.091 |
+| Enhancement only | .723 | .713 | .739 | .761 | 0.211 |
+| No gate (α=1) | .722 | .709 | .738 | .761 | 1.0 (fixed) |
+| **Full LLPM (ours)** | **.740** | **.719** | **.755** | **.772** | 0.185 |
+
+Training details:
+- Edge only: 15 epochs, final loss 0.0412, alpha converged to 0.091
+- Enhance only: 15 epochs, final loss 0.0416, alpha grew to 0.211
+- No gate: 15 epochs, final loss 0.0419, alpha fixed at 1.0
+
+Finding: Both branches contribute complementarily (+1.9 each, +2.5 combined).
+Learnable gate matters — fixing α=1 is the worst variant (+1.5).
+Edge-only α barely moves from init, suggesting edge attention alone has limited value.
