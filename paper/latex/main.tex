@@ -1,402 +1,50 @@
+% CVPR 2026 Paper Template; see https://github.com/cvpr-org/author-kit
+
 \documentclass[10pt,twocolumn,letterpaper]{article}
 
-\usepackage[review]{cvpr}  % anonymous review mode (line numbers, no author names)
-\usepackage{times}
-\usepackage{epsfig}
-\usepackage{graphicx}
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{booktabs}
-\usepackage{multirow}
-\usepackage{xcolor}
-\usepackage[pagebackref,breaklinks,colorlinks]{hyperref}
+%%%%%%%%% PAPER TYPE  - PLEASE UPDATE FOR FINAL VERSION
+% \usepackage{cvpr}              % To produce the CAMERA-READY version
+\usepackage[review]{cvpr}      % To produce the REVIEW version
+% \usepackage[pagenumbers]{cvpr} % To force page numbers, e.g. for an arXiv version
 
-\def\cvprPaperID{****}
-\def\paperID{****}
+% Import additional packages in the preamble file, before hyperref
+\input{preamble}
+
+% It is strongly recommended to use hyperref, especially for the review version.
+% hyperref with option pagebackref eases the reviewers' job.
+% Please disable hyperref *only* if you encounter grave issues,
+% e.g. with the file validation for the camera-ready version.
+%
+% If you comment hyperref and then uncomment it, you should delete *.aux before re-running LaTeX.
+% (Or just hit 'q' on the first LaTeX run, let it finish, and you should be clear).
+\definecolor{cvprblue}{rgb}{0.21,0.49,0.74}
+\usepackage[pagebackref,breaklinks,colorlinks,allcolors=cvprblue]{hyperref}
+
+%%%%%%%%% PAPER ID  - PLEASE UPDATE
+\def\paperID{*****} % *** Enter the Paper ID here
 \def\confName{CVPR}
 \def\confYear{2026}
 
-\begin{document}
-
-% ============================================================
+%%%%%%%%% TITLE - PLEASE UPDATE
 \title{The Decoder Is the Bottleneck: Lightweight Adaptation of SAM for Camouflaged Object Detection}
 
-\author{Anonymous CVPR submission\\Paper ID \cvprPaperID}
+%%%%%%%%% AUTHORS - PLEASE UPDATE
+\author{Anonymous CVPR submission\\Paper ID \paperID}
 
+\begin{document}
 \maketitle
-
-% ============================================================
-\begin{abstract}
-Foundation segmentation models like SAM encode rich visual features but fail on camouflaged objects---their decoders, trained on general scenes, cannot interpret subtle texture cues as object boundaries.
-We show that the decoder, not the encoder, is the bottleneck: freezing SAM's ViT-H encoder and fine-tuning only the 4M-parameter mask decoder on COD10K raises mIoU from 57.2\% to 73.8\% (+16.6 points).
-This gain is prompt-robust, transferring across four prompt types including edge prompts (+238\% relative).
-We validate prompt robustness through ablation: mixed-prompt training (point/box) outperforms single-prompt variants by 3--5 mIoU.
-A complementary Learnable Local Preprocessing Module (LLPM, $\sim$31K parameters) enhances input images before the frozen encoder, yielding a further +2.6 mIoU on edge prompts.
-Error analysis reveals that remaining failures cluster in dark images, tiny objects, and boundary-ambiguous cases---the LLPM specifically addresses the latter.
-Our approach requires no architectural changes, trains in under 30 minutes on a single GPU, and produces a 16MB checkpoint.
-\end{abstract}
-
-% ============================================================
-\section{Introduction}
-
-% Hook: the paradox
-SAM~\cite{kirillov2023sam} was trained on over one billion masks and segments almost anything---except when the object does not want to be seen. On COD10K's camouflaged test set~\cite{fan2020cod10k}, SAM ViT-H achieves only 57.2\% mIoU with center-of-mass prompts and a catastrophic 20.5\% with edge prompts (Table~\ref{tab:main}). Camouflaged organisms---insects mimicking bark, fish blending into coral---have evolved to defeat visual detection, and SAM's general-purpose decoder has never learned to interpret their subtle texture disruptions as boundaries.
-
-% Insight: it's the decoder
-We hypothesize that \textbf{the decoder is the bottleneck}: SAM's ViT-H encoder, pre-trained on 11M images, already captures the low-level texture gradients that distinguish camouflaged foreground from background---but the decoder, trained on general segmentation, does not know these signals matter. If this is true, fine-tuning only the lightweight 4M-parameter mask decoder should suffice.
-
-% Evidence
-Our experiments confirm this. Decoder-only fine-tuning on 3,040 COD10K training images raises mIoU from 57.2\% to 73.8\%, a +16.6-point gain. Crucially, this improvement is \textbf{prompt-robust}: it transfers uniformly across center, edge, grid, and random prompt strategies (Table~\ref{tab:improvement}), with the largest gain on the hardest case---edge prompts jump from 20.5\% to 69.4\% (+238\% relative). We validate that this robustness is not accidental: ablating the training prompt mix (Sec.~\ref{sec:ablation_prompt}) shows that mixed point/box training outperforms point-only and box-only training by 3--5 mIoU.
-
-% LLPM
-As a complementary contribution, we introduce a \textbf{Learnable Local Preprocessing Module (LLPM)}: a 31K-parameter module placed \emph{before} the frozen encoder that enhances boundary signals in input space. The LLPM improves edge-prompt mIoU by a further +2.6 points over decoder-only fine-tuning, specifically targeting the boundary-ambiguous failures identified by our error analysis (Sec.~\ref{sec:error_analysis}).
-
-% Error analysis tease
-An error analysis of the remaining failures reveals structured patterns: dark images, tiny objects ($<$1\% foreground pixels), and thin/elongated shapes account for the majority of low-IoU predictions. This decomposition guides future work and demonstrates that our method's failures are interpretable rather than random.
-
-\noindent\textbf{Contributions:}
-\begin{enumerate}
-    \item Evidence that SAM's decoder is the bottleneck for COD: decoder-only fine-tuning yields +16.6 mIoU on 2,026 test images with no architecture changes.
-    \item A prompt robustness analysis with ablation: mixed-prompt training produces decoders that generalize across all four prompt types, validated by point-only vs.\ box-only comparisons.
-    \item A Learnable Local Preprocessing Module (LLPM)---the first pre-encoder adaptation of SAM---that enhances boundary signals with only 31K parameters.
-    \item An error analysis categorizing failure modes (dark, tiny, thin, disjoint, general) that connects LLPM gains to specific failure types.
-\end{enumerate}
-
-% ============================================================
-\section{Related Work}
-
-\noindent\textbf{Segment Anything Model.}
-SAM~\cite{kirillov2023sam} introduced promptable segmentation trained on the SA-1B dataset. SAM2~\cite{ravi2024sam2} extended this to video. Several works adapt SAM to specialized domains: SAM-Adapter~\cite{chen2023samadapter} adds learnable modules \emph{inside} the image encoder, while COMPrompter~\cite{hao2024comprompter} reconceptualizes SAM with multi-prompt networks. Liu~\etal~\cite{liu2025dualstream} proposed dual-stream adapters. Our approach differs in two ways: we fine-tune the \emph{existing} decoder without adding parameters, and our LLPM operates \emph{before} the encoder in input space---a placement unexplored by prior work.
-
-\noindent\textbf{Camouflaged Object Detection.}
-Dedicated COD architectures include SINet~\cite{fan2020cod10k} (search-and-identify), PFNet~\cite{mei2021pfnet} (positioning and focus), ZoomNet~\cite{pang2022zoomnet} (mixed-scale learning), and SegMaR~\cite{jia2022segmar}. These design specialized networks from scratch. We instead leverage SAM's pre-trained representations and show that decoder-only adaptation achieves competitive improvements. Das~\etal~\cite{das2025camouflage} recently introduced synthetic camouflage generation, which is complementary to our detection-side approach.
-
-\noindent\textbf{Parameter-Efficient Fine-Tuning.}
-LoRA~\cite{hu2022lora} and prompt tuning~\cite{lester2021prompt} are standard for adapting large models. For SAM, these techniques add parameters to the encoder or prompt pathway. Our decoder-only approach is simpler: we freeze everything except the existing mask decoder, adding zero new parameters. The LLPM extends this with a minimal 31K-parameter pre-encoder module.
-
-% ============================================================
-\section{Method}
-
-\begin{figure*}[t]
-    \centering
-    \includegraphics[width=\textwidth]{figures/architecture_diagram.pdf}
-    \caption{\textbf{Two-stage adaptation.} (a)~\textbf{Decoder-only:} Embeddings are pre-computed from the frozen ViT-H encoder. Only the mask decoder (4M params) trains with mixed point/box prompts and BCE+Dice loss. (b)~\textbf{LLPM+decoder:} The LLPM (31K params) preprocesses images before the live frozen encoder; gradients flow back through the encoder to update the LLPM. The decoder is warm-started from (a). (c)~\textbf{Inference:} LLPM $\rightarrow$ frozen encoder $\rightarrow$ specialized decoder.}
-    \label{fig:architecture}
-\end{figure*}
-
-\subsection{Decoder-Only Fine-Tuning}
-
-SAM consists of a ViT-H image encoder ($\sim$632M parameters), a prompt encoder, and a mask decoder ($\sim$4M parameters). We freeze both encoders and train only the mask decoder (Figure~\ref{fig:architecture}a).
-
-\noindent\textbf{Pre-computed embeddings.} We run the frozen encoder once on all training images and cache embeddings as \texttt{.npy} files, eliminating the encoder forward pass from the training loop.
-
-\noindent\textbf{Mixed-prompt training.} Each iteration randomly selects between a point prompt (random foreground pixel) and a bounding box prompt (tight GT box) with 50/50 probability. This prevents the decoder from overfitting to any single prompt type.
-
-\noindent\textbf{Loss and optimization.} We minimize $\mathcal{L} = 0.5 \cdot \mathcal{L}_{\text{BCE}} + 0.5 \cdot \mathcal{L}_{\text{Dice}}$. BCE enforces pixel-level boundaries; Dice maintains region-level shape coherence. We use AdamW (lr $10^{-4}$, cosine schedule, 1-epoch warmup, 15 epochs).
-
-\subsection{Learnable Local Preprocessing Module}
-
-The frozen encoder may miss subtle camouflage boundaries at the pixel level. We introduce a lightweight module that enhances boundary signals \emph{before} encoding.
-
-\noindent\textbf{Architecture.} The LLPM has two branches processing input image $x$:
-\begin{itemize}
-    \item \textbf{Edge branch} $e(x)$: Conv stack ($3 \!\rightarrow\! 32 \!\rightarrow\! 1$) $\rightarrow$ Sigmoid, producing a single-channel edge attention map.
-    \item \textbf{Enhancement branch} $h(x)$: Conv stack with grouped convolutions ($3 \!\rightarrow\! 64 \!\rightarrow\! 3$), producing a 3-channel residual.
-\end{itemize}
-The branches fuse via a learnable gate $\alpha$ (init.\ 0.1):
-\begin{equation}
-    x' = x + \alpha \cdot (h(x) \odot e(x))
-    \label{eq:llpm}
-\end{equation}
-The residual connection ensures near-identity at initialization. Total: $\sim$31K parameters.
-
-\noindent\textbf{Training.} The preprocessed $x'$ passes through the \emph{live} frozen encoder (gradients flow back to LLPM). The decoder is warm-started from the best decoder-only checkpoint. Joint training uses AdamW (lr $5\!\times\!10^{-5}$), mixed precision (FP16), 15 epochs.
-
-\subsection{Evaluation Protocol}
-
-We evaluate on four prompt strategies of increasing difficulty: \textbf{Center-of-Mass} (1pt), \textbf{Edge} (1pt, boundary contour), \textbf{Multi-Grid} (4pt), and \textbf{Multi-Random} (3pt). We report IoU, Dice, Boundary F1, $S_\alpha$~\cite{fan2017smeasure}, $E_\phi$~\cite{fan2018emeasure}, $F_\beta^w$~\cite{margolin2014fmeasure}, and MAE on the full 2,026-image COD10K camouflaged test set.
-
-% ============================================================
-\section{Experiments}
-
-\subsection{Setup}
-
-\noindent\textbf{Dataset.} COD10K-v3~\cite{fan2020cod10k}: 3,040 camouflaged training images, 2,026 camouflaged test images across 78 categories (aquatic, terrestrial, flying, amphibian).
-
-\noindent\textbf{Implementation.} SAM ViT-H backbone. Training images augmented with horizontal flips (6,080 total). Decoder training: $<$30 min on A100 with pre-computed embeddings. LLPM+decoder training: $\sim$12 hrs (live encoder pass). Decoder checkpoint: 16MB.
-
-\subsection{Main Results}
-
-Table~\ref{tab:main} presents results across all prompt strategies.
-
-\begin{table*}[t]
-\centering
-\caption{\textbf{Main results} on COD10K camouflaged test set (2,026 images). Best per-column in \textbf{bold}. Decoder-only fine-tuning improves all metrics across all prompt types; LLPM adds further gains on edge prompts.}
-\label{tab:main}
-\small
-\begin{tabular}{llccccccc}
-\toprule
-Model & Prompt Strategy & mIoU & Dice & $S_\alpha$ & $E_\phi$ & $F_\beta^w$ & MAE$\downarrow$ & Bnd.~F1 \\
-\midrule
-Base SAM & Center-of-Mass (1pt) & 0.572 & 0.654 & 0.743 & 0.830 & 0.706 & 0.068 & 0.502 \\
-Base SAM & Edge (1pt) & 0.205 & 0.251 & 0.481 & 0.597 & 0.241 & 0.163 & 0.281 \\
-Base SAM & Multi-Pt Grid (4pt) & 0.682 & 0.761 & 0.812 & 0.897 & 0.802 & 0.046 & 0.600 \\
-Base SAM & Multi-Pt Random (3pt) & 0.726 & 0.812 & 0.830 & 0.928 & 0.831 & 0.045 & 0.648 \\
-\midrule
-Decoder-only & Center-of-Mass (1pt) & 0.738 & 0.819 & 0.847 & 0.942 & 0.819 & 0.028 & 0.702 \\
-Decoder-only & Edge (1pt) & 0.694 & 0.779 & 0.810 & 0.922 & 0.750 & 0.034 & 0.666 \\
-Decoder-only & Multi-Pt Grid (4pt) & \textbf{0.756} & \textbf{0.835} & \textbf{0.861} & \textbf{0.951} & \textbf{0.841} & \textbf{0.024} & \textbf{0.720} \\
-Decoder-only & Multi-Pt Random (3pt) & \textbf{0.774} & \textbf{0.855} & \textbf{0.874} & \textbf{0.959} & \textbf{0.862} & \textbf{0.022} & \textbf{0.739} \\
-\midrule
-LLPM + Decoder & Center-of-Mass (1pt) & \textbf{0.740} & \textbf{0.820} & \textbf{0.847} & \textbf{0.942} & \textbf{0.820} & \textbf{0.028} & \textbf{0.702} \\
-LLPM + Decoder & Edge (1pt) & \textbf{0.719} & \textbf{0.802} & \textbf{0.827} & \textbf{0.922} & \textbf{0.778} & \textbf{0.029} & \textbf{0.690} \\
-LLPM + Decoder & Multi-Pt Grid (4pt) & 0.755 & 0.833 & 0.856 & 0.951 & 0.833 & 0.025 & 0.718 \\
-LLPM + Decoder & Multi-Pt Random (3pt) & 0.772 & 0.851 & 0.866 & 0.959 & 0.848 & 0.022 & 0.735 \\
-\bottomrule
-\end{tabular}
-\end{table*}
-
-Decoder-only fine-tuning improves mIoU on all four prompt types by +4.8 to +48.9 absolute points. The LLPM provides an additional +2.5 mIoU on edge prompts, specifically the scenario where boundary signals matter most.
-
-\subsection{Prompt Robustness}
-
-\begin{table}[t]
-\centering
-\caption{\textbf{Prompt robustness.} Base SAM is highly sensitive to prompt quality (mIoU 0.205--0.726); our decoder narrows this to 0.694--0.774.}
-\label{tab:improvement}
-\small
-\begin{tabular}{lcccc}
-\toprule
-Prompt Type & Base & Ours & $\Delta$ & Rel.~$\Delta$ \\
-\midrule
-Center-of-Mass & 0.572 & 0.738 & +0.166 & +28.9\% \\
-Edge (Single) & 0.205 & 0.694 & +0.489 & \textbf{+238.1\%} \\
-Multi-Pt Grid & 0.682 & 0.756 & +0.074 & +10.9\% \\
-Multi-Pt Random & 0.726 & 0.774 & +0.048 & +6.6\% \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The headline result: base SAM's mIoU varies 3.5$\times$ across prompt types (0.205 to 0.726), while the specialized decoder varies only 1.1$\times$ (0.694 to 0.774). Edge prompts---where the prompt sits at the boundary between camouflaged object and background---show the largest absolute gain (+48.9 mIoU). This demonstrates that decoder specialization teaches the model to resolve boundary ambiguity rather than memorize prompt-mask associations.
-
-\subsection{Per-Category Analysis}
-
-\begin{table}[t]
-\centering
-\caption{\textbf{Per-category mIoU} (Center-of-Mass prompt). Terrestrial animals---the hardest category---show the largest relative gain.}
-\label{tab:category}
-\small
-\begin{tabular}{lcccr}
-\toprule
-Category & $N$ & Base & Ours & Rel.~Gain \\
-\midrule
-Amphibian & 124 & 0.680 & 0.825 & +21.4\% \\
-Aquatic & 474 & 0.563 & 0.720 & +27.9\% \\
-Flying & 714 & 0.610 & 0.767 & +25.6\% \\
-Terrestrial & 699 & 0.519 & 0.703 & \textbf{+35.5\%} \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Terrestrial animals (insects on bark, lizards on rocks) show the largest gain (+35.5\%), consistent with having the most challenging camouflage. Aquatic animals (+27.9\%) also benefit substantially.
-
-\subsection{Error Analysis}
-\label{sec:error_analysis}
-
-To understand \emph{where} our model still fails, we analyze the worst-performing images (bottom quartile by IoU) and categorize them using image metadata computed during evaluation.
-
-\noindent\textbf{Failure categories.} We define five automatic categories:
-\begin{itemize}
-    \item \textbf{Dark}: image brightness $<$ 80 (out of 255)
-    \item \textbf{Tiny}: foreground pixels $<$ 1\% of image area
-    \item \textbf{Thin/elongated}: GT bounding box aspect ratio $>$ 5:1
-    \item \textbf{Disjoint}: multiple connected components in GT mask
-    \item \textbf{General}: none of the above
-\end{itemize}
-
-\begin{table}[t]
-\centering
-\caption{\textbf{Error analysis.} Mean IoU on the 400 worst-performing images, grouped by failure category. LLPM improves on all categories except the rare thin/elongated case ($N\!=\!2$).}
-\label{tab:error_analysis}
-\small
-\begin{tabular}{lrccc}
-\toprule
-Category & $N$ & Base & Spec. & LLPM \\
-\midrule
-Disjoint & 175 & .213 & .303 & \textbf{.371} \\
-Dark & 104 & .316 & .326 & \textbf{.366} \\
-General & 65 & .352 & .342 & \textbf{.413} \\
-Tiny & 54 & .289 & .261 & \textbf{.292} \\
-Thin/elongated & 2 & .004 & \textbf{.346} & .222 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\noindent\textbf{Key findings.}
-Failures are structured, not random (Table~\ref{tab:error_analysis}). Disjoint objects (multiple connected components, 44\% of failures) and dark images (26\%) dominate. The LLPM improves over decoder-only on all major failure categories: +6.8 mIoU on disjoint objects, +7.1 on general failures, and +4.0 on dark images. This demonstrates that the LLPM's boundary enhancement benefits extend beyond edge prompts to the model's hardest cases overall. Tiny objects ($<$1\% foreground pixels) remain the most challenging category (mean IoU 0.29), suggesting that scale-aware augmentation or multi-scale features are needed for further improvement.
-
-\subsection{Comparison with Existing Methods}
-
-\begin{table}[t]
-\centering
-\caption{\textbf{Comparison with COD methods} on COD10K test set. Our method uses GT prompts; dedicated methods are fully automatic.}
-\label{tab:comparison}
-\small
-\begin{tabular}{llcccc}
-\toprule
-Method & Venue & $S_\alpha$ & $E_\phi$ & $F_\beta^w$ & MAE$\downarrow$ \\
-\midrule
-SINet~\cite{fan2020cod10k} & CVPR'20 & .776 & .864 & .631 & .043 \\
-PFNet~\cite{mei2021pfnet} & CVPR'21 & .800 & .877 & .660 & .040 \\
-SINet-V2~\cite{fan2022sinetv2} & TPAMI'22 & .815 & .887 & .680 & .037 \\
-SegMaR~\cite{jia2022segmar} & CVPR'22 & .833 & .899 & .724 & .034 \\
-ZoomNet~\cite{pang2022zoomnet} & CVPR'22 & .838 & .911 & .729 & .029 \\
-\midrule
-SAM-Adpt.~\cite{chen2023samadapter} & ICCVW'23 & .883 & .918 & .801 & .025 \\
-COMPr.~\cite{hao2024comprompter} & SCIS'24 & \textbf{.889} & .949 & .821 & \textbf{.023} \\
-\midrule
-\textbf{Ours} (Grid) & --- & .861 & \textbf{.951} & \textbf{.841} & .024 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Our decoder-only approach surpasses all dedicated COD architectures on $E_\phi$ and $F_\beta^w$ despite requiring no domain-specific design. Methods that modify the encoder (SAM-Adapter, COMPrompter) achieve higher $S_\alpha$---consistent with our thesis that encoder modification and decoder fine-tuning address complementary bottlenecks. Note: our method uses GT prompts; dedicated methods are fully automatic.
-
-% ============================================================
-\section{Ablation Studies}
-
-\subsection{Prompt-Type Training}
-\label{sec:ablation_prompt}
-
-To validate that prompt robustness arises from mixed-prompt training rather than being an inherent property of fine-tuning, we train three decoder variants: point-only, box-only, and mixed (default).
-
-\begin{table}[t]
-\centering
-\caption{\textbf{Prompt-type ablation} (500 test images). Mixed training produces the most robust decoder. Box-only training fails catastrophically on point prompts.}
-\label{tab:ablation_prompt}
-\small
-\begin{tabular}{lcccc}
-\toprule
-\multirow{2}{*}{Training} & \multicolumn{4}{c}{Test Prompt mIoU} \\
-\cmidrule(lr){2-5}
- & CoM & Edge & Grid & Random \\
-\midrule
-Point-only & .699 & .672 & .725 & .768 \\
-Box-only & .376 & .501 & .389 & .455 \\
-\textbf{Mixed (ours)} & \textbf{.738} & \textbf{.694} & \textbf{.756} & \textbf{.774} \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Mixed-prompt training outperforms point-only by 3--4 mIoU on every test strategy and box-only by 18--36 mIoU. Box-only training is catastrophically poor on point prompts (0.376 CoM), confirming that prompt robustness is \emph{not} an inherent property of fine-tuning but requires explicit multi-modal prompt exposure during training.
-
-\subsection{Loss Function}
-
-\begin{table}[t]
-\centering
-\caption{\textbf{Loss function ablation} (500 test images, Center-of-Mass). All variants perform similarly; Dice-heavy is marginally best.}
-\label{tab:ablation_loss}
-\small
-\begin{tabular}{lccccc}
-\toprule
-Loss Config & mIoU & Dice & $S_\alpha$ & $F_\beta^w$ & MAE$\downarrow$ \\
-\midrule
-BCE only (1.0/0.0) & .713 & .796 & .823 & .782 & .042 \\
-Dice only (0.0/1.0) & .712 & .793 & .815 & .778 & .046 \\
-BCE-heavy (0.7/0.3) & .708 & .789 & .818 & .781 & .044 \\
-Dice-heavy (0.3/0.7) & \textbf{.729} & \textbf{.810} & \textbf{.829} & \textbf{.801} & \textbf{.043} \\
-\midrule
-Ours (0.5/0.5)$^\dagger$ & .738 & .819 & .847 & .819 & .028 \\
-\bottomrule
-\multicolumn{6}{l}{\footnotesize $^\dagger$Full 2,026-image evaluation; ablation rows use 500 images.}
-\end{tabular}
-\end{table}
-
-All four loss variants achieve similar performance ($\pm$2.1 mIoU), indicating robustness to loss weighting. The Dice-heavy variant is marginally best, suggesting region-level supervision is slightly more beneficial for COD.
-
-\subsection{LLPM Component Analysis}
-
-To validate that both LLPM branches contribute, we train variants with individual branches disabled.
-
-\begin{table}[t]
-\centering
-\caption{\textbf{LLPM component ablation} (500 test images, Edge prompt mIoU). Both branches and the learnable gate contribute; removing any component degrades performance.}
-\label{tab:ablation_llpm}
-\small
-\begin{tabular}{lccc}
-\toprule
-LLPM Variant & Edge mIoU & $\Delta$ & $\alpha_{\text{final}}$ \\
-\midrule
-No LLPM (decoder-only) & .694 & --- & --- \\
-Edge branch only & .713 & +1.9 & 0.091 \\
-Enhancement only & .713 & +1.9 & 0.211 \\
-No gate ($\alpha\!=\!1$) & .709 & +1.5 & 1.0 (fixed) \\
-\textbf{Full LLPM (ours)} & \textbf{.719} & \textbf{+2.5} & 0.185 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Both individual branches achieve similar gains (+1.9 Edge mIoU), but the full LLPM outperforms either alone (+2.5), confirming that edge detection and feature enhancement are complementary. The learnable gate is also important: fixing $\alpha\!=\!1$ removes the model's ability to regulate enhancement strength, yielding the worst variant (+1.5). Notably, the edge-only variant's $\alpha$ barely grows from initialization (0.091 vs.\ 0.185 for full LLPM), suggesting that without the enhancement branch, the edge attention map alone provides limited value.
-
-\subsection{Data Augmentation}
-
-We test progressively richer augmentation beyond horizontal flips: adding random rotation ($\pm$5\textdegree) and pixel shift ($\pm$16px, half a ViT patch).
-
-\begin{table}[t]
-\centering
-\caption{\textbf{Augmentation ablation} (500 test images). Richer augmentation slightly hurts CoM/Grid/Random but improves Edge---the hardest prompt. Differences are small ($<$2 mIoU), indicating robustness to augmentation choice.}
-\label{tab:ablation_aug}
-\small
-\begin{tabular}{lcccc}
-\toprule
-\multirow{2}{*}{Augmentation} & \multicolumn{4}{c}{Test Prompt mIoU} \\
-\cmidrule(lr){2-5}
- & CoM & Edge & Grid & Random \\
-\midrule
-\textbf{Flip only (ours)} & \textbf{.738} & .694 & \textbf{.756} & \textbf{.775} \\
-Flip + rotation & .722 & .708 & .741 & .768 \\
-Flip + rot.\ + shift & .724 & \textbf{.718} & .738 & .765 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Adding rotation and pixel shift increases training samples (9,120 and 12,160 vs.\ 6,080) and lowers final training loss (0.068 and 0.064 vs.\ 0.072), but does not improve test mIoU on most prompts. The one exception is edge prompts, where richer augmentation helps (+2.4 mIoU for flip+rot+shift vs.\ flip-only), likely because geometric perturbations expose the decoder to more boundary configurations. Overall, the baseline flip-only augmentation is near-optimal.
-
-\subsection{Qualitative Results}
-
-\begin{figure*}[t]
-    \centering
-    \includegraphics[width=\textwidth]{figures/qualitative_comparison.png}
-    \caption{\textbf{Qualitative comparison.} Each row: input, GT mask, base SAM, our decoder (center-of-mass prompts). Top: hard cases where base SAM fails catastrophically. Bottom: easier cases where both succeed. The specialized decoder consistently follows true boundaries even when coloration matches the background.}
-    \label{fig:qualitative}
-\end{figure*}
-
-Base SAM frequently segments only the most salient region near the prompt, missing large portions of camouflaged objects. Our decoder produces masks that closely follow true boundaries, even where the animal's coloration is nearly identical to the background (Figure~\ref{fig:qualitative}).
-
-% ============================================================
-\section{Discussion}
-
-\noindent\textbf{Why the decoder is the bottleneck.}
-SAM's ViT-H encoder, pre-trained on 1B masks, already captures texture gradients and edge patterns sufficient for COD. The decoder---trained on general segmentation---has never learned that \emph{subtle} texture disruptions signify boundaries. Fine-tuning teaches this mapping: subtle features $\rightarrow$ object boundaries. The 16.6-point mIoU gain from training only 0.6\% of parameters (4M of 636M) confirms this bottleneck hypothesis.
-
-\noindent\textbf{Prompt robustness from mixed training.}
-By alternating point and box prompts, the decoder learns \emph{what} the camouflaged object is rather than \emph{where the user clicked}. Point-only training overfits to spatial proximity; box-only training overfits to box geometry. Mixed training forces the decoder to understand object structure, explaining why improvement transfers to prompt types never seen during training.
-
-\noindent\textbf{LLPM: targeted boundary enhancement.}
-The LLPM's impact is concentrated on edge prompts (+2.5 mIoU) and dark/boundary-ambiguous images. The learned gate converged to $\alpha = 0.185$, a moderate perturbation that enhances boundaries without disrupting the global statistics the frozen encoder expects. This confirms that pre-encoder and decoder-side adaptation are complementary.
-
-\noindent\textbf{Limitations.}
-(1) Evaluated on COD10K only; cross-dataset generalization is untested. (2) Requires user prompts, unlike fully automatic COD methods. (3) Encoder-side adaptation (SAM-Adapter) achieves higher absolute performance. (4) LLPM training requires live encoder forward passes (12 hrs vs.\ 30 min for decoder-only).
-
-% ============================================================
-\section{Conclusion}
-
-We show that SAM's decoder is the primary bottleneck for camouflaged object detection. Fine-tuning only the 4M-parameter mask decoder yields +16.6 mIoU on COD10K, with a +238\% relative gain on edge prompts. Mixed-prompt training produces prompt-robust decoders, validated by ablation. A complementary 31K-parameter LLPM enhances boundary signals before the frozen encoder, adding +2.6 mIoU on edge prompts. Error analysis reveals that remaining failures are structured (dark images, tiny objects, boundary ambiguity), providing clear directions for future work including stronger augmentation and cross-dataset evaluation.
-
-% ============================================================
-{\small
-\bibliographystyle{ieeenat_fullname}
-\bibliography{main}
+\input{sec/0_abstract}
+\input{sec/1_intro}
+\input{sec/2_related}
+\input{sec/3_method}
+\input{sec/4_experiments}
+\input{sec/5_ablation}
+\input{sec/6_discussion}
+\input{sec/7_conclusion}
+{
+    \small
+    \bibliographystyle{ieeenat_fullname}
+    \bibliography{main}
 }
 
 \end{document}

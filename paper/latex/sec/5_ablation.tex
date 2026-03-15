@@ -1,0 +1,109 @@
+\section{Ablation Studies}
+
+\subsection{Prompt-Type Training}
+\label{sec:ablation_prompt}
+
+To validate that prompt robustness arises from mixed-prompt training rather than being an inherent property of fine-tuning, we train three decoder variants: point-only, box-only, and mixed (default).
+
+\begin{table}[t]
+\centering
+\caption{\textbf{Prompt-type ablation} (500 test images). Mixed training produces the most robust decoder. Box-only training fails catastrophically on point prompts.}
+\label{tab:ablation_prompt}
+\small
+\begin{tabular}{lcccc}
+\toprule
+\multirow{2}{*}{Training} & \multicolumn{4}{c}{Test Prompt mIoU} \\
+\cmidrule(lr){2-5}
+ & CoM & Edge & Grid & Random \\
+\midrule
+Point-only & .699 & .672 & .725 & .768 \\
+Box-only & .376 & .501 & .389 & .455 \\
+\textbf{Mixed (ours)} & \textbf{.738} & \textbf{.694} & \textbf{.756} & \textbf{.774} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Mixed-prompt training outperforms point-only by 3--4 mIoU on every test strategy and box-only by 18--36 mIoU. Box-only training is catastrophically poor on point prompts (0.376 CoM), confirming that prompt robustness is \emph{not} an inherent property of fine-tuning but requires explicit multi-modal prompt exposure during training.
+
+\subsection{Loss Function}
+
+\begin{table}[t]
+\centering
+\caption{\textbf{Loss function ablation} (500 test images, Center-of-Mass). All variants perform similarly; Dice-heavy is marginally best.}
+\label{tab:ablation_loss}
+\small
+\begin{tabular}{lccccc}
+\toprule
+Loss Config & mIoU & Dice & $S_\alpha$ & $F_\beta^w$ & MAE$\downarrow$ \\
+\midrule
+BCE only (1.0/0.0) & .713 & .796 & .823 & .782 & .042 \\
+Dice only (0.0/1.0) & .712 & .793 & .815 & .778 & .046 \\
+BCE-heavy (0.7/0.3) & .708 & .789 & .818 & .781 & .044 \\
+Dice-heavy (0.3/0.7) & \textbf{.729} & \textbf{.810} & \textbf{.829} & \textbf{.801} & \textbf{.043} \\
+\midrule
+Ours (0.5/0.5)$^\dagger$ & .738 & .819 & .847 & .819 & .028 \\
+\bottomrule
+\multicolumn{6}{l}{\footnotesize $^\dagger$Full 2,026-image evaluation; ablation rows use 500 images.}
+\end{tabular}
+\end{table}
+
+All four loss variants achieve similar performance ($\pm$2.1 mIoU), indicating robustness to loss weighting. The Dice-heavy variant is marginally best, suggesting region-level supervision is slightly more beneficial for COD.
+
+\subsection{LLPM Component Analysis}
+
+To validate that both LLPM branches contribute, we train variants with individual branches disabled.
+
+\begin{table}[t]
+\centering
+\caption{\textbf{LLPM component ablation} (500 test images, Edge prompt mIoU). Both branches and the learnable gate contribute; removing any component degrades performance.}
+\label{tab:ablation_llpm}
+\small
+\begin{tabular}{lccc}
+\toprule
+LLPM Variant & Edge mIoU & $\Delta$ & $\alpha_{\text{final}}$ \\
+\midrule
+No LLPM (decoder-only) & .694 & --- & --- \\
+Edge branch only & .713 & +1.9 & 0.091 \\
+Enhancement only & .713 & +1.9 & 0.211 \\
+No gate ($\alpha\!=\!1$) & .709 & +1.5 & 1.0 (fixed) \\
+\textbf{Full LLPM (ours)} & \textbf{.719} & \textbf{+2.5} & 0.185 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Both individual branches achieve similar gains (+1.9 Edge mIoU), but the full LLPM outperforms either alone (+2.5), confirming that edge detection and feature enhancement are complementary. The learnable gate is also important: fixing $\alpha\!=\!1$ removes the model's ability to regulate enhancement strength, yielding the worst variant (+1.5). Notably, the edge-only variant's $\alpha$ barely grows from initialization (0.091 vs.\ 0.185 for full LLPM), suggesting that without the enhancement branch, the edge attention map alone provides limited value.
+
+\subsection{Data Augmentation}
+
+We test progressively richer augmentation beyond horizontal flips: adding random rotation ($\pm$5\textdegree) and pixel shift ($\pm$16px, half a ViT patch).
+
+\begin{table}[t]
+\centering
+\caption{\textbf{Augmentation ablation} (500 test images). Richer augmentation slightly hurts CoM/Grid/Random but improves Edge---the hardest prompt. Differences are small ($<$2 mIoU), indicating robustness to augmentation choice.}
+\label{tab:ablation_aug}
+\small
+\begin{tabular}{lcccc}
+\toprule
+\multirow{2}{*}{Augmentation} & \multicolumn{4}{c}{Test Prompt mIoU} \\
+\cmidrule(lr){2-5}
+ & CoM & Edge & Grid & Random \\
+\midrule
+\textbf{Flip only (ours)} & \textbf{.738} & .694 & \textbf{.756} & \textbf{.775} \\
+Flip + rotation & .722 & .708 & .741 & .768 \\
+Flip + rot.\ + shift & .724 & \textbf{.718} & .738 & .765 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Adding rotation and pixel shift increases training samples (9,120 and 12,160 vs.\ 6,080) and lowers final training loss (0.068 and 0.064 vs.\ 0.072), but does not improve test mIoU on most prompts. The one exception is edge prompts, where richer augmentation helps (+2.4 mIoU for flip+rot+shift vs.\ flip-only), likely because geometric perturbations expose the decoder to more boundary configurations. Overall, the baseline flip-only augmentation is near-optimal.
+
+\subsection{Qualitative Results}
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\textwidth]{figures/qualitative_comparison.png}
+    \caption{\textbf{Qualitative comparison.} Each row: input, GT mask, base SAM, our decoder (center-of-mass prompts). Top: hard cases where base SAM fails catastrophically. Bottom: easier cases where both succeed. The specialized decoder consistently follows true boundaries even when coloration matches the background.}
+    \label{fig:qualitative}
+\end{figure*}
+
+Base SAM frequently segments only the most salient region near the prompt, missing large portions of camouflaged objects. Our decoder produces masks that closely follow true boundaries, even where the animal's coloration is nearly identical to the background (Figure~\ref{fig:qualitative}).

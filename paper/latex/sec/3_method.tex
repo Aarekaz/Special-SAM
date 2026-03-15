@@ -1,0 +1,40 @@
+\section{Method}
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\textwidth]{figures/architecture_diagram.pdf}
+    \caption{\textbf{Two-stage adaptation.} (a)~\textbf{Decoder-only:} Embeddings are pre-computed from the frozen ViT-H encoder. Only the mask decoder (4M params) trains with mixed point/box prompts and BCE+Dice loss. (b)~\textbf{LLPM+decoder:} The LLPM (31K params) preprocesses images before the live frozen encoder; gradients flow back through the encoder to update the LLPM. The decoder is warm-started from (a). (c)~\textbf{Inference:} LLPM $\rightarrow$ frozen encoder $\rightarrow$ specialized decoder.}
+    \label{fig:architecture}
+\end{figure*}
+
+\subsection{Decoder-Only Fine-Tuning}
+
+SAM consists of a ViT-H image encoder ($\sim$632M parameters), a prompt encoder, and a mask decoder ($\sim$4M parameters). We freeze both encoders and train only the mask decoder (Figure~\ref{fig:architecture}a).
+
+\noindent\textbf{Pre-computed embeddings.} We run the frozen encoder once on all training images and cache embeddings as \texttt{.npy} files, eliminating the encoder forward pass from the training loop.
+
+\noindent\textbf{Mixed-prompt training.} Each iteration randomly selects between a point prompt (random foreground pixel) and a bounding box prompt (tight GT box) with 50/50 probability. This prevents the decoder from overfitting to any single prompt type.
+
+\noindent\textbf{Loss and optimization.} We minimize $\mathcal{L} = 0.5 \cdot \mathcal{L}_{\text{BCE}} + 0.5 \cdot \mathcal{L}_{\text{Dice}}$. BCE enforces pixel-level boundaries; Dice maintains region-level shape coherence. We use AdamW (lr $10^{-4}$, cosine schedule, 1-epoch warmup, 15 epochs).
+
+\subsection{Learnable Local Preprocessing Module}
+
+The frozen encoder may miss subtle camouflage boundaries at the pixel level. We introduce a lightweight module that enhances boundary signals \emph{before} encoding.
+
+\noindent\textbf{Architecture.} The LLPM has two branches processing input image $x$:
+\begin{itemize}
+    \item \textbf{Edge branch} $e(x)$: Conv stack ($3 \!\rightarrow\! 32 \!\rightarrow\! 1$) $\rightarrow$ Sigmoid, producing a single-channel edge attention map.
+    \item \textbf{Enhancement branch} $h(x)$: Conv stack with grouped convolutions ($3 \!\rightarrow\! 64 \!\rightarrow\! 3$), producing a 3-channel residual.
+\end{itemize}
+The branches fuse via a learnable gate $\alpha$ (init.\ 0.1):
+\begin{equation}
+    x' = x + \alpha \cdot (h(x) \odot e(x))
+    \label{eq:llpm}
+\end{equation}
+The residual connection ensures near-identity at initialization. Total: $\sim$31K parameters.
+
+\noindent\textbf{Training.} The preprocessed $x'$ passes through the \emph{live} frozen encoder (gradients flow back to LLPM). The decoder is warm-started from the best decoder-only checkpoint. Joint training uses AdamW (lr $5\!\times\!10^{-5}$), mixed precision (FP16), 15 epochs.
+
+\subsection{Evaluation Protocol}
+
+We evaluate on four prompt strategies of increasing difficulty: \textbf{Center-of-Mass} (1pt), \textbf{Edge} (1pt, boundary contour), \textbf{Multi-Grid} (4pt), and \textbf{Multi-Random} (3pt). We report IoU, Dice, Boundary F1, $S_\alpha$~\cite{fan2017smeasure}, $E_\phi$~\cite{fan2018emeasure}, $F_\beta^w$~\cite{margolin2014fmeasure}, and MAE on the full 2,026-image COD10K camouflaged test set.

@@ -1,0 +1,3 @@
+\section{Conclusion}
+
+We show that SAM's decoder is the primary bottleneck for camouflaged object detection. Fine-tuning only the 4M-parameter mask decoder yields +16.6 mIoU on COD10K, with a +238\% relative gain on edge prompts. Mixed-prompt training produces prompt-robust decoders, validated by ablation. A complementary 31K-parameter LLPM enhances boundary signals before the frozen encoder, adding +2.6 mIoU on edge prompts. Error analysis reveals that remaining failures are structured (dark images, tiny objects, boundary ambiguity), providing clear directions for future work including stronger augmentation and cross-dataset evaluation.
