@@ -23,7 +23,7 @@ Box-only & .376 & .501 & .389 & .455 \\
 \end{tabular}
 \end{table}
 
-Mixed-prompt training outperforms point-only by 3--4 mIoU on every test strategy and box-only by 18--36 mIoU. Box-only training is catastrophically poor on point prompts (0.376 CoM), confirming that prompt robustness is \emph{not} an inherent property of fine-tuning but requires explicit multi-modal prompt exposure during training.
+Mixed-prompt training outperforms point-only on all test strategies (by 2--4 mIoU on CoM, Edge, and Grid; 0.6 on Random where point-only already performs well) and box-only by 19--37 mIoU. Box-only training is catastrophically poor on point prompts (0.376 CoM), confirming that prompt robustness is \emph{not} an inherent property of fine-tuning but requires explicit multi-modal prompt exposure during training.
 
 \subsection{Loss Function}
 

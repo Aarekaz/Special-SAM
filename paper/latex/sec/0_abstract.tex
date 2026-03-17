@@ -2,8 +2,8 @@
 Foundation segmentation models like SAM encode rich visual features but fail on camouflaged objects---their decoders, trained on general scenes, cannot interpret subtle texture cues as object boundaries.
 We show that the decoder, not the encoder, is the bottleneck: freezing SAM's ViT-H encoder and fine-tuning only the 4M-parameter mask decoder on COD10K raises mIoU from 57.2\% to 73.8\% (+16.6 points).
 This gain is prompt-robust, transferring across four prompt types including edge prompts (+238\% relative).
-We validate prompt robustness through ablation: mixed-prompt training (point/box) outperforms single-prompt variants by 3--5 mIoU.
+We validate prompt robustness through ablation: mixed-prompt training (point/box) outperforms point-only by up to 4 mIoU and box-only by 19--37 mIoU.
 A complementary Learnable Local Preprocessing Module (LLPM, $\sim$31K parameters) enhances input images before the frozen encoder, yielding a further +2.6 mIoU on edge prompts.
 Error analysis reveals that remaining failures cluster in dark images, tiny objects, and boundary-ambiguous cases---the LLPM specifically addresses the latter.
-Our approach requires no architectural changes, trains in under 30 minutes on a single GPU, and produces a 16MB checkpoint.
+Our approach requires no architectural changes, trains in under 2 hours on a single GPU, and produces a 16MB checkpoint.
 \end{abstract}

@@ -1,0 +1,39 @@
+# Evaluation configuration for NC4K cross-dataset generalization
+
+model:
+  type: vit_h
+  base_checkpoint: weights/sam_vit_h_4b8939.pth
+  specialized_decoder: checkpoints/camo_decoder_vith.pth
+  llpm_path: checkpoints/llpm_vith.pth
+  llpm_decoder: checkpoints/camo_decoder_llpm_vith.pth
+
+llpm:
+  edge_channels: 32
+  enhance_channels: 64
+
+data:
+  test_img_dir: data/nc4k/Test/Image
+  test_mask_dir: data/nc4k/Test/GT_Object
+
+evaluation:
+  max_samples: 0  # 0 = use all test samples
+  target_size: 1024
+  boundary_threshold: 5
+  prompt_strategies:
+    - center
+
+metrics:
+  - iou
+  - dice
+  - f1
+  - boundary_f1
+  - s_alpha
+  - e_phi
+  - f_beta_w
+  - mae
+
+output:
+  results_csv: results/crossdataset/nc4k_results.csv
+  per_image_csv: results/crossdataset/nc4k_per_image.csv
+  comparison_plot: results/crossdataset/nc4k_comparison.png
+  visualization_dir: results/crossdataset/nc4k_visualizations
