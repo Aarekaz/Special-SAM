@@ -19,6 +19,6 @@ An error analysis of the remaining failures reveals structured patterns: dark im
 \begin{enumerate}
     \item Evidence that SAM's decoder is the bottleneck for COD: decoder-only fine-tuning yields +16.6 mIoU on 2,026 test images with no architecture changes.
     \item A prompt robustness analysis with ablation: mixed-prompt training produces decoders that generalize across all four prompt types, validated by point-only vs.\ box-only comparisons.
-    \item A Learnable Local Preprocessing Module (LLPM)---the first pre-encoder adaptation of SAM---that enhances boundary signals with only 31K parameters.
+    \item A Learnable Local Preprocessing Module (LLPM) that enhances boundary signals before the frozen encoder with only 31K parameters.
     \item An error analysis categorizing failure modes (dark, tiny, thin, disjoint, general) that connects LLPM gains to specific failure types.
 \end{enumerate}

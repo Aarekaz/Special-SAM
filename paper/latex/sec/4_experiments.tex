@@ -123,6 +123,7 @@ Failures are structured, not random (Table~\ref{tab:error_analysis}). Disjoint o
 \caption{\textbf{Comparison with COD methods} on COD10K test set. This table contextualizes decoder-only adaptation within the broader COD landscape. \emph{Important:} our method uses oracle GT-derived prompts, while dedicated methods are fully automatic---these are not head-to-head comparisons.\textsuperscript{$\dagger$}}
 \label{tab:comparison}
 \small
+\resizebox{\columnwidth}{!}{%
 \begin{tabular}{llcccc}
 \toprule
 Method & Venue & $S_\alpha$ & $E_\phi$ & $F_\beta^w$ & MAE$\downarrow$ \\
@@ -134,16 +135,16 @@ SINet-V2~\cite{fan2022sinetv2} & TPAMI'22 & .815 & .887 & .680 & .037 \\
 SegMaR~\cite{jia2022segmar} & CVPR'22 & .833 & .899 & .724 & .034 \\
 ZoomNet~\cite{pang2022zoomnet} & CVPR'22 & .838 & .911 & .729 & .029 \\
 \midrule
-\multicolumn{6}{l}{\textit{SAM-based adaptation (encoder or prompt tuning)}} \\
+\multicolumn{6}{l}{\textit{SAM-based (encoder/prompt tuning)}} \\
 SAM-Adpt.~\cite{chen2023samadapter} & ICCVW'23 & .883 & .918 & .801 & .025 \\
 COMPr.~\cite{hao2024comprompter} & SCIS'24 & \textbf{.889} & .949 & .821 & \textbf{.023} \\
 \midrule
-\multicolumn{6}{l}{\textit{Decoder-only adaptation (ours, oracle GT prompts\textsuperscript{$\dagger$})}} \\
-\textbf{Ours} (Grid) & --- & .861 & \textbf{.951} & \textbf{.841} & .024 \\
+\multicolumn{6}{l}{\textit{Decoder-only (ours, oracle prompts\textsuperscript{$\dagger$})}} \\
+\textbf{Ours} (Grid) & --- & .861 & .951 & .841 & .024 \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \vspace{1pt}
-{\footnotesize \textsuperscript{$\dagger$}Our prompts are derived from ground-truth masks (center-of-mass, grid, etc.). In deployment, prompts come from user interaction or an upstream detector; performance will depend on prompt quality, not our decoder adaptation.}
+{\footnotesize \textsuperscript{$\dagger$}Prompts derived from GT masks. In deployment, prompts come from users or upstream detectors; performance depends on prompt quality, not our adaptation.}
 \end{table}
 
-Table~\ref{tab:comparison} contextualizes where decoder-only adaptation falls in the COD performance landscape, rather than claiming direct superiority. Our approach surpasses all dedicated COD architectures on $E_\phi$ and $F_\beta^w$ despite requiring no domain-specific design, but uses oracle GT-derived prompts while dedicated methods are fully automatic. Methods that modify the encoder (SAM-Adapter, COMPrompter) achieve higher $S_\alpha$---consistent with our thesis that encoder modification and decoder fine-tuning address complementary bottlenecks. The gap between oracle and realistic prompt performance depends on prompt quality, not the decoder adaptation itself.
+Table~\ref{tab:comparison} contextualizes where decoder-only adaptation falls in the COD performance landscape. Despite using oracle GT-derived prompts (an advantage over fully automatic methods), our decoder-only approach does not surpass encoder-adaptation methods (SAM-Adapter, COMPrompter) on $S_\alpha$ or MAE. This is consistent with our thesis: encoder and decoder adaptation address complementary bottlenecks, and decoder-only fine-tuning---while efficient---does not replace encoder-side modification. The value of our approach lies in its simplicity (no new parameters, 90-min training) and the insight that decoder specialization alone recovers substantial performance.
