@@ -148,3 +148,27 @@ COMPr.~\cite{hao2024comprompter} & SCIS'24 & \textbf{.889} & .949 & .821 & \text
 \end{table}
 
 Table~\ref{tab:comparison} contextualizes where decoder-only adaptation falls in the COD performance landscape. Despite using oracle GT-derived prompts (an advantage over fully automatic methods), our decoder-only approach does not surpass encoder-adaptation methods (SAM-Adapter, COMPrompter) on $S_\alpha$ or MAE. This is consistent with our thesis: encoder and decoder adaptation address complementary bottlenecks, and decoder-only fine-tuning---while efficient---does not replace encoder-side modification. The value of our approach lies in its simplicity (no new parameters, 90-min training) and the insight that decoder specialization alone recovers substantial performance.
+
+\subsection{Cross-Dataset Generalization}
+
+\begin{table}[t]
+\centering
+\caption{\textbf{Cross-dataset generalization} (Center-of-Mass prompt). Our decoder is trained only on COD10K and evaluated on held-out datasets without retraining.}
+\label{tab:crossdataset}
+\small
+\begin{tabular}{llcccc}
+\toprule
+Dataset & Model & mIoU & $S_\alpha$ & $E_\phi$ & MAE$\downarrow$ \\
+\midrule
+\multirow{3}{*}{CAMO (250)} & Base SAM & .489 & .672 & .748 & .122 \\
+ & Decoder-only & .658 & .787 & .875 & .075 \\
+ & LLPM+Decoder & \textbf{.677} & \textbf{.797} & \textbf{.887} & \textbf{.073} \\
+\midrule
+\multirow{3}{*}{NC4K (4{,}121)} & Base SAM & --- & --- & --- & --- \\
+ & Decoder-only & --- & --- & --- & --- \\
+ & LLPM+Decoder & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Despite being trained exclusively on COD10K, the specialized decoder generalizes to CAMO: mIoU improves from 0.489 (base) to 0.677 (+18.8 points), matching the improvement pattern observed on COD10K. NC4K results are pending.
