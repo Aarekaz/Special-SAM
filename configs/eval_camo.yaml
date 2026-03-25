@@ -12,8 +12,8 @@ llpm:
   enhance_channels: 64
 
 data:
-  test_img_dir: data/camo/Test/Image
-  test_mask_dir: data/camo/Test/GT_Object
+  test_img_dir: data/camo/CAMO-V.1.0-CVIU2019/Images/Test
+  test_mask_dir: data/camo/CAMO-V.1.0-CVIU2019/GT
 
 evaluation:
   max_samples: 0  # 0 = use all test samples
