@@ -140,6 +140,22 @@ Tracks all SLURM jobs, their purpose, status, and results.
 
 ---
 
+### Job 5847371 — Cross-Dataset Evaluation (CAMO + NC4K)
+- **Script:** `scripts/eval_crossdataset.sh` (SLURM array, tasks 0-1)
+- **Submitted:** 2026-03-25
+- **GPU:** A100 80GB
+- **Wall time:** 6 hrs per task
+- **Status:** RUNNING
+- **Configs:**
+  - Task 0: `configs/eval_camo.yaml` (CAMO test, 250 images)
+  - Task 1: `configs/eval_nc4k.yaml` (NC4K test, 4,121 images)
+- **Models evaluated:** Base SAM, Decoder-only, LLPM+Decoder (Center-of-Mass prompt)
+- **Output:** `results/crossdataset/camo_results.csv`, `results/crossdataset/nc4k_results.csv`
+- **Logs:** `logs/crossdataset_5847371_0.out`, `logs/crossdataset_5847371_1.out`
+- **Notes:** CHAMELEON skipped (dataset download pending). Results will be used to add cross-dataset generalization table to paper.
+
+---
+
 ## Key Paths on Pegasus
 
 | Resource | Path |
