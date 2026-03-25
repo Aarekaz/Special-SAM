@@ -7,7 +7,7 @@
 #SBATCH --mem=32G
 #SBATCH --cpus-per-task=4
 #SBATCH --time=06:00:00
-#SBATCH --array=0-2
+#SBATCH --array=0-1
 
 export PATH="/SEAS/home/g37014071/.conda/envs/specialsam/bin:$PATH"
 export PYTHONUNBUFFERED=1
