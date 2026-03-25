@@ -107,6 +107,25 @@ class PromptStrategy:
         return np.array(points), np.ones(len(points), dtype=int)
 
     @staticmethod
+    def center_fixed(mask: np.ndarray, num_points: int = 1):
+        """Fixed center-of-image prompting: always uses (width/2, height/2).
+
+        No ground truth information used. The prompt is placed at the
+        geometric center of the image regardless of where the object is.
+        This makes the comparison GT-free and parameter-free.
+
+        Args:
+            mask: Binary mask (H, W) — used only for shape, not content.
+            num_points: Ignored (always returns 1 point).
+
+        Returns:
+            (point_coords, point_labels)
+        """
+        h, w = mask.shape[:2]
+        cx, cy = w // 2, h // 2
+        return np.array([[cx, cy]]), np.array([1])
+
+    @staticmethod
     def random_points(mask: np.ndarray, num_points: int = 3):
         """Random foreground point sampling.
 
@@ -139,6 +158,12 @@ PROMPT_CONFIGS = {
         "strategy": PromptStrategy.center_of_mass,
         "num_points": 1,
         "description": "Single point at object center of mass",
+    },
+    "center_fixed": {
+        "name": "Center-of-Image (Fixed)",
+        "strategy": PromptStrategy.center_fixed,
+        "num_points": 1,
+        "description": "Single point at fixed image center, no GT used",
     },
     "edge_single": {
         "name": "Edge (Single)",
