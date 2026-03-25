@@ -156,6 +156,21 @@ Tracks all SLURM jobs, their purpose, status, and results.
 
 ---
 
+### Job 5847376 — Fixed Center-of-Image Prompt Evaluation
+- **Script:** `scripts/eval_center_fixed.sh`
+- **Submitted:** 2026-03-25
+- **GPU:** A100 80GB
+- **Wall time:** 6 hrs
+- **Status:** RUNNING
+- **Config:** `configs/eval_center_fixed.yaml` (COD10K test, 2,026 images)
+- **Prompt:** Fixed image center (width/2, height/2) — no GT used
+- **Models evaluated:** Base SAM, Decoder-only, LLPM+Decoder
+- **Output:** `results/center_fixed_results.csv`
+- **Logs:** `logs/center_fixed_5847376.out`
+- **Notes:** Professor suggested this to remove oracle prompt dependency. If results are good, reframe paper prompting story as "GT-free fixed center prompt."
+
+---
+
 ## Key Paths on Pegasus
 
 | Resource | Path |
