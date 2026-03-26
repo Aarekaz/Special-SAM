@@ -186,6 +186,16 @@ Tracks all SLURM jobs, their purpose, status, and results.
   - **Decision:** instead of presenting these numbers, we reframed the prompting story in `sec/1_intro.tex` and `sec/6_discussion.tex`: oracle center-of-mass prompts = standard SAM interactive segmentation protocol (simulated user click on target), not a GT dependency. Prompt robustness (3.5x→1.1x variance reduction) is the key practical finding.
   - If a clean fixed-center eval is needed in future, re-run with a config that filters to camouflaged-only images (e.g. using the GT mask list to whitelist files).
 
+### ⏳ PENDING — Re-run center_fixed on camouflaged-only images (2026-03-26)
+- **Root cause fixed:** `configs/eval_center_fixed.yaml` now points to `data/cod10k/COD10K-v3/Test/Image_CAM` (symlink dir with only 2,026 camouflaged images, created with `ln -s ../Image/COD10K-CAM-* .`)
+- **Status:** Ready to submit — blocked by Pegasus cluster outage (SLURM controller down as of 2026-03-26)
+- **Action needed:** When cluster is back up, run on HPC:
+  ```bash
+  sbatch scripts/eval_center_fixed.sh
+  ```
+- **Expected output:** `results/center_fixed_results.csv` (overwritten with correct 2,026-sample results)
+- **What to do with results:** Paste CSV output to Claude. If Decoder-only mIoU > ~0.55, add a row to the main table in `paper/latex/sec/4_experiments.tex` and update the prompting discussion in `sec/6_discussion.tex` to cite a concrete GT-free number.
+
 ---
 
 ### Job 5847383 — COCO Regular Image Figure Generation
