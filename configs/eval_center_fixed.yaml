@@ -14,7 +14,7 @@ llpm:
   enhance_channels: 64
 
 data:
-  test_img_dir: data/cod10k/COD10K-v3/Test/Image
+  test_img_dir: data/cod10k/COD10K-v3/Test/Image_CAM
   test_mask_dir: data/cod10k/COD10K-v3/Test/GT_Object
 
 evaluation:
