@@ -4,6 +4,7 @@ We show that the decoder, not the encoder, is the bottleneck: freezing SAM's ViT
 This gain is prompt-robust, transferring across four prompt types including edge prompts (+238\% relative).
 We validate prompt robustness through ablation: mixed-prompt training (point/box) outperforms point-only by up to 4 mIoU and box-only by 19--37 mIoU.
 A complementary Learnable Local Preprocessing Module (LLPM, $\sim$31K parameters) enhances input images before the frozen encoder, yielding a further +2.6 mIoU on edge prompts.
+The decoder generalizes without retraining: evaluated on CAMO and NC4K, it improves mIoU by +18.8 and +18.5 points respectively over base SAM, confirming that specialization learns transferable camouflage cues rather than dataset-specific patterns.
 Error analysis reveals that remaining failures cluster in dark images, tiny objects, and boundary-ambiguous cases---the LLPM specifically addresses the latter.
 Our approach requires no architectural changes, trains in under 2 hours on a single GPU, and produces a 16MB checkpoint.
 \end{abstract}
