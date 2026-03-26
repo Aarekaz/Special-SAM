@@ -147,7 +147,7 @@ COMPr.~\cite{hao2024comprompter} & SCIS'24 & \textbf{.889} & .949 & .821 & \text
 {\footnotesize \textsuperscript{$\dagger$}Prompts derived from GT masks. In deployment, prompts come from users or upstream detectors; performance depends on prompt quality, not our adaptation.}
 \end{table}
 
-Table~\ref{tab:comparison} contextualizes where decoder-only adaptation falls in the COD performance landscape. Despite using oracle GT-derived prompts (an advantage over fully automatic methods), our decoder-only approach does not surpass encoder-adaptation methods (SAM-Adapter, COMPrompter) on $S_\alpha$ or MAE. This is consistent with our thesis: encoder and decoder adaptation address complementary bottlenecks, and decoder-only fine-tuning---while efficient---does not replace encoder-side modification. The value of our approach lies in its simplicity (no new parameters, 90-min training) and the insight that decoder specialization alone recovers substantial performance.
+Table~\ref{tab:comparison} places decoder-only adaptation in the broader COD landscape, but should be interpreted as contextual rather than head-to-head. Our method is evaluated in SAM's standard prompt-based setting, whereas dedicated COD methods are fully automatic. Under this protocol, decoder-only adaptation still recovers substantial performance with no new decoder parameters and 90-minute training, although it does not surpass encoder-adaptation methods (SAM-Adapter, COMPrompter) on $S_\alpha$ or MAE. This is consistent with our broader conclusion that encoder- and decoder-side specialization are complementary.
 
 \subsection{Cross-Dataset Generalization}
 
@@ -178,8 +178,8 @@ Despite being trained exclusively on COD10K, the specialized decoder generalizes
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{figures/coco_comparison.png}
-\caption{\textbf{Qualitative results on regular COCO images} (fixed image-center prompt, no ground truth used). Camouflage specialization does not degrade general segmentation: our decoder produces tighter, more precise masks. Base SAM over-segments in several cases (rows 3 and 6), while our decoder remains conservative.}
+\caption{\textbf{Qualitative results on regular COCO images} (fixed image-center prompt, no ground truth used). As a sanity check, camouflage specialization does not appear to cause obvious degradation on regular images: our decoder often produces tighter masks. Base SAM over-segments in several cases (rows 3 and 6), while our decoder remains conservative.}
 \label{fig:coco}
 \end{figure}
 
-A natural concern is whether specializing for camouflage degrades performance on ordinary images. Figure~\ref{fig:coco} shows qualitative results on random COCO val2017 images using a fixed image-center prompt (no ground truth). Our decoder does not exhibit catastrophic failure on non-camouflage scenes. In several cases it produces \emph{tighter} segmentations than base SAM, which over-segments background regions when the center prompt is ambiguous. This is consistent with the decoder having learned more precise boundary delineation.
+A natural concern is whether specializing for camouflage degrades performance on ordinary images. Figure~\ref{fig:coco} provides a qualitative sanity check on random COCO val2017 images using a fixed image-center prompt (no ground truth). Our decoder does not exhibit obvious catastrophic failure on these non-camouflage scenes. In several cases it produces \emph{tighter} segmentations than base SAM, which over-segments background regions when the center prompt is ambiguous. A quantitative study of general-image performance is left for future work.

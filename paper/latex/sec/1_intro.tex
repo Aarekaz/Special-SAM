@@ -3,8 +3,8 @@
 % Hook: the paradox
 SAM~\cite{kirillov2023sam} was trained on over one billion masks and segments almost anything---except when the object does not want to be seen. On COD10K's camouflaged test set~\cite{fan2020cod10k}, SAM ViT-H achieves only 57.2\% mIoU with center-of-mass prompts and a catastrophic 20.5\% with edge prompts (Table~\ref{tab:main}). Camouflaged organisms---insects mimicking bark, fish blending into coral---have evolved to defeat visual detection, and SAM's general-purpose decoder has never learned to interpret their subtle texture disruptions as boundaries.
 
-% Insight: it's the decoder
-We hypothesize that \textbf{the decoder is the bottleneck}: SAM's ViT-H encoder, pre-trained on 11M images, already captures the low-level texture gradients that distinguish camouflaged foreground from background---but the decoder, trained on general segmentation, does not know these signals matter. If this is true, fine-tuning only the lightweight 4M-parameter mask decoder should suffice.
+% Insight: decoder adaptation may be enough
+We hypothesize that, for \textbf{promptable camouflaged object detection}, decoder adaptation is the main bottleneck: SAM's ViT-H encoder, pre-trained on 11M images, may already capture the low-level texture gradients that distinguish camouflaged foreground from background, but the decoder, trained on general segmentation, does not reliably map these signals to object boundaries. If this is true, fine-tuning only the lightweight 4M-parameter mask decoder should suffice.
 
 % Evidence
 Our experiments confirm this. Decoder-only fine-tuning on 3,040 COD10K training images raises mIoU from 57.2\% to 73.8\%, a +16.6-point gain. Following the standard SAM evaluation protocol~\cite{kirillov2023sam}, prompts are derived from ground-truth masks to simulate an idealized user click on the target object---the setting for which SAM was designed. Crucially, this improvement is \textbf{prompt-robust}: it transfers uniformly across center, edge, grid, and random prompt strategies (Table~\ref{tab:improvement}), with the largest gain on the hardest case---edge prompts jump from 20.5\% to 69.4\% (+238\% relative). We validate that this robustness is not accidental: ablating the training prompt mix (Sec.~\ref{sec:ablation_prompt}) shows that mixed point/box training outperforms point-only by up to 4 mIoU and box-only by 19--37 mIoU.
@@ -17,7 +17,7 @@ An error analysis of the remaining failures reveals structured patterns: dark im
 
 \noindent\textbf{Contributions:}
 \begin{enumerate}
-    \item Evidence that SAM's decoder is the bottleneck for COD: decoder-only fine-tuning yields +16.6 mIoU on 2,026 test images with no architecture changes.
+    \item Evidence that decoder-only adaptation is highly effective for promptable COD: fine-tuning only SAM's mask decoder yields +16.6 mIoU on 2,026 test images with no architecture changes.
     \item A prompt robustness analysis with ablation: mixed-prompt training reduces sensitivity to prompt type from 3.5$\times$ to 1.1$\times$, meaning imprecise user clicks still yield strong segmentations. Validated by point-only vs.\ box-only comparisons.
     \item A Learnable Local Preprocessing Module (LLPM) that enhances boundary signals before the frozen encoder with only 31K parameters.
     \item An error analysis categorizing failure modes (dark, tiny, thin, disjoint, general) that connects LLPM gains to specific failure types.
