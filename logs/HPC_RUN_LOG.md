@@ -178,7 +178,13 @@ Tracks all SLURM jobs, their purpose, status, and results.
 - **Models evaluated:** Base SAM, Decoder-only, LLPM+Decoder
 - **Output:** `results/center_fixed_results.csv`
 - **Logs:** `logs/center_fixed_5847376.out`
-- **Notes:** Evaluated 4,000 images (full Test/Image folder including non-camouflaged background images), not just the 2,026 camouflaged images. This tanked absolute metrics. LLPM result was bugged (0.001 mIoU). Results not used in paper. Prompting story reframed differently: oracle prompts = standard SAM interactive segmentation protocol; prompt robustness (3.5x→1.1x) is the key practical finding.
+- **Why results were NOT included in the paper:**
+  - The eval config pointed to `Test/Image` which contains ~4,000 images (2,026 camouflaged + ~1,974 non-camouflaged background images). The eval ran on all of them.
+  - On background images there is no object near the image center, so GT mask is empty and the fixed-center point hits nothing. This tanked absolute metrics: Base SAM 0.165 mIoU, Decoder-only 0.287 mIoU.
+  - LLPM result was clearly bugged (0.001 mIoU), likely due to the same empty-mask edge case.
+  - Putting 0.287 mIoU as our "GT-free" headline would actively hurt the paper — reviewers would just see a weak model.
+  - **Decision:** instead of presenting these numbers, we reframed the prompting story in `sec/1_intro.tex` and `sec/6_discussion.tex`: oracle center-of-mass prompts = standard SAM interactive segmentation protocol (simulated user click on target), not a GT dependency. Prompt robustness (3.5x→1.1x variance reduction) is the key practical finding.
+  - If a clean fixed-center eval is needed in future, re-run with a config that filters to camouflaged-only images (e.g. using the GT mask list to whitelist files).
 
 ---
 
