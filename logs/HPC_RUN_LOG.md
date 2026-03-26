@@ -145,14 +145,25 @@ Tracks all SLURM jobs, their purpose, status, and results.
 - **Submitted:** 2026-03-25
 - **GPU:** A100 80GB
 - **Wall time:** 6 hrs per task
-- **Status:** RUNNING
+- **Status:** COMPLETED
 - **Configs:**
   - Task 0: `configs/eval_camo.yaml` (CAMO test, 250 images)
   - Task 1: `configs/eval_nc4k.yaml` (NC4K test, 4,121 images)
 - **Models evaluated:** Base SAM, Decoder-only, LLPM+Decoder (Center-of-Mass prompt)
 - **Output:** `results/crossdataset/camo_results.csv`, `results/crossdataset/nc4k_results.csv`
 - **Logs:** `logs/crossdataset_5847371_0.out`, `logs/crossdataset_5847371_1.out`
-- **Notes:** CHAMELEON skipped (dataset download pending). Results will be used to add cross-dataset generalization table to paper.
+- **Results:**
+
+| Dataset | Model | mIoU | S_α | E_φ | MAE |
+|---|---|---|---|---|---|
+| CAMO (250) | Base SAM | 0.489 | 0.672 | 0.748 | 0.122 |
+| CAMO (250) | Decoder-only | 0.658 | 0.787 | 0.875 | 0.075 |
+| CAMO (250) | LLPM+Decoder | 0.677 | 0.797 | 0.887 | 0.073 |
+| NC4K (4121) | Base SAM | 0.567 | 0.728 | 0.805 | 0.093 |
+| NC4K (4121) | Decoder-only | 0.741 | 0.841 | 0.924 | 0.048 |
+| NC4K (4121) | LLPM+Decoder | 0.752 | 0.848 | 0.929 | 0.045 |
+
+- **Notes:** CHAMELEON skipped (dataset not downloaded). Cross-dataset generalization table added to paper (`sec/4_experiments.tex`).
 
 ---
 
@@ -161,13 +172,24 @@ Tracks all SLURM jobs, their purpose, status, and results.
 - **Submitted:** 2026-03-25
 - **GPU:** A100 80GB
 - **Wall time:** 6 hrs
-- **Status:** RUNNING
-- **Config:** `configs/eval_center_fixed.yaml` (COD10K test, 2,026 images)
+- **Status:** COMPLETED
+- **Config:** `configs/eval_center_fixed.yaml`
 - **Prompt:** Fixed image center (width/2, height/2) — no GT used
 - **Models evaluated:** Base SAM, Decoder-only, LLPM+Decoder
 - **Output:** `results/center_fixed_results.csv`
 - **Logs:** `logs/center_fixed_5847376.out`
-- **Notes:** Professor suggested this to remove oracle prompt dependency. If results are good, reframe paper prompting story as "GT-free fixed center prompt."
+- **Notes:** Evaluated 4,000 images (full Test/Image folder including non-camouflaged background images), not just the 2,026 camouflaged images. This tanked absolute metrics. LLPM result was bugged (0.001 mIoU). Results not used in paper. Prompting story reframed differently: oracle prompts = standard SAM interactive segmentation protocol; prompt robustness (3.5x→1.1x) is the key practical finding.
+
+---
+
+### Job 5847383 — COCO Regular Image Figure Generation
+- **Script:** `scripts/coco_figure.sh`
+- **Submitted:** 2026-03-25
+- **GPU:** A100 80GB
+- **Status:** COMPLETED
+- **Config:** `configs/eval.yaml`
+- **Output:** `paper/latex/figures/coco_comparison.png` (5.1MB)
+- **Notes:** Sampled 8 random COCO val2017 images. Fixed image-center prompt, no GT. Shows specialized decoder does not degrade on non-camouflage images. Added to paper as qualitative generalization figure (`sec/4_experiments.tex`).
 
 ---
 
