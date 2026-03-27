@@ -9,7 +9,7 @@
 
 \subsection{Decoder-Only Fine-Tuning}
 
-SAM consists of a ViT-H image encoder ($\sim$632M parameters), a prompt encoder, and a mask decoder ($\sim$4M parameters). We freeze both encoders and train only the mask decoder (Figure~\ref{fig:architecture}a).
+SAM consists of a ViT-H image encoder ($\sim$632M parameters), a prompt encoder, and a mask decoder ($\sim$4M parameters). We freeze both encoders and train only the mask decoder (\cref{fig:architecture}a).
 
 \noindent\textbf{Pre-computed embeddings.} We run the frozen encoder once on all training images and cache embeddings as \texttt{.npy} files, eliminating the encoder forward pass from the training loop.
 

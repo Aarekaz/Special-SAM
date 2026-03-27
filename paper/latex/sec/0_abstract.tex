@@ -1,6 +1,6 @@
 \begin{abstract}
 Foundation segmentation models like SAM encode rich visual features but struggle on camouflaged objects, where foreground and background differ only by subtle texture and boundary cues.
-We find that decoder adaptation is the primary lever for improving SAM in this setting: freezing SAM's ViT-H encoder and fine-tuning only the 4M-parameter mask decoder on COD10K raises mIoU from 57.2\% to 73.8\% (+16.6 points).
+We ask a simple question: \emph{is the decoder the bottleneck?} Our results suggest that, for promptable camouflaged object detection, the answer is largely yes: freezing SAM's ViT-H encoder and fine-tuning only the 4M-parameter mask decoder on COD10K raises mIoU from 57.2\% to 73.8\% (+16.6 points).
 This gain is prompt-robust, transferring across four prompt types including edge prompts (+238\% relative).
 We validate prompt robustness through ablation: mixed-prompt training (point/box) outperforms point-only by up to 4 mIoU and box-only by 19--37 mIoU.
 A complementary Learnable Local Preprocessing Module (LLPM, $\sim$31K parameters) enhances input images before the frozen encoder, yielding a further +2.6 mIoU on edge prompts.
