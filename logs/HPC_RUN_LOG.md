@@ -208,6 +208,39 @@ Tracks all SLURM jobs, their purpose, status, and results.
 
 ---
 
+### Job 5854374 — Prompt-Mix Ablation (full test set, 2,026 images)
+- **Script:** `scripts/ablation_prompt.sh` (SLURM array, tasks 0-1)
+- **Submitted:** 2026-03-29
+- **GPU:** A100 80GB x2 (parallel array)
+- **Status:** RUNNING
+- **Configs:**
+  - Task 0: `configs/ablation/prompt_point_only.yaml` (point-only training)
+  - Task 1: `configs/ablation/prompt_box_only.yaml` (box-only training)
+- **Evaluation:** `--max-samples 0` (full 2,026-image COD10K camouflaged test set), all 4 prompt types (center, edge_single, multi_grid, multi_random)
+- **Output:** `results/ablation/point_only_results.csv`, `results/ablation/box_only_results.csv`
+- **Logs:** `logs/ablation_prompt_5854374_0.out`, `logs/ablation_prompt_5854374_1.out`
+- **Purpose:** Rerun prompt ablation on full test set (previously 500-image subset) for VisCon paper Table 2.
+- **Expected runtime:** ~1.5-2 hours per task
+
+---
+
+### Job 5854375 — Cross-Dataset Evaluation (CAMO + NC4K, all 4 prompt types)
+- **Script:** `scripts/eval_crossdataset.sh` (SLURM array, tasks 0-1)
+- **Submitted:** 2026-03-29
+- **GPU:** A100 80GB x2 (parallel array)
+- **Status:** RUNNING
+- **Configs:**
+  - Task 0: `configs/eval_camo.yaml` (CAMO test, 250 images, 4 prompt types)
+  - Task 1: `configs/eval_nc4k.yaml` (NC4K test, 4,121 images, 4 prompt types)
+- **Models evaluated:** Base SAM, Decoder-only, LLPM+Decoder
+- **Prompt strategies:** center, edge_single, multi_grid, multi_random (expanded from center-only in previous Job 5847371)
+- **Output:** `results/crossdataset/camo_results.csv`, `results/crossdataset/nc4k_results.csv`
+- **Logs:** `logs/crossdataset_5854375_0.out`, `logs/crossdataset_5854375_1.out`
+- **Purpose:** Expand cross-dataset eval to all prompt types for VisCon paper Table 3 Range row.
+- **Expected runtime:** ~30-45 min (CAMO), ~3-4 hours (NC4K)
+
+---
+
 ## Key Paths on Pegasus
 
 | Resource | Path |
