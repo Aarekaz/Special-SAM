@@ -63,7 +63,7 @@ SAM consists of a ViT-H image encoder ($\sim$632M parameters), a prompt encoder,
 \begin{figure}[t]
     \centering
     \includegraphics[width=\columnwidth]{figures/architecture_diagram.pdf}
-    \caption{\textbf{Decoder-only specialization of SAM.} We freeze the ViT-H image encoder and prompt encoder, cache image embeddings, and fine-tune only the 4M-parameter mask decoder with mixed point/box prompts.}
+    \caption{\textbf{SAM adaptation pipelines.} (a)~Decoder-only training: we freeze the encoder, cache embeddings, and fine-tune only the 4M-parameter mask decoder. (b)~Optional LLPM + decoder training: a small preprocessing module sharpens input features before the frozen encoder. (c)~Inference with either configuration.}
     \label{fig:architecture}
 \end{figure}
 
@@ -184,7 +184,7 @@ These experiments tell us something about how foundation models organize visual 
 The sharp drop in prompt sensitivity (\cref{tab:main_viscon}) suggests that mixed-prompt training produces a decoder that reasons about object appearance rather than prompt-specific heuristics. Point-only training overfits to spatial proximity; box-only training overfits to box geometry (\cref{tab:prompt_ablation_viscon}). Mixed training forces the decoder to recover object structure, which is why improvement transfers to prompt types never seen during training.
 
 \noindent\textbf{Complementary directions.}
-A small preprocessing module ($\sim$31K parameters) placed before the frozen encoder yields a further +2.5 mIoU on edge prompts, and encoder-adaptation methods~\cite{chen2023samadapter,hao2024comprompter} achieve higher absolute $S_\alpha$. Both confirm that encoder and decoder specialization address different parts of the problem. Pairing our decoder with an automatic prompt generator is a natural next step toward fully automatic deployment.
+A Learnable Local Preprocessing Module (LLPM, $\sim$31K parameters), a lightweight edge-attention and channel-enhancement network placed before the frozen encoder (\cref{fig:architecture}b--c), yields a further +2.5 mIoU on edge prompts, and encoder-adaptation methods~\cite{chen2023samadapter,hao2024comprompter} achieve higher absolute $S_\alpha$. Both confirm that encoder and decoder specialization address different parts of the problem. Pairing our decoder with an automatic prompt generator is a natural next step toward fully automatic deployment.
 
 \noindent\textbf{Limitations.}
 (1)~Our evaluation uses oracle GT-derived prompts following SAM's standard protocol; deployment requires a prompt source.
