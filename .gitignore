@@ -38,14 +38,16 @@ Thumbs.db
 *~
 
 # LaTeX build artifacts
-paper/latex/*.aux
-paper/latex/*.log
-paper/latex/*.bbl
-paper/latex/*.blg
-paper/latex/*.out
-paper/latex/*.synctex.gz
-paper/latex/*.fdb_latexmk
-paper/latex/*.fls
+*.aux
+*.bbl
+*.blg
+*.brf
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.pdf
 
 # Environment
 .env
@@ -71,6 +73,8 @@ venv/
 !results/tables/
 !results/ablation/
 
-# Paper figures
+# Paper figures and PDFs
 !paper/figures/*.png
 !paper/figures/*.jpg
+!paper/**/figures/*.pdf
+!paper/**/main.pdf
