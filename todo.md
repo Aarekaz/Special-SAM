@@ -13,8 +13,10 @@
 - [x] Fixed ambiguous "both encoders" phrasing in Method section
 - [x] Humanized prose: removed AI writing patterns (copula avoidance, trailing -ing clauses, promotional modifiers, vague hedging), tightened sentence structure across all sections
 - [x] Rewrote qualitative figure script: contour-based overlays (not opaque fills), GT contour on prediction columns, IoU badges, reduced default to 4 rows
+- [x] Added --best selection mode (default): scores both models, picks examples with largest IoU delta where ours succeeds, deduplicates by instance
 
 ## Next (requires HPC)
+- [ ] Run `sbatch scripts/qualitative.sh` -- regenerate qualitative figure with --best selection and contour overlays
 - [ ] Run `sbatch scripts/ablation_prompt.sh` -- rerun prompt ablation on full COD10K test set
 - [ ] Run `sbatch scripts/eval_crossdataset.sh` -- cross-dataset eval with all four prompt types
 - [ ] Update Table 2 numbers with full-set ablation results

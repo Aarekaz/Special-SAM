@@ -4,15 +4,19 @@ Creates a figure with N rows (default 4) and 4 columns:
   Image + prompt | GT (green contour) | Base SAM (red, + GT contour) | Ours (blue, + GT contour)
 
 Prediction columns overlay a thin GT boundary contour so the reader can
-compare prediction vs. ground truth boundaries without scanning back and
-forth. IoU scores appear as badges in the lower-right corner.
+compare prediction vs. GT boundaries at a glance. IoU scores appear as
+badges in the lower-right corner of each prediction.
 
-Examples are selected for diversity across easy/medium/hard difficulty
-buckets based on base SAM IoU.
+Two selection modes:
+  --best (default): Scores all test images with BOTH models, then picks
+      the N examples with the largest IoU improvement where our method
+      also succeeds (spec IoU >= 0.65). Deduplicates by instance ID.
+  --diverse: Picks evenly across easy/medium/hard buckets (old behavior).
 
 Usage:
     python -m scripts.generate_qualitative_figures --config configs/eval.yaml
-    python -m scripts.generate_qualitative_figures --num-examples 4 --output paper/figures/qualitative_comparison.png
+    python -m scripts.generate_qualitative_figures --num-examples 4 --best
+    python -m scripts.generate_qualitative_figures --num-examples 6 --diverse
 """
 
 import argparse
@@ -75,23 +79,25 @@ def run_prediction(predictor, image: np.ndarray, point_coords: np.ndarray,
     return masks[0] > 0.5
 
 
-def collect_candidates(config: dict) -> list[dict]:
-    """Run base SAM on all test images and collect per-image IoU scores.
+def collect_candidates(config: dict, score_both: bool = False) -> list[dict]:
+    """Run SAM on all test images and collect per-image IoU scores.
 
-    This first pass identifies easy/medium/hard examples based on base SAM
-    performance, so we can select diverse rows for the figure.
+    When score_both=True, runs both base and specialized SAM so we can
+    select examples by largest improvement delta. When False, only runs
+    base SAM (faster, for the diverse-bucket selection mode).
 
     Args:
-        config: Evaluation configuration dict.
+        config: Configuration dict.
+        score_both: If True, also score with the specialized decoder.
 
     Returns:
-        List of dicts, each containing image path, mask path, base IoU,
-        the resized image, resized mask, and prompt point coordinates.
+        List of candidate dicts with base_iou (and spec_iou / delta_iou
+        if score_both=True).
     """
     device = get_device()
     target_size = config["evaluation"]["target_size"]
 
-    print("Loading base SAM for candidate selection...")
+    print("Loading base SAM for candidate scoring...")
     base_model = load_sam(
         model_type=config["model"]["type"],
         checkpoint=config["model"]["base_checkpoint"],
@@ -100,12 +106,26 @@ def collect_candidates(config: dict) -> list[dict]:
     base_model.eval()
     base_predictor = get_predictor(base_model)
 
+    spec_predictor = None
+    if score_both:
+        print("Loading specialized SAM for candidate scoring...")
+        spec_model = load_specialized_sam(
+            model_type=config["model"]["type"],
+            checkpoint=config["model"]["base_checkpoint"],
+            decoder_path=config["model"]["specialized_decoder"],
+            device=device,
+        )
+        spec_model.eval()
+        spec_predictor = get_predictor(spec_model)
+
     test_pairs = get_image_mask_pairs(
         config["data"]["test_img_dir"],
         config["data"]["test_mask_dir"],
     )
 
-    print(f"Scoring {len(test_pairs)} test images with base SAM...")
+    n_total = len(test_pairs)
+    mode_label = "both models" if score_both else "base SAM"
+    print(f"Scoring {n_total} test images with {mode_label}...")
 
     candidates = []
     for idx, (img_path, mask_path) in enumerate(test_pairs):
@@ -123,32 +143,47 @@ def collect_candidates(config: dict) -> list[dict]:
         if point_coords is None:
             continue
 
+        gt_binary = mask_resized > 128
+
         try:
-            pred = run_prediction(base_predictor, img_resized,
-                                  point_coords, point_labels)
-            gt_binary = mask_resized > 128
-            iou = compute_iou(pred, gt_binary)
+            base_pred = run_prediction(base_predictor, img_resized,
+                                       point_coords, point_labels)
+            base_iou = compute_iou(base_pred, gt_binary)
         except Exception as e:
             print(f"  Skipping sample {idx}: {e}")
             continue
 
-        candidates.append({
+        entry = {
             "img_path": img_path,
             "mask_path": mask_path,
-            "base_iou": iou,
+            "base_iou": base_iou,
             "img_resized": img_resized,
             "mask_resized": mask_resized,
             "point_coords": point_coords,
             "point_labels": point_labels,
-        })
+        }
+
+        if spec_predictor is not None:
+            try:
+                spec_pred = run_prediction(spec_predictor, img_resized,
+                                           point_coords, point_labels)
+                spec_iou = compute_iou(spec_pred, gt_binary)
+                entry["spec_iou"] = spec_iou
+                entry["delta_iou"] = spec_iou - base_iou
+            except Exception:
+                entry["spec_iou"] = 0.0
+                entry["delta_iou"] = 0.0
+
+        candidates.append(entry)
 
         if (idx + 1) % 100 == 0:
-            print(f"  Scored {idx + 1}/{len(test_pairs)}")
+            print(f"  Scored {idx + 1}/{n_total}")
 
     print(f"Collected {len(candidates)} valid candidates")
 
-    # Free base model memory before loading both models for final rendering
     del base_predictor, base_model
+    if score_both:
+        del spec_predictor, spec_model
     torch.cuda.empty_cache()
 
     return candidates
@@ -209,6 +244,52 @@ def select_diverse_examples(candidates: list[dict],
     # Order: hard (low IoU) -> medium -> easy (high IoU), top to bottom
     selected = selected_hard + selected_medium + selected_easy
     print(f"Selected {len(selected)} examples for figure")
+    return selected
+
+
+def select_best_examples(candidates: list[dict],
+                         num_examples: int = 4,
+                         min_spec_iou: float = 0.65) -> list[dict]:
+    """Select examples where our method improves most over base SAM.
+
+    Picks images with the largest IoU delta (spec - base), filtered to
+    cases where our method actually succeeds (spec_iou >= min_spec_iou).
+    Deduplicates by instance ID so the figure shows different subjects.
+
+    Args:
+        candidates: List of candidate dicts with 'delta_iou' and
+            'spec_iou' keys (requires score_both=True in collection).
+        num_examples: Number of rows to select.
+        min_spec_iou: Minimum specialized IoU to consider (filters out
+            cases where both methods fail).
+
+    Returns:
+        Selected candidates ordered by descending delta (most
+        impressive improvement first).
+    """
+    viable = [c for c in candidates if c.get("spec_iou", 0) >= min_spec_iou]
+    print(f"Viable candidates (spec IoU >= {min_spec_iou}): {len(viable)}")
+
+    # Deduplicate by instance: keep the best delta per unique subject
+    instances: dict[str, dict] = {}
+    for c in viable:
+        stem = Path(c["img_path"]).stem
+        # Instance ID = filename minus the last segment after the last hyphen
+        parts = stem.split("-")
+        inst_id = "-".join(parts[:-1]) if len(parts) > 1 else stem
+        if inst_id not in instances or c["delta_iou"] > instances[inst_id]["delta_iou"]:
+            instances[inst_id] = c
+
+    unique = list(instances.values())
+    unique.sort(key=lambda c: c["delta_iou"], reverse=True)
+
+    selected = unique[:num_examples]
+
+    for i, c in enumerate(selected):
+        print(f"  Row {i+1}: base={c['base_iou']:.3f} -> ours={c['spec_iou']:.3f} "
+              f"(+{c['delta_iou']:.3f})  {Path(c['img_path']).name}")
+
+    print(f"Selected {len(selected)} best-improvement examples")
     return selected
 
 
@@ -446,28 +527,43 @@ def main():
         "--output", type=str, default="paper/figures/qualitative_comparison.png",
         help="Output path for the figure PNG",
     )
+    parser.add_argument(
+        "--best", action="store_true", default=True,
+        help="Select examples with largest IoU improvement (default: True)",
+    )
+    parser.add_argument(
+        "--diverse", action="store_true", default=False,
+        help="Use the old diverse-bucket selection instead of --best",
+    )
     args = parser.parse_args()
 
     with open(args.config) as f:
         config = yaml.safe_load(f)
+
+    use_best = args.best and not args.diverse
+    mode_name = "best-improvement" if use_best else "diverse-bucket"
 
     print("=" * 70)
     print("Qualitative Figure Generation")
     print("=" * 70)
     print(f"  Config:       {args.config}")
     print(f"  Num examples: {args.num_examples}")
+    print(f"  Selection:    {mode_name}")
     print(f"  Output:       {args.output}")
     print()
 
-    # Step 1: Score all test images with base SAM to find easy/medium/hard
-    candidates = collect_candidates(config)
+    # Step 1: Score test images (both models if --best, base only if --diverse)
+    candidates = collect_candidates(config, score_both=use_best)
 
     if len(candidates) < args.num_examples:
         print(f"Warning: Only {len(candidates)} valid candidates found, "
               f"requested {args.num_examples}")
 
-    # Step 2: Select diverse examples
-    selected = select_diverse_examples(candidates, args.num_examples)
+    # Step 2: Select examples
+    if use_best:
+        selected = select_best_examples(candidates, args.num_examples)
+    else:
+        selected = select_diverse_examples(candidates, args.num_examples)
 
     # Step 3: Generate the figure with both models
     generate_figure(selected, config, args.output)
