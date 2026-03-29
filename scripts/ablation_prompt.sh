@@ -71,7 +71,7 @@ echo "[Step 2/2] Evaluating decoder: ${NAME}"
 python scripts/eval_ablation.py \
     --decoders "${DECODER}" \
     --names "${NAME}" \
-    --max-samples 500 \
+    --max-samples 0 \
     --output-csv "results/ablation/${NAME}_results.csv" \
     --prompt-strategies center edge_single multi_grid multi_random
 

@@ -21,6 +21,9 @@ evaluation:
   boundary_threshold: 5
   prompt_strategies:
     - center
+    - edge_single
+    - multi_grid
+    - multi_random
 
 metrics:
   - iou

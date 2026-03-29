@@ -6,7 +6,7 @@
 #SBATCH --gres=gpu:a100:1
 #SBATCH --mem=32G
 #SBATCH --cpus-per-task=4
-#SBATCH --time=06:00:00
+#SBATCH --time=12:00:00
 #SBATCH --array=0-1
 
 export PATH="/SEAS/home/g37014071/.conda/envs/specialsam/bin:$PATH"

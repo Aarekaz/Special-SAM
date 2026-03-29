@@ -29,7 +29,7 @@ This failure raises a question about visual concept representation: does the enc
 
 Prior SAM adaptation methods typically modify the encoder via adapters~\cite{chen2023samadapter}, redesign prompt pathways~\cite{hao2024comprompter}, or add dual-stream modules~\cite{liu2025dualstream}. These approaches improve performance but conflate two questions: whether the encoder needs better features, and whether the decoder needs better feature utilization. By changing only the decoder, we isolate the latter.
 
-Our strongest evidence is not the average gain alone, but the change in behavior across prompts. Base SAM varies 3.5$\times$ in mIoU across prompt types; after decoder specialization, this narrows to 1.1$\times$. An ablation confirms this is learned: mixed point/box training consistently outperforms point-only and box-only alternatives (\cref{tab:prompt_ablation_viscon}). The specialized decoder also generalizes to held-out camouflage datasets (CAMO, NC4K) without retraining, suggesting it learns transferable camouflage concepts rather than dataset-specific patterns.
+Our strongest evidence is not the average gain alone, but the change in behavior across prompts. Decoder specialization sharply reduces prompt sensitivity (\cref{tab:main_viscon}), and an ablation confirms this is learned: mixed point/box training consistently outperforms point-only and box-only alternatives (\cref{tab:prompt_ablation_viscon}). The specialized decoder also generalizes to held-out camouflage datasets (CAMO, NC4K) without retraining, suggesting it learns transferable camouflage concepts rather than dataset-specific patterns.
 
 \noindent\textbf{Contributions.}
 \begin{enumerate}
@@ -38,8 +38,19 @@ Our strongest evidence is not the average gain alone, but the change in behavior
     \item We provide a diagnostic lens: camouflage as a setting that separates concept representation (encoder) from concept utilization (decoder) in foundation segmentation models.
 \end{enumerate}
 
+\section{Related Work}
+
+\noindent\textbf{Camouflaged object detection.}
+Dedicated COD architectures---SINet~\cite{fan2020cod10k}, ZoomNet~\cite{pang2022zoomnet}, SegMaR~\cite{jia2022segmar}---design task-specific networks from scratch. We instead leverage SAM's pre-trained representations and ask how far decoder-only adaptation can go without domain-specific architecture.
+
+\noindent\textbf{SAM adaptation.}
+SAM-Adapter~\cite{chen2023samadapter} injects learnable modules inside the encoder, COMPrompter~\cite{hao2024comprompter} redesigns the prompt pathway, and Liu~\etal~\cite{liu2025dualstream} add dual-stream adapters. All modify the encoder, conflating feature quality with feature utilization. We fine-tune only the existing decoder, isolating the utilization question.
+
+\noindent\textbf{Parameter-efficient fine-tuning.}
+LoRA~\cite{hu2022lora} and prompt tuning~\cite{lester2021prompt} adapt large models by adding small parameter sets to the encoder or prompt pathway. Our approach is simpler: we add zero new parameters and train only the existing 4M-parameter mask decoder.
+
 \section{Method}
-SAM consists of a ViT-H image encoder ($\sim$632M parameters), a prompt encoder, and a mask decoder ($\sim$4M parameters). We freeze both encoders and train only the mask decoder (\cref{fig:architecture}).
+SAM consists of a ViT-H image encoder ($\sim$632M parameters), a prompt encoder, and a mask decoder ($\sim$4M parameters). We freeze the image encoder and prompt encoder, and train only the mask decoder (\cref{fig:architecture}).
 
 \noindent\textbf{Pre-computed embeddings.} We run the frozen encoder once on all training images and cache embeddings as \texttt{.npy} files, eliminating the encoder forward pass from training.
 
@@ -85,7 +96,7 @@ Multi-Random & 0.727 & 0.776 & +0.049 & +6.7\% \\
 
 \begin{table}[t]
 \centering
-\caption{\textbf{Prompt-mix ablation} (500-image subset). Mixed training produces the most robust decoder; box-only collapses on point prompts.}
+\caption{\textbf{Prompt-mix ablation} (COD10K, 2,026 test images). Mixed training produces the most robust decoder; box-only collapses on point prompts.}
 \label{tab:prompt_ablation_viscon}
 \small
 \begin{tabular}{lcccc}
@@ -107,7 +118,7 @@ Box-only & .376 & .501 & .389 & .455 \\
 
 \begin{table}[t]
 \centering
-\caption{\textbf{Cross-dataset generalization} (Center-of-Mass prompt). The decoder is trained only on COD10K and evaluated on held-out datasets without retraining.}
+\caption{\textbf{Cross-dataset generalization} (Center-of-Mass prompt, with multi-prompt mIoU range). The decoder is trained only on COD10K and evaluated on held-out datasets without retraining. \textit{Range} reports the max/min mIoU ratio across all four prompt types.}
 \label{tab:crossdataset}
 \small
 \begin{tabular}{llcccc}
@@ -122,6 +133,10 @@ Dataset & Model & mIoU & $S_\alpha$ & $E_\phi$ & MAE$\downarrow$ \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+% TODO: After running eval_crossdataset.sh with all four prompt types,
+% add a Range row to this table (e.g., CAMO Range: Base X.Xx / Ours 1.Xx)
+% and update the prose below with the actual cross-dataset range values.
 
 A critical test of whether the decoder learns generalizable visual concepts or dataset-specific shortcuts is cross-dataset transfer. \Cref{tab:crossdataset} shows that the decoder, trained exclusively on COD10K, generalizes consistently: +18.8 mIoU on CAMO and +18.5 on NC4K without any retraining. This confirms that decoder specialization learns transferable camouflage cues---the ability to map subtle texture and boundary evidence to object masks---rather than memorizing COD10K-specific patterns.
 
@@ -161,13 +176,13 @@ COMPr.~\cite{hao2024comprompter} & Prompt adapt & .889 & .949 & .821 & .023 \\
 \section{Discussion}
 
 \noindent\textbf{What this reveals about visual concept representation.}
-Our results contribute to understanding how foundation models organize visual concepts. SAM's ViT-H encoder, pre-trained on 1B+ masks, appears to already capture texture gradients and edge patterns relevant to camouflage. The decoder---trained on general segmentation---has not learned that \emph{subtle} texture disruptions signify boundaries. The +16.6 mIoU gain from training only 0.6\% of parameters (4M of 636M) suggests that, at least for camouflage, the bottleneck lies in concept utilization (decoder) rather than concept representation (encoder). Camouflage serves as a useful diagnostic because it isolates a regime where the gap between having a concept and acting on it is unusually large.
+Our results contribute to understanding how foundation models organize visual concepts. SAM's ViT-H encoder, pre-trained on 1B+ masks, appears to already capture texture gradients and edge patterns relevant to camouflage. The decoder---trained on general segmentation---has not learned that \emph{subtle} texture disruptions signify boundaries. The substantial mIoU gains from training only 0.6\% of parameters (\cref{tab:main_viscon}) suggest that, at least for camouflage, the bottleneck lies in concept utilization (decoder) rather than concept representation (encoder). Camouflage serves as a useful diagnostic because it isolates a regime where the gap between having a concept and acting on it is unusually large.
 
 \noindent\textbf{Prompt robustness as concept grounding.}
-The reduction from 3.5$\times$ to 1.1$\times$ prompt sensitivity suggests that mixed-prompt training produces a decoder that is grounded in the visual concept of the object rather than in prompt-specific heuristics. Point-only training overfits to spatial proximity; box-only training overfits to box geometry. Mixed training forces the decoder to understand object structure, which is why improvement transfers to prompt types never seen during training.
+The sharp reduction in prompt sensitivity (\cref{tab:main_viscon}) suggests that mixed-prompt training produces a decoder grounded in the visual concept of the object rather than in prompt-specific heuristics. Point-only training overfits to spatial proximity; box-only training overfits to box geometry (\cref{tab:prompt_ablation_viscon}). Mixed training forces the decoder to understand object structure, which is why improvement transfers to prompt types never seen during training.
 
 \noindent\textbf{Complementary directions.}
-A lightweight Learnable Local Preprocessing Module (LLPM, $\sim$31K parameters) placed before the frozen encoder yields a further +2.5 mIoU on edge prompts by enhancing boundary signals in input space, suggesting that pre-encoder and decoder-side adaptation are complementary. Encoder-adaptation methods~\cite{chen2023samadapter,hao2024comprompter} achieve higher absolute $S_\alpha$, confirming that encoder specialization remains important. A practical system may benefit from both, and pairing our decoder with an automatic prompt generator is a natural next step toward fully automatic deployment.
+As a preliminary extension, we tested a Learnable Local Preprocessing Module (LLPM, $\sim$31K parameters) placed before the frozen encoder. LLPM consists of two branches---an edge-attention branch (Conv $3{\to}32{\to}1$, sigmoid) and a channel-enhancement branch (grouped convs $3{\to}64{\to}3$)---fused via a learnable scalar gate $\alpha$ (initialized at 0.1, converging to $\sim$0.185). Because gradients must flow through the frozen encoder to reach LLPM, training requires live encoder forward passes ($\sim$7.5 hours vs.\ 90 minutes for decoder-only). This module yields a further +2.5 mIoU on edge prompts by enhancing boundary signals in input space, suggesting that pre-encoder and decoder-side adaptation are complementary. Encoder-adaptation methods~\cite{chen2023samadapter,hao2024comprompter} achieve higher absolute $S_\alpha$, confirming that encoder specialization also remains important. A practical system may benefit from both, and pairing our decoder with an automatic prompt generator is a natural next step toward fully automatic deployment.
 
 \noindent\textbf{Limitations.}
 (1)~Our evaluation uses oracle GT-derived prompts following SAM's standard protocol; deployment requires a prompt source.

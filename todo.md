@@ -1,8 +1,22 @@
 ## Current focus
-- [in progress] Build a compact `VisCon` version of the paper without disturbing the full workshop manuscript
+- [in progress] VisCon workshop paper revision
 
-## Next
-- [ ] Decide which evidence to keep in the `VisCon` version after a page-budget pass
-- [ ] Monitor HPC job `5850045` and collect the corrected `center_fixed` evaluation results
-- [ ] Review the new `paper/latex/viscon/main.tex` draft for fit, page length, and submission readiness
+## Completed (this revision)
+- [x] Added compact Related Work section (COD, SAM adaptation, PEFT)
+- [x] Added bib entries for SegMaR, LoRA, prompt tuning
+- [x] Expanded LLPM mention in Discussion with architecture, training, and result details
+- [x] Updated `ablation_prompt.sh` to use full 2,026-image test set (`--max-samples 0`)
+- [x] Updated `eval_camo.yaml` and `eval_nc4k.yaml` to evaluate all four prompt types
+- [x] Updated `eval_crossdataset.sh` time limit for expanded evaluation
+- [x] Updated Table 2 caption to reflect full test set
+- [x] Reduced number repetition across intro/discussion (replaced with table references)
+- [x] Fixed ambiguous "both encoders" phrasing in Method section
+
+## Next (requires HPC)
+- [ ] Run `sbatch scripts/ablation_prompt.sh` -- rerun prompt ablation on full COD10K test set
+- [ ] Run `sbatch scripts/eval_crossdataset.sh` -- cross-dataset eval with all four prompt types
+- [ ] Update Table 2 numbers with full-set ablation results
+- [ ] Update Table 3 with cross-dataset Range row once results are in
+- [ ] Remove the TODO comment in main.tex after Table 3 is finalized
+- [ ] Final page-budget and submission readiness review
 
