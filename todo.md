@@ -14,6 +14,7 @@
 - [x] Humanized prose: removed AI writing patterns (copula avoidance, trailing -ing clauses, promotional modifiers, vague hedging), tightened sentence structure across all sections
 - [x] Rewrote qualitative figure script: contour-based overlays (not opaque fills), GT contour on prediction columns, IoU badges, reduced default to 4 rows
 - [x] Added --best selection mode (default): scores both models, picks examples with largest IoU delta where ours succeeds, deduplicates by instance
+- [x] Deep humanizer pass across all 8 sections: removed promotional language ("rich", "Crucially", "highly effective", "complementary contribution"), hedging ("appears to", "largely yes", "suggests that"), copula avoidance ("serves as"), trailing -ing clauses, duplicate phrasing between abstract/intro, verbose filler, and sycophantic constructions. Tightened sentence structure, varied rhythm, and differentiated abstract vs. intro openings.
 
 ## Next (requires HPC)
 - [ ] Run `sbatch scripts/qualitative.sh` -- regenerate qualitative figure with --best selection and contour overlays
@@ -22,5 +23,5 @@
 - [ ] Update Table 2 numbers with full-set ablation results
 - [ ] Update Table 3 with cross-dataset Range row once results are in
 - [ ] Remove the TODO comment in main.tex after Table 3 is finalized
-- [ ] Final page-budget and submission readiness review
+- [ ] Final page-budget review (4-page limit) and submission readiness check
 

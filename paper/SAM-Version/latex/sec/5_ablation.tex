@@ -23,7 +23,7 @@ Box-only & .376 & .501 & .389 & .455 \\
 \end{tabular}
 \end{table}
 
-Mixed-prompt training outperforms point-only on all test strategies (by 2--4 mIoU on CoM, Edge, and Grid; 0.6 on Random where point-only already performs well) and box-only by 19--37 mIoU. Box-only training is catastrophically poor on point prompts (0.376 CoM), confirming that prompt robustness is \emph{not} an inherent property of fine-tuning but requires explicit multi-modal prompt exposure during training.
+Mixed-prompt training outperforms point-only on all test strategies (by 2--4 mIoU on CoM, Edge, and Grid; 0.6 on Random where point-only already performs well) and box-only by 19--37 mIoU. Box-only training scores 0.376 mIoU on CoM (near-catastrophic), showing that prompt robustness requires explicit exposure to both prompt formats during training, not just fine-tuning per se.
 
 \subsection{Loss Function}
 
@@ -47,7 +47,7 @@ Ours (0.5/0.5)$^\dagger$ & .738 & .819 & .847 & .819 & .028 \\
 \end{tabular}
 \end{table}
 
-All four loss variants achieve similar performance ($\pm$2.1 mIoU), indicating robustness to loss weighting. The Dice-heavy variant is marginally best, suggesting region-level supervision is slightly more beneficial for COD.
+All four loss variants fall within $\pm$2.1 mIoU of each other, so the decoder is not sensitive to loss weighting. The Dice-heavy variant is marginally best, hinting that region-level supervision is slightly more useful for COD than pixel-level BCE.
 
 \subsection{LLPM Component Analysis}
 
@@ -71,7 +71,7 @@ No gate ($\alpha\!=\!1$) & .709 & +1.5 & 1.0 (fixed) \\
 \end{tabular}
 \end{table}
 
-Both individual branches achieve similar gains (+1.9 Edge mIoU), but the full LLPM outperforms either alone (+2.5), confirming that edge detection and feature enhancement are complementary. The learnable gate is also important: fixing $\alpha\!=\!1$ removes the model's ability to regulate enhancement strength, yielding the worst variant (+1.5). Notably, the edge-only variant's $\alpha$ barely grows from initialization (0.091 vs.\ 0.185 for full LLPM), suggesting that without the enhancement branch, the edge attention map alone provides limited value.
+Each branch alone gains +1.9 Edge mIoU, but the full LLPM reaches +2.5, so the two branches are not redundant. The learnable gate matters too: fixing $\alpha\!=\!1$ gives the weakest variant (+1.5), since the model can no longer regulate enhancement strength. The edge-only variant's $\alpha$ barely moves from its initialization (0.091 vs.\ 0.185 for the full LLPM), suggesting the edge attention map has limited standalone value without the enhancement branch to act on it.
 
 \subsection{Data Augmentation}
 
@@ -79,7 +79,7 @@ We test progressively richer augmentation beyond horizontal flips: adding random
 
 \begin{table}[t]
 \centering
-\caption{\textbf{Augmentation ablation} (500 test images). Richer augmentation slightly hurts CoM/Grid/Random but improves Edge---the hardest prompt. Differences are small ($<$2 mIoU), indicating robustness to augmentation choice.}
+\caption{\textbf{Augmentation ablation} (500 test images). Richer augmentation slightly hurts CoM/Grid/Random but improves Edge, the hardest prompt. Differences are small ($<$2 mIoU), indicating robustness to augmentation choice.}
 \label{tab:ablation_aug}
 \small
 \begin{tabular}{lcccc}
@@ -95,7 +95,7 @@ Flip + rot.\ + shift & .724 & \textbf{.718} & .738 & .765 \\
 \end{tabular}
 \end{table}
 
-Adding rotation and pixel shift increases training samples (9,120 and 12,160 vs.\ 6,080) and lowers final training loss (0.068 and 0.064 vs.\ 0.072), but does not improve test mIoU on most prompts. The one exception is edge prompts, where richer augmentation helps (+2.4 mIoU for flip+rot+shift vs.\ flip-only), likely because geometric perturbations expose the decoder to more boundary configurations. Overall, the baseline flip-only augmentation is near-optimal.
+Adding rotation and pixel shift increases training samples (9,120 and 12,160 vs.\ 6,080) and lowers training loss (0.068 and 0.064 vs.\ 0.072), but does not improve test mIoU on most prompts. The exception is edge prompts, where richer augmentation gains +2.4 mIoU (flip+rot+shift vs.\ flip-only), likely because geometric perturbations expose the decoder to more boundary configurations. Flip-only is near-optimal overall.
 
 \subsection{Qualitative Results}
 
@@ -106,4 +106,4 @@ Adding rotation and pixel shift increases training samples (9,120 and 12,160 vs.
     \label{fig:qualitative}
 \end{figure*}
 
-Base SAM frequently segments only the most salient region near the prompt, missing large portions of camouflaged objects. Our decoder produces masks that closely follow true boundaries, even where the animal's coloration is nearly identical to the background (\cref{fig:qualitative}).
+Base SAM tends to segment only the most salient patch near the prompt, missing large portions of camouflaged objects. The specialized decoder follows object boundaries even where the animal's coloration is nearly identical to the background (\cref{fig:qualitative}).

@@ -11,15 +11,15 @@
 
 SAM consists of a ViT-H image encoder ($\sim$632M parameters), a prompt encoder, and a mask decoder ($\sim$4M parameters). We freeze both encoders and train only the mask decoder (\cref{fig:architecture}a).
 
-\noindent\textbf{Pre-computed embeddings.} We run the frozen encoder once on all training images and cache embeddings as \texttt{.npy} files, eliminating the encoder forward pass from the training loop.
+\noindent\textbf{Pre-computed embeddings.} We run the frozen encoder once over all training images and cache the resulting embeddings as \texttt{.npy} files, removing the encoder forward pass from the training loop entirely.
 
-\noindent\textbf{Mixed-prompt training.} Each iteration randomly selects between a point prompt (random foreground pixel) and a bounding box prompt (tight GT box) with 50/50 probability. This prevents the decoder from overfitting to any single prompt type.
+\noindent\textbf{Mixed-prompt training.} Each iteration samples either a point prompt (random foreground pixel) or a bounding box prompt (tight GT box) with equal probability, so the decoder cannot rely on any single prompt format.
 
-\noindent\textbf{Loss and optimization.} We minimize $\mathcal{L} = 0.5 \cdot \mathcal{L}_{\text{BCE}} + 0.5 \cdot \mathcal{L}_{\text{Dice}}$. BCE enforces pixel-level boundaries; Dice maintains region-level shape coherence. We use AdamW (lr $10^{-4}$, cosine schedule, 1-epoch warmup, 15 epochs).
+\noindent\textbf{Loss and optimization.} We minimize $\mathcal{L} = 0.5 \cdot \mathcal{L}_{\text{BCE}} + 0.5 \cdot \mathcal{L}_{\text{Dice}}$. BCE supervises per-pixel classification; Dice regularizes region-level overlap. We train with AdamW (lr $10^{-4}$, cosine schedule, 1-epoch warmup, 15 epochs).
 
 \subsection{Learnable Local Preprocessing Module}
 
-The frozen encoder may miss subtle camouflage boundaries at the pixel level. We introduce a lightweight module that enhances boundary signals \emph{before} encoding.
+The frozen encoder may miss subtle camouflage boundaries at the pixel level. We add a small module that amplifies boundary contrast \emph{before} encoding.
 
 \noindent\textbf{Architecture.} The LLPM has two branches processing input image $x$:
 \begin{itemize}
@@ -31,9 +31,9 @@ The branches fuse via a learnable gate $\alpha$ (init.\ 0.1):
     x' = x + \alpha \cdot (h(x) \odot e(x))
     \label{eq:llpm}
 \end{equation}
-The residual connection ensures near-identity at initialization. Total: $\sim$31K parameters.
+The residual connection makes the module near-identity at initialization. Total: $\sim$31K parameters.
 
-\noindent\textbf{Training.} The preprocessed $x'$ passes through the \emph{live} frozen encoder (gradients flow back to LLPM). The decoder is warm-started from the best decoder-only checkpoint. Joint training uses AdamW (lr $5\!\times\!10^{-5}$), mixed precision (FP16), 15 epochs.
+\noindent\textbf{Training.} The preprocessed $x'$ passes through the \emph{live} frozen encoder; gradients flow back through it to update the LLPM. The decoder is warm-started from the best decoder-only checkpoint. We train jointly with AdamW (lr $5\!\times\!10^{-5}$), mixed precision (FP16), 15 epochs.
 
 \subsection{Evaluation Protocol}
 

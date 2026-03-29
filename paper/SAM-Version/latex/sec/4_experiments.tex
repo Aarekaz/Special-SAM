@@ -37,7 +37,7 @@ LLPM + Decoder & Multi-Pt Random (3pt) & 0.770 & 0.850 & 0.865 & 0.954 & 0.847 &
 \end{tabular}
 \end{table*}
 
-Decoder-only fine-tuning improves mIoU on all four prompt types by +4.9 to +48.9 absolute points. The LLPM provides an additional +2.6 mIoU on edge prompts, specifically the scenario where boundary signals matter most.
+Decoder-only fine-tuning improves mIoU on all four prompt types by +4.9 to +48.9 absolute points. The LLPM adds +2.6 mIoU on edge prompts, where boundary disambiguation matters most.
 
 \subsection{Prompt Robustness}
 
@@ -58,13 +58,13 @@ Multi-Pt Random & 0.727 & 0.776 & +0.049 & +6.7\% \\
 \end{tabular}
 \end{table}
 
-The headline result: base SAM's mIoU varies 3.5$\times$ across prompt types (0.205 to 0.727), while the specialized decoder varies only 1.1$\times$ (0.694 to 0.776). Edge prompts---where the prompt sits at the boundary between camouflaged object and background---show the largest absolute gain (+48.9 mIoU). This demonstrates that decoder specialization teaches the model to resolve boundary ambiguity rather than memorize prompt-mask associations.
+Base SAM's mIoU varies 3.5$\times$ across prompt types (0.205 to 0.727); the specialized decoder varies only 1.1$\times$ (0.694 to 0.776). Edge prompts, where the click lands on the boundary between object and background, show the largest absolute gain (+48.9 mIoU), indicating that decoder fine-tuning learns to resolve boundary ambiguity rather than memorize prompt-mask associations.
 
 \subsection{Per-Category Analysis}
 
 \begin{table}[t]
 \centering
-\caption{\textbf{Per-category mIoU} (Center-of-Mass prompt). Terrestrial animals---the hardest category---show the largest relative gain.}
+\caption{\textbf{Per-category mIoU} (Center-of-Mass prompt). Terrestrial animals, the hardest category, show the largest relative gain.}
 \label{tab:category}
 \small
 \begin{tabular}{lcccr}
@@ -79,7 +79,7 @@ Terrestrial & 699 & 0.519 & 0.703 & \textbf{+35.5\%} \\
 \end{tabular}
 \end{table}
 
-Terrestrial animals (insects on bark, lizards on rocks) show the largest gain (+35.5\%), consistent with having the most challenging camouflage. Aquatic animals (+27.9\%) also benefit substantially.
+Terrestrial animals (insects on bark, lizards on rocks) show the largest gain (+35.5\%), consistent with their strong background-matching camouflage. Aquatic animals follow at +27.9\%.
 
 \subsection{Error Analysis}
 \label{sec:error_analysis}
@@ -113,14 +113,14 @@ Thin/elongated & 2 & .004 & \textbf{.346} & .222 \\
 \end{tabular}
 \end{table}
 
-\noindent\textbf{Key findings.}
-Failures are structured, not random (\cref{tab:error_analysis}). Disjoint objects (multiple connected components, 44\% of failures) and dark images (26\%) dominate. The LLPM improves over decoder-only on all major failure categories: +6.8 mIoU on disjoint objects, +7.1 on general failures, and +4.0 on dark images. This demonstrates that the LLPM's boundary enhancement benefits extend beyond edge prompts to the model's hardest cases overall. Tiny objects ($<$1\% foreground pixels) remain the most challenging category (mean IoU 0.29), suggesting that scale-aware augmentation or multi-scale features are needed for further improvement.
+\noindent\textbf{Findings.}
+Failures are not random (\cref{tab:error_analysis}). Disjoint objects (multiple connected components, 44\% of failures) and dark images (26\%) dominate. The LLPM improves over the decoder-only model in all major categories: +6.8 mIoU on disjoint objects, +7.1 on the general bin, and +4.0 on dark images. These gains show that the LLPM's boundary-contrast amplification helps beyond edge prompts alone. Tiny objects ($<$1\% foreground pixels) remain the hardest category (mean IoU 0.29); scale-aware augmentation or multi-scale features are likely needed here.
 
 \subsection{Comparison with Existing Methods}
 
 \begin{table}[t]
 \centering
-\caption{\textbf{Comparison with COD methods} on COD10K test set. This table contextualizes decoder-only adaptation within the broader COD landscape. \emph{Important:} our method uses oracle GT-derived prompts, while dedicated methods are fully automatic---these are not head-to-head comparisons.\textsuperscript{$\dagger$}}
+\caption{\textbf{Comparison with COD methods} on COD10K test set. This table contextualizes decoder-only adaptation within the broader COD landscape. \emph{Important:} our method uses oracle GT-derived prompts, while dedicated methods are fully automatic; these are not head-to-head comparisons.\textsuperscript{$\dagger$}}
 \label{tab:comparison}
 \small
 \resizebox{\columnwidth}{!}{%
@@ -147,7 +147,7 @@ COMPr.~\cite{hao2024comprompter} & SCIS'24 & \textbf{.889} & .949 & .821 & \text
 {\footnotesize \textsuperscript{$\dagger$}Prompts derived from GT masks. In deployment, prompts come from users or upstream detectors; performance depends on prompt quality, not our adaptation.}
 \end{table}
 
-\Cref{tab:comparison} places decoder-only adaptation in the broader COD landscape, but should be interpreted as contextual rather than head-to-head. Our method is evaluated in SAM's standard prompt-based setting, whereas dedicated COD methods are fully automatic. Under this protocol, decoder-only adaptation still recovers substantial performance with no new decoder parameters and 90-minute training, although it does not surpass encoder-adaptation methods (SAM-Adapter, COMPrompter) on $S_\alpha$ or MAE. This is consistent with our broader conclusion that encoder- and decoder-side specialization are complementary.
+\Cref{tab:comparison} places decoder-only adaptation in the broader COD landscape. The comparison is contextual, not head-to-head: our method uses oracle GT-derived prompts, while dedicated COD methods are fully automatic. Under this protocol, decoder-only adaptation recovers strong performance with no new decoder parameters and 90-minute training, but does not surpass encoder-adaptation methods (SAM-Adapter, COMPrompter) on $S_\alpha$ or MAE. This gap is consistent with encoder and decoder specialization addressing different aspects of the problem.
 
 \subsection{Cross-Dataset Generalization}
 
@@ -171,7 +171,7 @@ Dataset & Model & mIoU & $S_\alpha$ & $E_\phi$ & MAE$\downarrow$ \\
 \end{tabular}
 \end{table}
 
-Despite being trained exclusively on COD10K, the specialized decoder generalizes consistently across both held-out datasets. On CAMO, mIoU improves from 0.489 to 0.677 (+18.8 points); on NC4K (4,121 images), from 0.567 to 0.752 (+18.5 points). The improvement pattern---and the LLPM's additional gain---replicates without any retraining, confirming that decoder specialization learns transferable camouflage cues rather than dataset-specific artifacts.
+The decoder is trained only on COD10K. On CAMO, mIoU improves from 0.489 to 0.677 (+18.8 points); on NC4K (4,121 images), from 0.567 to 0.752 (+18.5 points). The LLPM's additional gain also replicates on both datasets without retraining, suggesting that the decoder learns camouflage-general cues rather than COD10K-specific patterns.
 
 \subsection{Generalization to Regular Images}
 
@@ -182,4 +182,4 @@ Despite being trained exclusively on COD10K, the specialized decoder generalizes
 \label{fig:coco}
 \end{figure}
 
-A natural concern is whether specializing for camouflage degrades performance on ordinary images. \Cref{fig:coco} provides a qualitative sanity check on random COCO val2017 images using a fixed image-center prompt (no ground truth). Our decoder does not exhibit obvious catastrophic failure on these non-camouflage scenes. In several cases it produces \emph{tighter} segmentations than base SAM, which over-segments background regions when the center prompt is ambiguous. A quantitative study of general-image performance is left for future work.
+A reasonable concern is whether camouflage specialization degrades performance on ordinary images. \Cref{fig:coco} gives a qualitative check on random COCO val2017 images using a fixed image-center prompt (no ground truth). The specialized decoder does not obviously degrade on these scenes. In several cases it produces \emph{tighter} masks than base SAM, which over-segments background when the center prompt is ambiguous. Quantitative evaluation on general images is left for future work.
