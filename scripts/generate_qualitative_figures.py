@@ -1,16 +1,18 @@
 """Generate qualitative comparison figure grid for the Special-SAM paper.
 
-Creates a figure with N rows (default 12) and 4 columns:
-  Original Image | Ground Truth Mask | Base SAM Prediction | Specialized SAM Prediction
+Creates a figure with N rows (default 4) and 4 columns:
+  Image + prompt | GT (green contour) | Base SAM (red, + GT contour) | Ours (blue, + GT contour)
 
-Examples are selected for diversity: 4 "easy" (base SAM IoU > 0.7),
-4 "medium" (IoU 0.3-0.7), and 4 "hard" (IoU < 0.3) cases.
+Prediction columns overlay a thin GT boundary contour so the reader can
+compare prediction vs. ground truth boundaries without scanning back and
+forth. IoU scores appear as badges in the lower-right corner.
 
-The center-of-mass prompt point is overlaid on each image.
+Examples are selected for diversity across easy/medium/hard difficulty
+buckets based on base SAM IoU.
 
 Usage:
     python -m scripts.generate_qualitative_figures --config configs/eval.yaml
-    python -m scripts.generate_qualitative_figures --num-examples 12 --output paper/figures/qualitative_comparison.png
+    python -m scripts.generate_qualitative_figures --num-examples 4 --output paper/figures/qualitative_comparison.png
 """
 
 import argparse
@@ -210,23 +212,84 @@ def select_diverse_examples(candidates: list[dict],
     return selected
 
 
-def generate_figure(selected: list[dict], config: dict,
-                    output_path: str) -> None:
-    """Generate the final qualitative comparison figure.
+def _mask_contours(binary_mask: np.ndarray) -> list:
+    """Extract contours from a binary mask using OpenCV."""
+    mask_u8 = (binary_mask.astype(np.uint8)) * 255
+    contours, _ = cv2.findContours(mask_u8, cv2.RETR_EXTERNAL,
+                                   cv2.CHAIN_APPROX_NONE)
+    return contours
 
-    Loads both base and specialized SAM, runs predictions on each
-    selected example, and assembles the 4-column figure grid.
+
+def _overlay_with_contour(img: np.ndarray, binary_mask: np.ndarray,
+                          fill_color: tuple, contour_color: tuple,
+                          fill_alpha: float = 0.25,
+                          contour_thickness: int = 2) -> np.ndarray:
+    """Draw a semi-transparent fill and solid contour for a mask on an image.
 
     Args:
-        selected: List of selected candidate dicts.
-        config: Evaluation configuration dict.
-        output_path: Path to save the output PNG.
+        img: RGB image (H, W, 3) uint8.
+        binary_mask: Boolean mask (H, W).
+        fill_color: RGB tuple for the fill (0-255).
+        contour_color: BGR tuple for the contour (OpenCV convention).
+        fill_alpha: Opacity of the fill.
+        contour_thickness: Contour line width in pixels.
+    """
+    canvas = img.copy()
+    fill_arr = np.array(fill_color, dtype=np.uint8)
+    canvas[binary_mask] = (
+        (1 - fill_alpha) * canvas[binary_mask] + fill_alpha * fill_arr
+    ).astype(np.uint8)
+
+    contours = _mask_contours(binary_mask)
+    canvas_bgr = cv2.cvtColor(canvas, cv2.COLOR_RGB2BGR)
+    cv2.drawContours(canvas_bgr, contours, -1, contour_color, contour_thickness)
+    return cv2.cvtColor(canvas_bgr, cv2.COLOR_BGR2RGB)
+
+
+def _draw_gt_contour(img: np.ndarray, gt_mask: np.ndarray,
+                     color: tuple = (0, 200, 0),
+                     thickness: int = 1) -> np.ndarray:
+    """Draw a thin GT boundary contour on an image (no fill).
+
+    Overlaid on prediction columns so the reader can compare prediction
+    vs. GT boundaries without scanning back and forth.
+    """
+    contours = _mask_contours(gt_mask)
+    canvas_bgr = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    cv2.drawContours(canvas_bgr, contours, -1, color, thickness)
+    return cv2.cvtColor(canvas_bgr, cv2.COLOR_BGR2RGB)
+
+
+def _draw_iou_badge(ax, iou: float) -> None:
+    """Draw an IoU score badge in the lower-right corner of matplotlib axes."""
+    ax.text(
+        0.95, 0.05, f"IoU {iou:.3f}",
+        transform=ax.transAxes,
+        fontsize=9, fontweight="bold", color="white",
+        ha="right", va="bottom",
+        bbox=dict(
+            boxstyle="round,pad=0.2",
+            facecolor="black", alpha=0.7, edgecolor="none",
+        ),
+    )
+
+
+def generate_figure(selected: list[dict], config: dict,
+                    output_path: str) -> None:
+    """Generate the qualitative comparison figure for the paper.
+
+    Layout per row (4 columns):
+      Image + prompt | GT (green contour + fill) |
+      Base SAM (red contour + fill, thin green GT contour, IoU badge) |
+      Ours (blue contour + fill, thin green GT contour, IoU badge)
+
+    The GT contour appears in prediction columns so the reader can
+    compare boundaries directly.
     """
     device = get_device()
     target_size = config["evaluation"]["target_size"]
     n_rows = len(selected)
 
-    # Use non-interactive backend for HPC compatibility
     matplotlib.use("Agg")
 
     print("Loading base SAM for figure generation...")
@@ -248,11 +311,10 @@ def generate_figure(selected: list[dict], config: dict,
     spec_model.eval()
     spec_predictor = get_predictor(spec_model)
 
-    # Figure sizing: 4 columns, n_rows rows
-    col_width = 3.5  # inches per column
-    row_height = 3.0  # inches per row
+    col_width = 3.8
+    row_height = 3.2
     fig_width = col_width * 4
-    fig_height = row_height * n_rows + 1.0  # extra space for column titles
+    fig_height = row_height * n_rows + 0.6
 
     fig, axes = plt.subplots(
         n_rows, 4,
@@ -260,120 +322,108 @@ def generate_figure(selected: list[dict], config: dict,
         squeeze=False,
     )
 
-    column_titles = [
-        "Original Image",
-        "Ground Truth",
-        "Base SAM",
-        "Specialized SAM",
-    ]
-
-    # Style: green overlay for masks, red point for prompt
-    mask_color = np.array([0, 255, 0], dtype=np.uint8)  # green
-    mask_alpha = 0.4
-    point_color = "red"
-    point_size = 80
-    point_edge_color = "white"
+    # Color palette (fill = RGB, contour = BGR for OpenCV)
+    GT_FILL = (0, 210, 0)
+    GT_CONTOUR_BGR = (0, 200, 0)
+    BASE_FILL = (220, 80, 80)
+    BASE_CONTOUR_BGR = (60, 60, 220)
+    OURS_FILL = (80, 140, 255)
+    OURS_CONTOUR_BGR = (255, 140, 80)
+    GT_THIN_BGR = (0, 200, 0)
 
     for row_idx, candidate in enumerate(selected):
         img = candidate["img_resized"]
         gt_mask = candidate["mask_resized"]
         point_coords = candidate["point_coords"]
         point_labels = candidate["point_labels"]
-        base_iou = candidate["base_iou"]
 
         gt_binary = gt_mask > 128
-
-        # Run predictions
         base_pred = run_prediction(base_predictor, img, point_coords, point_labels)
         spec_pred = run_prediction(spec_predictor, img, point_coords, point_labels)
 
         base_iou_val = compute_iou(base_pred, gt_binary)
         spec_iou_val = compute_iou(spec_pred, gt_binary)
 
-        # Column 0: Original image with prompt point
+        # Column 0: Image + prompt point
         ax = axes[row_idx, 0]
         ax.imshow(img)
         for pt in point_coords:
-            ax.scatter(
-                pt[0], pt[1],
-                c=point_color, s=point_size, marker="*",
-                edgecolors=point_edge_color, linewidths=0.8,
-                zorder=5,
+            ax.plot(
+                pt[0], pt[1], marker="*", markersize=14,
+                color="#FF4444", markeredgecolor="white",
+                markeredgewidth=1.2, zorder=5,
             )
         ax.set_xticks([])
         ax.set_yticks([])
 
-        # Column 1: Ground truth mask overlay
+        # Column 1: GT (green contour + light fill)
         ax = axes[row_idx, 1]
-        overlay = img.copy()
-        overlay[gt_binary] = (
-            (1 - mask_alpha) * overlay[gt_binary]
-            + mask_alpha * mask_color
-        ).astype(np.uint8)
-        ax.imshow(overlay)
+        gt_vis = _overlay_with_contour(img, gt_binary,
+                                       fill_color=GT_FILL,
+                                       contour_color=GT_CONTOUR_BGR,
+                                       fill_alpha=0.25,
+                                       contour_thickness=2)
+        ax.imshow(gt_vis)
         ax.set_xticks([])
         ax.set_yticks([])
 
-        # Column 2: Base SAM prediction overlay
+        # Column 2: Base SAM (red prediction overlay + thin GT contour)
         ax = axes[row_idx, 2]
-        overlay = img.copy()
-        overlay[base_pred] = (
-            (1 - mask_alpha) * overlay[base_pred]
-            + mask_alpha * mask_color
-        ).astype(np.uint8)
-        ax.imshow(overlay)
+        base_vis = _overlay_with_contour(img, base_pred,
+                                         fill_color=BASE_FILL,
+                                         contour_color=BASE_CONTOUR_BGR,
+                                         fill_alpha=0.25,
+                                         contour_thickness=2)
+        base_vis = _draw_gt_contour(base_vis, gt_binary,
+                                    color=GT_THIN_BGR, thickness=1)
+        ax.imshow(base_vis)
         for pt in point_coords:
-            ax.scatter(
-                pt[0], pt[1],
-                c=point_color, s=point_size, marker="*",
-                edgecolors=point_edge_color, linewidths=0.8,
-                zorder=5,
+            ax.plot(
+                pt[0], pt[1], marker="*", markersize=10,
+                color="#FF4444", markeredgecolor="white",
+                markeredgewidth=0.8, zorder=5,
             )
-        ax.set_xlabel(f"IoU: {base_iou_val:.3f}", fontsize=9)
+        _draw_iou_badge(ax, base_iou_val)
         ax.set_xticks([])
         ax.set_yticks([])
 
-        # Column 3: Specialized SAM prediction overlay
+        # Column 3: Ours (blue prediction overlay + thin GT contour)
         ax = axes[row_idx, 3]
-        overlay = img.copy()
-        overlay[spec_pred] = (
-            (1 - mask_alpha) * overlay[spec_pred]
-            + mask_alpha * mask_color
-        ).astype(np.uint8)
-        ax.imshow(overlay)
+        spec_vis = _overlay_with_contour(img, spec_pred,
+                                         fill_color=OURS_FILL,
+                                         contour_color=OURS_CONTOUR_BGR,
+                                         fill_alpha=0.25,
+                                         contour_thickness=2)
+        spec_vis = _draw_gt_contour(spec_vis, gt_binary,
+                                    color=GT_THIN_BGR, thickness=1)
+        ax.imshow(spec_vis)
         for pt in point_coords:
-            ax.scatter(
-                pt[0], pt[1],
-                c=point_color, s=point_size, marker="*",
-                edgecolors=point_edge_color, linewidths=0.8,
-                zorder=5,
+            ax.plot(
+                pt[0], pt[1], marker="*", markersize=10,
+                color="#FF4444", markeredgecolor="white",
+                markeredgewidth=0.8, zorder=5,
             )
-        ax.set_xlabel(f"IoU: {spec_iou_val:.3f}", fontsize=9)
+        _draw_iou_badge(ax, spec_iou_val)
         ax.set_xticks([])
         ax.set_yticks([])
 
-        # Row label indicating difficulty
-        if row_idx < len(selected) // 3:
-            difficulty = "Hard"
-        elif row_idx < 2 * (len(selected) // 3):
-            difficulty = "Medium"
-        else:
-            difficulty = "Easy"
-        axes[row_idx, 0].set_ylabel(
-            difficulty, fontsize=10, fontweight="bold", rotation=90,
-            labelpad=10,
-        )
+    # Column headers
+    titles = ["Image", "Ground Truth", "Base SAM", "Ours"]
+    for col_idx, title in enumerate(titles):
+        axes[0, col_idx].set_title(title, fontsize=11, fontweight="bold", pad=8)
 
-    # Column titles
-    for col_idx, title in enumerate(column_titles):
-        axes[0, col_idx].set_title(title, fontsize=12, fontweight="bold", pad=10)
+    # Remove all spines for a cleaner look
+    for ax_row in axes:
+        for ax in ax_row:
+            for spine in ax.spines.values():
+                spine.set_visible(False)
 
-    plt.tight_layout()
+    plt.subplots_adjust(wspace=0.03, hspace=0.06)
 
-    # Save high-resolution PNG
     output = Path(output_path)
     output.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(str(output), dpi=300, bbox_inches="tight", facecolor="white")
+    fig.savefig(str(output), dpi=300, bbox_inches="tight",
+                facecolor="white", pad_inches=0.05)
     plt.close(fig)
 
     print(f"\nFigure saved to: {output}")
@@ -389,8 +439,8 @@ def main():
         help="Path to evaluation config YAML",
     )
     parser.add_argument(
-        "--num-examples", type=int, default=12,
-        help="Number of example rows in the figure (default: 12)",
+        "--num-examples", type=int, default=4,
+        help="Number of example rows in the figure (default: 4)",
     )
     parser.add_argument(
         "--output", type=str, default="paper/figures/qualitative_comparison.png",

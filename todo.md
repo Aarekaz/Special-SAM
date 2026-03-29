@@ -12,6 +12,7 @@
 - [x] Reduced number repetition across intro/discussion (replaced with table references)
 - [x] Fixed ambiguous "both encoders" phrasing in Method section
 - [x] Humanized prose: removed AI writing patterns (copula avoidance, trailing -ing clauses, promotional modifiers, vague hedging), tightened sentence structure across all sections
+- [x] Rewrote qualitative figure script: contour-based overlays (not opaque fills), GT contour on prediction columns, IoU badges, reduced default to 4 rows
 
 ## Next (requires HPC)
 - [ ] Run `sbatch scripts/ablation_prompt.sh` -- rerun prompt ablation on full COD10K test set

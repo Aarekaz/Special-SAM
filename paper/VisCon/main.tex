@@ -169,7 +169,7 @@ COMPr.~\cite{hao2024comprompter} & Prompt adapt & .889 & .949 & .821 & .023 \\
 \begin{figure*}[t]
     \centering
     \includegraphics[width=\textwidth]{figures/qualitative_comparison.png}
-    \caption{\textbf{Qualitative comparison} (center-of-mass prompts). Each row: input image, ground-truth mask, base SAM prediction, our decoder-only prediction. Base SAM tends to segment only the most salient region near the prompt, missing large portions of camouflaged objects. The specialized decoder follows true object boundaries even when coloration matches the background.}
+    \caption{\textbf{Qualitative comparison} (center-of-mass prompts). Columns: input with prompt point, GT boundary (green), base SAM prediction (red, with thin GT contour overlaid), and our decoder-only prediction (blue, with GT contour). IoU scores appear per prediction. Base SAM segments only the salient region near the prompt; our decoder follows the true object boundary even when coloration matches the background.}
     \label{fig:qualitative}
 \end{figure*}
 
