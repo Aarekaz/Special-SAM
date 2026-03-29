@@ -15,6 +15,10 @@
 - [x] Rewrote qualitative figure script: contour-based overlays (not opaque fills), GT contour on prediction columns, IoU badges, reduced default to 4 rows
 - [x] Added --best selection mode (default): scores both models, picks examples with largest IoU delta where ours succeeds, deduplicates by instance
 - [x] Deep humanizer pass across all 8 sections: removed promotional language ("rich", "Crucially", "highly effective", "complementary contribution"), hedging ("appears to", "largely yes", "suggests that"), copula avoidance ("serves as"), trailing -ing clauses, duplicate phrasing between abstract/intro, verbose filler, and sycophantic constructions. Tightened sentence structure, varied rhythm, and differentiated abstract vs. intro openings.
+- [x] Trimmed LLPM paragraph from 7 sentences to 3 (freed ~4 lines for 4-page budget)
+- [x] Added Conclusion section (2 sentences)
+- [x] Strengthened contribution 3 with connection to medical imaging and underwater domains
+- [x] Added S_alpha column to Table 1 (Base and Ours, from full paper data)
 
 ## Next (requires HPC)
 - [ ] Run `sbatch scripts/qualitative.sh` -- regenerate qualitative figure with --best selection and contour overlays
