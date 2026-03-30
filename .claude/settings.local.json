@@ -14,7 +14,9 @@
       "Bash(brew list:*)",
       "Bash(sips -g pixelWidth -g pixelHeight /Users/aarekaz/Development/Special-SAM/paper/VisCon/figures/coco_comparison.png /Users/aarekaz/Development/Special-SAM/paper/VisCon/figures/qualitative_comparison.png)",
       "Bash(md5 /Users/aarekaz/Development/Special-SAM/paper/VisCon/figures/qualitative_comparison.png /Users/aarekaz/Development/Special-SAM/paper/SAM-Version/latex/figures/qualitative_comparison.png)",
-      "Bash(chmod +x /Users/aarekaz/Development/Special-SAM/scripts/generate_all_figures.sh)"
+      "Bash(chmod +x /Users/aarekaz/Development/Special-SAM/scripts/generate_all_figures.sh)",
+      "Skill(humanizer)",
+      "Skill(humanizer:*)"
     ]
   }
 }
