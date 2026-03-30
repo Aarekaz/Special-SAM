@@ -78,7 +78,7 @@ SAM consists of a ViT-H image encoder ($\sim$632M parameters), a prompt encoder,
 \begin{figure}[t]
     \centering
     \includegraphics[width=\columnwidth]{figures/architecture_diagram.pdf}
-    \caption{\textbf{SAM adaptation pipelines.} (a)~Decoder-only training: we freeze the encoder, cache embeddings, and fine-tune only the 4M-parameter mask decoder. (b)~Optional LLPM + decoder training: a small preprocessing module sharpens input features before the frozen encoder. (c)~Inference with either configuration.}
+    \caption{\textbf{Our approach.} (a)~Training: we freeze the encoder, cache embeddings offline, and fine-tune only the 4M-parameter mask decoder with mixed point/box prompts. (b)~Inference: the frozen encoder and specialized decoder produce segmentation masks from a user prompt.}
     \label{fig:architecture}
 \end{figure}
 
