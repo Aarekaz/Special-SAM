@@ -1,0 +1,53 @@
+Starting qualitative figure generation at Mon Mar 30 01:42:28 EDT 2026
+GPU: NVIDIA A100 80GB PCIe
+Python: /SEAS/home/g37014071/.conda/envs/specialsam/bin/python
+======================================================================
+Qualitative Figure Generation
+======================================================================
+  Config:       configs/eval.yaml
+  Num examples: 4
+  Selection:    best-improvement
+  Output:       paper/figures/qualitative_comparison.png
+
+Loading base SAM for candidate scoring...
+Loading specialized SAM for candidate scoring...
+Found 4000 images in data/cod10k/COD10K-v3/Test/Image
+Found 4000 masks in data/cod10k/COD10K-v3/Test/GT_Object
+Matched 4000 image-mask pairs
+Using all 4000 samples
+Scoring 4000 test images with both models...
+  Scored 100/4000
+  Scored 200/4000
+  Scored 300/4000
+  Scored 400/4000
+  Scored 500/4000
+  Scored 600/4000
+  Scored 700/4000
+  Scored 800/4000
+  Scored 900/4000
+  Scored 1000/4000
+  Scored 1100/4000
+  Scored 1200/4000
+  Scored 1300/4000
+  Scored 1400/4000
+  Scored 1500/4000
+  Scored 1600/4000
+  Scored 1700/4000
+  Scored 1800/4000
+  Scored 1900/4000
+  Scored 2000/4000
+Collected 2026 valid candidates
+Viable candidates (spec IoU >= 0.65): 1518
+  Row 1: base=0.003 -> ours=0.977 (+0.974)  COD10K-CAM-1-Aquatic-11-Octopus-472.jpg
+  Row 2: base=0.013 -> ours=0.983 (+0.971)  COD10K-CAM-3-Flying-65-Owl-4599.jpg
+  Row 3: base=0.003 -> ours=0.964 (+0.961)  COD10K-CAM-4-Amphibian-68-Toad-5022.jpg
+  Row 4: base=0.001 -> ours=0.955 (+0.954)  COD10K-CAM-3-Flying-61-Katydid-4115.jpg
+Selected 4 best-improvement examples
+Loading base SAM for figure generation...
+Loading specialized SAM for figure generation...
+
+Figure saved to: paper/figures/qualitative_comparison.png
+  Resolution: 4560 x 4020 px
+
+Done.
+Finished at Mon Mar 30 02:15:59 EDT 2026
