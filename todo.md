@@ -20,12 +20,15 @@
 - [x] Strengthened contribution 3 with connection to medical imaging and underwater domains
 - [x] Added S_alpha column to Table 1 (Base and Ours, from full paper data)
 
-## Next (requires HPC)
-- [ ] Run `sbatch scripts/qualitative.sh` -- regenerate qualitative figure with --best selection and contour overlays
-- [ ] Run `sbatch scripts/ablation_prompt.sh` -- rerun prompt ablation on full COD10K test set
-- [ ] Run `sbatch scripts/eval_crossdataset.sh` -- cross-dataset eval with all four prompt types
-- [ ] Update Table 2 numbers with full-set ablation results
-- [ ] Update Table 3 with cross-dataset Range row once results are in
-- [ ] Remove the TODO comment in main.tex after Table 3 is finalized
-- [ ] Final page-budget review (4-page limit) and submission readiness check
+## HPC done; synced from origin
+- [x] Prompt ablation `5854374` — Table 2 + `ablation_comparison_table.txt`
+- [x] Cross-dataset CAMO `5854375_0` — `camo_results.csv`; Table 3 CAMO + Range
+- [x] Cross-dataset NC4K `5854375_1` — `nc4k_results.csv`; Table 3 NC4K Range (5.8× / 1.1×) + prose in `paper/VisCon/main.tex`
+- [x] Qualitative `5854478` — `paper/figures/qualitative_comparison.png` (commit on HPC: `17e818d`)
+
+## Optional
+- [ ] Add `results/ablation/point_only_results.csv` and `box_only_results.csv` to git from HPC
+
+## Final (no HPC)
+- [ ] Page-budget / VisCon submission checklist
 

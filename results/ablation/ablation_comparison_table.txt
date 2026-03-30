@@ -1,12 +1,13 @@
 
 ==========================================================================================
-ABLATION STUDY: Loss Function Configuration Comparison
+PROMPT-MIX ABLATION: training variant comparison (COD10K test, full evaluation set per job)
 ==========================================================================================
 
 Prompt Strategy: Center-of-Mass (Single)
 ------------------------------------------------------------------------------------------
 Variant                BCE  Dice    mIoU    Dice  S-alpha   E-phi F-beta-w     MAE   BndF1
 ------------------------------------------------------------------------------------------
+point_only               ?     ?  0.7287  0.8102   0.8392  0.9403   0.8095  0.0290  0.6899
 box_only                 ?     ?  0.3846  0.4967   0.6486  0.7565   0.5033  0.0695  0.3886
 
 
@@ -14,6 +15,7 @@ Prompt Strategy: Edge (Single)
 ------------------------------------------------------------------------------------------
 Variant                BCE  Dice    mIoU    Dice  S-alpha   E-phi F-beta-w     MAE   BndF1
 ------------------------------------------------------------------------------------------
+point_only               ?     ?  0.6732  0.7606   0.7956  0.9152   0.7296  0.0369  0.6397
 box_only                 ?     ?  0.5226  0.6273   0.7144  0.8492   0.5777  0.0540  0.5139
 
 
@@ -21,6 +23,7 @@ Prompt Strategy: Multi-Point Grid (4 pts)
 ------------------------------------------------------------------------------------------
 Variant                BCE  Dice    mIoU    Dice  S-alpha   E-phi F-beta-w     MAE   BndF1
 ------------------------------------------------------------------------------------------
+point_only               ?     ?  0.7472  0.8278   0.8516  0.9481   0.8289  0.0255  0.7068
 box_only                 ?     ?  0.4242  0.5421   0.6772  0.7836   0.5707  0.0637  0.4065
 
 
@@ -28,15 +31,13 @@ Prompt Strategy: Multi-Point Random (3 pts)
 ------------------------------------------------------------------------------------------
 Variant                BCE  Dice    mIoU    Dice  S-alpha   E-phi F-beta-w     MAE   BndF1
 ------------------------------------------------------------------------------------------
+point_only               ?     ?  0.7664  0.8484   0.8650  0.9544   0.8487  0.0227  0.7239
 box_only                 ?     ?  0.4912  0.6072   0.7137  0.8268   0.6160  0.0566  0.4767
 
 ==========================================================================================
-BEST VARIANTS (first prompt strategy)
+Notes
 ------------------------------------------------------------------------------------------
-  mIoU        : box_only             (0.3846)
-  Dice        : box_only             (0.4967)
-  S-alpha     : box_only             (0.6486)
-  E-phi       : box_only             (0.7565)
-  F-beta-w    : box_only             (0.5033)
-  MAE         : box_only             (0.0695)
+- point_only / box_only: from SLURM jobs 5854374_0 and 5854374_1 (see logs/ablation_prompt_*.out).
+- Mixed (production decoder) is reported in the main paper Table 1, not re-trained here.
+- Each array task overwrote this file; this merged copy restores both variants.
 ==========================================================================================

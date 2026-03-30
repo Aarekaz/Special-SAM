@@ -208,19 +208,27 @@ Tracks all SLURM jobs, their purpose, status, and results.
 
 ---
 
-### Job 5854374 — Prompt-Mix Ablation (full test set, 2,026 images)
+### Job 5854374 — Prompt-Mix Ablation (full test set)
 - **Script:** `scripts/ablation_prompt.sh` (SLURM array, tasks 0-1)
 - **Submitted:** 2026-03-29
 - **GPU:** A100 80GB x2 (parallel array)
-- **Status:** RUNNING
+- **Status:** COMPLETED (task 0 finished 2026-03-29 18:56 EDT; task 1 finished 2026-03-29 23:15 EDT)
 - **Configs:**
   - Task 0: `configs/ablation/prompt_point_only.yaml` (point-only training)
   - Task 1: `configs/ablation/prompt_box_only.yaml` (box-only training)
-- **Evaluation:** `--max-samples 0` (full 2,026-image COD10K camouflaged test set), all 4 prompt types (center, edge_single, multi_grid, multi_random)
+- **Evaluation:** `--max-samples 0` (all matched test pairs), all 4 prompt types (center, edge_single, multi_grid, multi_random)
 - **Output:** `results/ablation/point_only_results.csv`, `results/ablation/box_only_results.csv`
 - **Logs:** `logs/ablation_prompt_5854374_0.out`, `logs/ablation_prompt_5854374_1.out`
 - **Purpose:** Rerun prompt ablation on full test set (previously 500-image subset) for VisCon paper Table 2.
-- **Expected runtime:** ~1.5-2 hours per task
+- **Important:** Eval matched **4,000** image-mask pairs (`Test/Image` + `GT_Object`), not the 2,026 camouflaged-only subset. Paper Table 2 should either align eval to `Image_CAM` / camouflaged list or report 4,000-sample numbers explicitly.
+- **Results (mIoU, from job logs):**
+
+| Training | CoM | Edge | Grid | Random |
+|---|---|---|---|---|
+| point_only | 0.7287 | 0.6732 | 0.7472 | 0.7664 |
+| box_only | 0.3846 | 0.5226 | 0.4242 | 0.4912 |
+
+- **Prompt sensitivity (max/min mIoU):** point_only ~1.14x; box_only ~1.36x (vs. mixed decoder ~1.1x on 2,026 camouflaged COD10K in main table).
 
 ---
 
@@ -228,7 +236,7 @@ Tracks all SLURM jobs, their purpose, status, and results.
 - **Script:** `scripts/eval_crossdataset.sh` (SLURM array, tasks 0-1)
 - **Submitted:** 2026-03-29
 - **GPU:** A100 80GB x2 (parallel array)
-- **Status:** RUNNING
+- **Status:** CAMO **COMPLETED** 2026-03-29 23:54 EDT; NC4K **incomplete in synced repo** (see below)
 - **Configs:**
   - Task 0: `configs/eval_camo.yaml` (CAMO test, 250 images, 4 prompt types)
   - Task 1: `configs/eval_nc4k.yaml` (NC4K test, 4,121 images, 4 prompt types)
@@ -237,7 +245,16 @@ Tracks all SLURM jobs, their purpose, status, and results.
 - **Output:** `results/crossdataset/camo_results.csv`, `results/crossdataset/nc4k_results.csv`
 - **Logs:** `logs/crossdataset_5854375_0.out`, `logs/crossdataset_5854375_1.out`
 - **Purpose:** Expand cross-dataset eval to all prompt types for VisCon paper Table 3 Range row.
-- **Expected runtime:** ~30-45 min (CAMO), ~3-4 hours (NC4K)
+
+**CAMO (250 images) — mIoU from log `crossdataset_5854375_0.out`:**
+
+| Model | CoM | Edge | Grid | Random | Range |
+|---|---|---|---|---|---|
+| Base SAM | 0.489 | 0.153 | 0.688 | 0.692 | ~4.5x |
+| Specialized | 0.658 | 0.619 | 0.698 | 0.703 | ~1.1x |
+| LLPM+Decoder | 0.677 | 0.656 | 0.722 | 0.737 | ~1.1x |
+
+**NC4K:** Local `logs/crossdataset_5854375_1.out` ends mid-run (Base model, Multi-Point Grid, ~2450/4121). Re-pull from HPC or wait for job completion; `results/crossdataset/nc4k_results.csv` may be partial until the run finishes.
 
 ---
 

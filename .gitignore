@@ -11,8 +11,16 @@ checkpoints/
 *_embeddings*/
 *.npy
 
-# Results (regenerable)
-results/
+# Results (regenerable): cannot use plain `results/` — it blocks `!` exceptions for
+# subfolders. Ignore direct children only, then re-include what we track.
+results/*
+!results/crossdataset/
+!results/crossdataset/**
+!results/ablation/
+!results/ablation/**
+!results/tables/
+!results/tables/**
+!results/*.csv
 
 # Python
 __pycache__/
@@ -67,13 +75,6 @@ venv/
 # Logs (small text files, valuable for reproducibility)
 !logs/
 !logs/**
-
-# Results CSVs and tables
-!results/*.csv
-!results/tables/
-!results/ablation/
-!results/crossdataset/
-!results/crossdataset/**
 
 # Paper figures and PDFs
 !paper/figures/*.png
