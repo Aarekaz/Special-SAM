@@ -72,6 +72,8 @@ venv/
 !results/*.csv
 !results/tables/
 !results/ablation/
+!results/crossdataset/
+!results/crossdataset/**
 
 # Paper figures and PDFs
 !paper/figures/*.png
