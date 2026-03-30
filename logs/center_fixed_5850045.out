@@ -1,0 +1,153 @@
+=== Fixed center-of-image prompt evaluation ===
+Started at Sat Mar 28 18:29:27 EDT 2026
+GPU: NVIDIA A100 80GB PCIe
+Python: /SEAS/home/g37014071/.conda/envs/specialsam/bin/python
+Found 2026 images in data/cod10k/COD10K-v3/Test/Image_CAM
+Found 4000 masks in data/cod10k/COD10K-v3/Test/GT_Object
+Matched 2026 image-mask pairs
+Using all 2026 samples
+
+Evaluating BASE model on 2026 samples
+  Testing: Center-of-Image (Fixed)
+    Processed 50/2026
+    Processed 100/2026
+    Processed 150/2026
+    Processed 200/2026
+    Processed 250/2026
+    Processed 300/2026
+    Processed 350/2026
+    Processed 400/2026
+    Processed 450/2026
+    Processed 500/2026
+    Processed 550/2026
+    Processed 600/2026
+    Processed 650/2026
+    Processed 700/2026
+    Processed 750/2026
+    Processed 800/2026
+    Processed 850/2026
+    Processed 900/2026
+    Processed 950/2026
+    Processed 1000/2026
+    Processed 1050/2026
+    Processed 1100/2026
+    Processed 1150/2026
+    Processed 1200/2026
+    Processed 1250/2026
+    Processed 1300/2026
+    Processed 1350/2026
+    Processed 1400/2026
+    Processed 1450/2026
+    Processed 1500/2026
+    Processed 1550/2026
+    Processed 1600/2026
+    Processed 1650/2026
+    Processed 1700/2026
+    Processed 1750/2026
+    Processed 1800/2026
+    Processed 1850/2026
+    Processed 1900/2026
+    Processed 1950/2026
+    Processed 2000/2026
+    mIoU=0.3260, S-alpha=0.5267, MAE=0.1685
+Found 2026 images in data/cod10k/COD10K-v3/Test/Image_CAM
+Found 4000 masks in data/cod10k/COD10K-v3/Test/GT_Object
+Matched 2026 image-mask pairs
+Using all 2026 samples
+
+Evaluating SPECIALIZED model on 2026 samples
+  Testing: Center-of-Image (Fixed)
+    Processed 50/2026
+    Processed 100/2026
+    Processed 150/2026
+    Processed 200/2026
+    Processed 250/2026
+    Processed 300/2026
+    Processed 350/2026
+    Processed 400/2026
+    Processed 450/2026
+    Processed 500/2026
+    Processed 550/2026
+    Processed 600/2026
+    Processed 650/2026
+    Processed 700/2026
+    Processed 750/2026
+    Processed 800/2026
+    Processed 850/2026
+    Processed 900/2026
+    Processed 950/2026
+    Processed 1000/2026
+    Processed 1050/2026
+    Processed 1100/2026
+    Processed 1150/2026
+    Processed 1200/2026
+    Processed 1250/2026
+    Processed 1300/2026
+    Processed 1350/2026
+    Processed 1400/2026
+    Processed 1450/2026
+    Processed 1500/2026
+    Processed 1550/2026
+    Processed 1600/2026
+    Processed 1650/2026
+    Processed 1700/2026
+    Processed 1750/2026
+    Processed 1800/2026
+    Processed 1850/2026
+    Processed 1900/2026
+    Processed 1950/2026
+    Processed 2000/2026
+    mIoU=0.5663, S-alpha=0.7249, MAE=0.0457
+Found 2026 images in data/cod10k/COD10K-v3/Test/Image_CAM
+Found 4000 masks in data/cod10k/COD10K-v3/Test/GT_Object
+Matched 2026 image-mask pairs
+Using all 2026 samples
+
+Evaluating LLPM model on 2026 samples
+  Testing: Center-of-Image (Fixed)
+    Processed 50/2026
+    Processed 100/2026
+    Processed 150/2026
+    Processed 200/2026
+    Processed 250/2026
+    Processed 300/2026
+    Processed 350/2026
+    Processed 400/2026
+    Processed 450/2026
+    Processed 500/2026
+    Processed 550/2026
+    Processed 600/2026
+    Processed 650/2026
+    Processed 700/2026
+    Processed 750/2026
+    Processed 800/2026
+    Processed 850/2026
+    Processed 900/2026
+    Processed 950/2026
+    Processed 1000/2026
+    Processed 1050/2026
+    Processed 1100/2026
+    Processed 1150/2026
+    Processed 1200/2026
+    Processed 1250/2026
+    Processed 1300/2026
+    Processed 1350/2026
+    Processed 1400/2026
+    Processed 1450/2026
+    Processed 1500/2026
+    Processed 1550/2026
+    Processed 1600/2026
+    Processed 1650/2026
+    Processed 1700/2026
+    Processed 1750/2026
+    Processed 1800/2026
+    Processed 1850/2026
+    Processed 1900/2026
+    Processed 1950/2026
+    Processed 2000/2026
+    mIoU=0.0014, S-alpha=0.4742, MAE=0.0905
+
+Results saved to results/center_fixed_results.csv
+Per-category results saved to results/per_category_results.csv
+Per-image results saved to results/center_fixed_per_image.csv (6078 rows)
+Finished at Sat Mar 28 19:38:00 EDT 2026

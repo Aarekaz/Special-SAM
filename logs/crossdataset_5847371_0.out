@@ -1,0 +1,49 @@
+=== Cross-dataset evaluation: camo ===
+Started at Wed Mar 25 18:40:18 EDT 2026
+GPU: NVIDIA A100 80GB PCIe
+Python: /SEAS/home/g37014071/.conda/envs/specialsam/bin/python
+Config: configs/eval_camo.yaml
+Found 250 images in data/camo/CAMO-V.1.0-CVIU2019/Images/Test
+Found 1250 masks in data/camo/CAMO-V.1.0-CVIU2019/GT
+Matched 250 image-mask pairs
+Using all 250 samples
+
+Evaluating BASE model on 250 samples
+  Testing: Center-of-Mass (Single)
+    Processed 50/250
+    Processed 100/250
+    Processed 150/250
+    Processed 200/250
+    Processed 250/250
+    mIoU=0.4890, S-alpha=0.6715, MAE=0.1222
+Found 250 images in data/camo/CAMO-V.1.0-CVIU2019/Images/Test
+Found 1250 masks in data/camo/CAMO-V.1.0-CVIU2019/GT
+Matched 250 image-mask pairs
+Using all 250 samples
+
+Evaluating SPECIALIZED model on 250 samples
+  Testing: Center-of-Mass (Single)
+    Processed 50/250
+    Processed 100/250
+    Processed 150/250
+    Processed 200/250
+    Processed 250/250
+    mIoU=0.6578, S-alpha=0.7875, MAE=0.0754
+Found 250 images in data/camo/CAMO-V.1.0-CVIU2019/Images/Test
+Found 1250 masks in data/camo/CAMO-V.1.0-CVIU2019/GT
+Matched 250 image-mask pairs
+Using all 250 samples
+
+Evaluating LLPM model on 250 samples
+  Testing: Center-of-Mass (Single)
+    Processed 50/250
+    Processed 100/250
+    Processed 150/250
+    Processed 200/250
+    Processed 250/250
+    mIoU=0.6768, S-alpha=0.7975, MAE=0.0726
+
+Results saved to results/crossdataset/camo_results.csv
+Per-category results saved to results/crossdataset/per_category_results.csv
+Per-image results saved to results/crossdataset/camo_per_image.csv (750 rows)
+Finished camo at Wed Mar 25 18:50:04 EDT 2026

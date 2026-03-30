@@ -1,0 +1,252 @@
+============================================
+Prompt Ablation: box_only
+Config: configs/ablation/prompt_box_only.yaml
+Started at Sun Mar 29 18:56:44 EDT 2026
+GPU: NVIDIA A100 80GB PCIe
+============================================
+[Step 1/2] Training decoder: box_only
+Training for 15 epochs on 6080 samples...
+  LR scheduler: cosine, warmup: 1 epochs
+Epoch 1/15 | Loss: 0.1071 | LR: 1.00e-04
+Epoch 2/15 | Loss: 0.0942 | LR: 1.00e-04
+Epoch 3/15 | Loss: 0.0876 | LR: 9.88e-05
+Epoch 4/15 | Loss: 0.0822 | LR: 9.51e-05
+Epoch 5/15 | Loss: 0.0769 | LR: 8.92e-05
+Epoch 6/15 | Loss: 0.0730 | LR: 8.14e-05
+Epoch 7/15 | Loss: 0.0686 | LR: 7.20e-05
+Epoch 8/15 | Loss: 0.0651 | LR: 6.15e-05
+Epoch 9/15 | Loss: 0.0618 | LR: 5.05e-05
+Epoch 10/15 | Loss: 0.0591 | LR: 3.95e-05
+Epoch 11/15 | Loss: 0.0567 | LR: 2.90e-05
+Epoch 12/15 | Loss: 0.0546 | LR: 1.96e-05
+Epoch 13/15 | Loss: 0.0528 | LR: 1.18e-05
+Epoch 14/15 | Loss: 0.0515 | LR: 5.90e-06
+Epoch 15/15 | Loss: 0.0508 | LR: 2.24e-06
+Saved decoder to checkpoints/ablation/camo_decoder_box_only.pth
+[Step 2/2] Evaluating decoder: box_only
+
+============================================================
+Evaluating: box_only
+  Decoder:  checkpoints/ablation/camo_decoder_box_only.pth
+  Samples:  all
+============================================================
+Found 4000 images in data/cod10k/COD10K-v3/Test/Image
+Found 4000 masks in data/cod10k/COD10K-v3/Test/GT_Object
+Matched 4000 image-mask pairs
+Using all 4000 samples
+
+Evaluating SPECIALIZED model on 4000 samples
+  Testing: Center-of-Mass (Single)
+    Processed 50/4000
+    Processed 100/4000
+    Processed 150/4000
+    Processed 200/4000
+    Processed 250/4000
+    Processed 300/4000
+    Processed 350/4000
+    Processed 400/4000
+    Processed 450/4000
+    Processed 500/4000
+    Processed 550/4000
+    Processed 600/4000
+    Processed 650/4000
+    Processed 700/4000
+    Processed 750/4000
+    Processed 800/4000
+    Processed 850/4000
+    Processed 900/4000
+    Processed 950/4000
+    Processed 1000/4000
+    Processed 1050/4000
+    Processed 1100/4000
+    Processed 1150/4000
+    Processed 1200/4000
+    Processed 1250/4000
+    Processed 1300/4000
+    Processed 1350/4000
+    Processed 1400/4000
+    Processed 1450/4000
+    Processed 1500/4000
+    Processed 1550/4000
+    Processed 1600/4000
+    Processed 1650/4000
+    Processed 1700/4000
+    Processed 1750/4000
+    Processed 1800/4000
+    Processed 1850/4000
+    Processed 1900/4000
+    Processed 1950/4000
+    Processed 2000/4000
+    mIoU=0.3846, S-alpha=0.6486, MAE=0.0695
+  Testing: Edge (Single)
+    Processed 50/4000
+    Processed 100/4000
+    Processed 150/4000
+    Processed 200/4000
+    Processed 250/4000
+    Processed 300/4000
+    Processed 350/4000
+    Processed 400/4000
+    Processed 450/4000
+    Processed 500/4000
+    Processed 550/4000
+    Processed 600/4000
+    Processed 650/4000
+    Processed 700/4000
+    Processed 750/4000
+    Processed 800/4000
+    Processed 850/4000
+    Processed 900/4000
+    Processed 950/4000
+    Processed 1000/4000
+    Processed 1050/4000
+    Processed 1100/4000
+    Processed 1150/4000
+    Processed 1200/4000
+    Processed 1250/4000
+    Processed 1300/4000
+    Processed 1350/4000
+    Processed 1400/4000
+    Processed 1450/4000
+    Processed 1500/4000
+    Processed 1550/4000
+    Processed 1600/4000
+    Processed 1650/4000
+    Processed 1700/4000
+    Processed 1750/4000
+    Processed 1800/4000
+    Processed 1850/4000
+    Processed 1900/4000
+    Processed 1950/4000
+    Processed 2000/4000
+    mIoU=0.5226, S-alpha=0.7144, MAE=0.0540
+  Testing: Multi-Point Grid (4 pts)
+    Processed 50/4000
+    Processed 100/4000
+    Processed 150/4000
+    Processed 200/4000
+    Processed 250/4000
+    Processed 300/4000
+    Processed 350/4000
+    Processed 400/4000
+    Processed 450/4000
+    Processed 500/4000
+    Processed 550/4000
+    Processed 600/4000
+    Processed 650/4000
+    Processed 700/4000
+    Processed 750/4000
+    Processed 800/4000
+    Processed 850/4000
+    Processed 900/4000
+    Processed 950/4000
+    Processed 1000/4000
+    Processed 1050/4000
+    Processed 1100/4000
+    Processed 1150/4000
+    Processed 1200/4000
+    Processed 1250/4000
+    Processed 1300/4000
+    Processed 1350/4000
+    Processed 1400/4000
+    Processed 1450/4000
+    Processed 1500/4000
+    Processed 1550/4000
+    Processed 1600/4000
+    Processed 1650/4000
+    Processed 1700/4000
+    Processed 1750/4000
+    Processed 1800/4000
+    Processed 1850/4000
+    Processed 1900/4000
+    Processed 1950/4000
+    Processed 2000/4000
+    mIoU=0.4242, S-alpha=0.6772, MAE=0.0637
+  Testing: Multi-Point Random (3 pts)
+    Processed 50/4000
+    Processed 100/4000
+    Processed 150/4000
+    Processed 200/4000
+    Processed 250/4000
+    Processed 300/4000
+    Processed 350/4000
+    Processed 400/4000
+    Processed 450/4000
+    Processed 500/4000
+    Processed 550/4000
+    Processed 600/4000
+    Processed 650/4000
+    Processed 700/4000
+    Processed 750/4000
+    Processed 800/4000
+    Processed 850/4000
+    Processed 900/4000
+    Processed 950/4000
+    Processed 1000/4000
+    Processed 1050/4000
+    Processed 1100/4000
+    Processed 1150/4000
+    Processed 1200/4000
+    Processed 1250/4000
+    Processed 1300/4000
+    Processed 1350/4000
+    Processed 1400/4000
+    Processed 1450/4000
+    Processed 1500/4000
+    Processed 1550/4000
+    Processed 1600/4000
+    Processed 1650/4000
+    Processed 1700/4000
+    Processed 1750/4000
+    Processed 1800/4000
+    Processed 1850/4000
+    Processed 1900/4000
+    Processed 1950/4000
+    Processed 2000/4000
+    mIoU=0.4912, S-alpha=0.7137, MAE=0.0566
+
+Results saved to: results/ablation/box_only_results.csv
+
+==========================================================================================
+ABLATION STUDY: Loss Function Configuration Comparison
+==========================================================================================
+
+Prompt Strategy: Center-of-Mass (Single)
+------------------------------------------------------------------------------------------
+Variant                BCE  Dice    mIoU    Dice  S-alpha   E-phi F-beta-w     MAE   BndF1
+------------------------------------------------------------------------------------------
+box_only                 ?     ?  0.3846  0.4967   0.6486  0.7565   0.5033  0.0695  0.3886
+
+
+Prompt Strategy: Edge (Single)
+------------------------------------------------------------------------------------------
+Variant                BCE  Dice    mIoU    Dice  S-alpha   E-phi F-beta-w     MAE   BndF1
+------------------------------------------------------------------------------------------
+box_only                 ?     ?  0.5226  0.6273   0.7144  0.8492   0.5777  0.0540  0.5139
+
+
+Prompt Strategy: Multi-Point Grid (4 pts)
+------------------------------------------------------------------------------------------
+Variant                BCE  Dice    mIoU    Dice  S-alpha   E-phi F-beta-w     MAE   BndF1
+------------------------------------------------------------------------------------------
+box_only                 ?     ?  0.4242  0.5421   0.6772  0.7836   0.5707  0.0637  0.4065
+
+
+Prompt Strategy: Multi-Point Random (3 pts)
+------------------------------------------------------------------------------------------
+Variant                BCE  Dice    mIoU    Dice  S-alpha   E-phi F-beta-w     MAE   BndF1
+------------------------------------------------------------------------------------------
+box_only                 ?     ?  0.4912  0.6072   0.7137  0.8268   0.6160  0.0566  0.4767
+
+==========================================================================================
+BEST VARIANTS (first prompt strategy)
+------------------------------------------------------------------------------------------
+  mIoU        : box_only             (0.3846)
+  Dice        : box_only             (0.4967)
+  S-alpha     : box_only             (0.6486)
+  E-phi       : box_only             (0.7565)
+  F-beta-w    : box_only             (0.5033)
+  MAE         : box_only             (0.0695)
+==========================================================================================
+Comparison table saved to: results/ablation/ablation_comparison_table.txt
+Prompt ablation box_only finished at Sun Mar 29 23:15:49 EDT 2026

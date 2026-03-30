@@ -1,0 +1,280 @@
+=== Cross-dataset evaluation: nc4k ===
+Started at Wed Mar 25 18:40:18 EDT 2026
+GPU: NVIDIA A100 80GB PCIe
+Python: /SEAS/home/g37014071/.conda/envs/specialsam/bin/python
+Config: configs/eval_nc4k.yaml
+Found 4121 images in data/nc4k/Imgs
+Found 4121 masks in data/nc4k/GT
+Matched 4121 image-mask pairs
+Using all 4121 samples
+
+Evaluating BASE model on 4121 samples
+  Testing: Center-of-Mass (Single)
+    Processed 50/4121
+    Processed 100/4121
+    Processed 150/4121
+    Processed 200/4121
+    Processed 250/4121
+    Processed 300/4121
+    Processed 350/4121
+    Processed 400/4121
+    Processed 450/4121
+    Processed 500/4121
+    Processed 550/4121
+    Processed 600/4121
+    Processed 650/4121
+    Processed 700/4121
+    Processed 750/4121
+    Processed 800/4121
+    Processed 850/4121
+    Processed 900/4121
+    Processed 950/4121
+    Processed 1000/4121
+    Processed 1050/4121
+    Processed 1100/4121
+    Processed 1150/4121
+    Processed 1200/4121
+    Processed 1250/4121
+    Processed 1300/4121
+    Processed 1350/4121
+    Processed 1400/4121
+    Processed 1450/4121
+    Processed 1500/4121
+    Processed 1550/4121
+    Processed 1600/4121
+    Processed 1650/4121
+    Processed 1700/4121
+    Processed 1750/4121
+    Processed 1800/4121
+    Processed 1850/4121
+    Processed 1900/4121
+    Processed 1950/4121
+    Processed 2000/4121
+    Processed 2050/4121
+    Processed 2100/4121
+    Processed 2150/4121
+    Processed 2200/4121
+    Processed 2250/4121
+    Processed 2300/4121
+    Processed 2350/4121
+    Processed 2400/4121
+    Processed 2450/4121
+    Processed 2500/4121
+    Processed 2550/4121
+    Processed 2600/4121
+    Processed 2650/4121
+    Processed 2700/4121
+    Processed 2750/4121
+    Processed 2800/4121
+    Processed 2850/4121
+    Processed 2900/4121
+    Processed 2950/4121
+    Processed 3000/4121
+    Processed 3050/4121
+    Processed 3100/4121
+    Processed 3150/4121
+    Processed 3200/4121
+    Processed 3250/4121
+    Processed 3300/4121
+    Processed 3350/4121
+    Processed 3400/4121
+    Processed 3450/4121
+    Processed 3500/4121
+    Processed 3550/4121
+    Processed 3600/4121
+    Processed 3650/4121
+    Processed 3700/4121
+    Processed 3750/4121
+    Processed 3800/4121
+    Processed 3850/4121
+    Processed 3900/4121
+    Processed 3950/4121
+    Processed 4000/4121
+    Processed 4050/4121
+    Processed 4100/4121
+    mIoU=0.5667, S-alpha=0.7278, MAE=0.0931
+Found 4121 images in data/nc4k/Imgs
+Found 4121 masks in data/nc4k/GT
+Matched 4121 image-mask pairs
+Using all 4121 samples
+
+Evaluating SPECIALIZED model on 4121 samples
+  Testing: Center-of-Mass (Single)
+    Processed 50/4121
+    Processed 100/4121
+    Processed 150/4121
+    Processed 200/4121
+    Processed 250/4121
+    Processed 300/4121
+    Processed 350/4121
+    Processed 400/4121
+    Processed 450/4121
+    Processed 500/4121
+    Processed 550/4121
+    Processed 600/4121
+    Processed 650/4121
+    Processed 700/4121
+    Processed 750/4121
+    Processed 800/4121
+    Processed 850/4121
+    Processed 900/4121
+    Processed 950/4121
+    Processed 1000/4121
+    Processed 1050/4121
+    Processed 1100/4121
+    Processed 1150/4121
+    Processed 1200/4121
+    Processed 1250/4121
+    Processed 1300/4121
+    Processed 1350/4121
+    Processed 1400/4121
+    Processed 1450/4121
+    Processed 1500/4121
+    Processed 1550/4121
+    Processed 1600/4121
+    Processed 1650/4121
+    Processed 1700/4121
+    Processed 1750/4121
+    Processed 1800/4121
+    Processed 1850/4121
+    Processed 1900/4121
+    Processed 1950/4121
+    Processed 2000/4121
+    Processed 2050/4121
+    Processed 2100/4121
+    Processed 2150/4121
+    Processed 2200/4121
+    Processed 2250/4121
+    Processed 2300/4121
+    Processed 2350/4121
+    Processed 2400/4121
+    Processed 2450/4121
+    Processed 2500/4121
+    Processed 2550/4121
+    Processed 2600/4121
+    Processed 2650/4121
+    Processed 2700/4121
+    Processed 2750/4121
+    Processed 2800/4121
+    Processed 2850/4121
+    Processed 2900/4121
+    Processed 2950/4121
+    Processed 3000/4121
+    Processed 3050/4121
+    Processed 3100/4121
+    Processed 3150/4121
+    Processed 3200/4121
+    Processed 3250/4121
+    Processed 3300/4121
+    Processed 3350/4121
+    Processed 3400/4121
+    Processed 3450/4121
+    Processed 3500/4121
+    Processed 3550/4121
+    Processed 3600/4121
+    Processed 3650/4121
+    Processed 3700/4121
+    Processed 3750/4121
+    Processed 3800/4121
+    Processed 3850/4121
+    Processed 3900/4121
+    Processed 3950/4121
+    Processed 4000/4121
+    Processed 4050/4121
+    Processed 4100/4121
+    mIoU=0.7411, S-alpha=0.8407, MAE=0.0475
+Found 4121 images in data/nc4k/Imgs
+Found 4121 masks in data/nc4k/GT
+Matched 4121 image-mask pairs
+Using all 4121 samples
+
+Evaluating LLPM model on 4121 samples
+  Testing: Center-of-Mass (Single)
+    Processed 50/4121
+    Processed 100/4121
+    Processed 150/4121
+    Processed 200/4121
+    Processed 250/4121
+    Processed 300/4121
+    Processed 350/4121
+    Processed 400/4121
+    Processed 450/4121
+    Processed 500/4121
+    Processed 550/4121
+    Processed 600/4121
+    Processed 650/4121
+    Processed 700/4121
+    Processed 750/4121
+    Processed 800/4121
+    Processed 850/4121
+    Processed 900/4121
+    Processed 950/4121
+    Processed 1000/4121
+    Processed 1050/4121
+    Processed 1100/4121
+    Processed 1150/4121
+    Processed 1200/4121
+    Processed 1250/4121
+    Processed 1300/4121
+    Processed 1350/4121
+    Processed 1400/4121
+    Processed 1450/4121
+    Processed 1500/4121
+    Processed 1550/4121
+    Processed 1600/4121
+    Processed 1650/4121
+    Processed 1700/4121
+    Processed 1750/4121
+    Processed 1800/4121
+    Processed 1850/4121
+    Processed 1900/4121
+    Processed 1950/4121
+    Processed 2000/4121
+    Processed 2050/4121
+    Processed 2100/4121
+    Processed 2150/4121
+    Processed 2200/4121
+    Processed 2250/4121
+    Processed 2300/4121
+    Processed 2350/4121
+    Processed 2400/4121
+    Processed 2450/4121
+    Processed 2500/4121
+    Processed 2550/4121
+    Processed 2600/4121
+    Processed 2650/4121
+    Processed 2700/4121
+    Processed 2750/4121
+    Processed 2800/4121
+    Processed 2850/4121
+    Processed 2900/4121
+    Processed 2950/4121
+    Processed 3000/4121
+    Processed 3050/4121
+    Processed 3100/4121
+    Processed 3150/4121
+    Processed 3200/4121
+    Processed 3250/4121
+    Processed 3300/4121
+    Processed 3350/4121
+    Processed 3400/4121
+    Processed 3450/4121
+    Processed 3500/4121
+    Processed 3550/4121
+    Processed 3600/4121
+    Processed 3650/4121
+    Processed 3700/4121
+    Processed 3750/4121
+    Processed 3800/4121
+    Processed 3850/4121
+    Processed 3900/4121
+    Processed 3950/4121
+    Processed 4000/4121
+    Processed 4050/4121
+    Processed 4100/4121
+    mIoU=0.7521, S-alpha=0.8475, MAE=0.0453
+
+Results saved to results/crossdataset/nc4k_results.csv
+Per-category results saved to results/crossdataset/per_category_results.csv
+Per-image results saved to results/crossdataset/nc4k_per_image.csv (12363 rows)
+Finished nc4k at Wed Mar 25 20:37:36 EDT 2026

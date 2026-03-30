@@ -1,0 +1,112 @@
+=== Cross-dataset evaluation: camo ===
+Started at Sun Mar 29 23:22:56 EDT 2026
+GPU: NVIDIA A100 80GB PCIe
+Python: /SEAS/home/g37014071/.conda/envs/specialsam/bin/python
+Config: configs/eval_camo.yaml
+Found 250 images in data/camo/CAMO-V.1.0-CVIU2019/Images/Test
+Found 1250 masks in data/camo/CAMO-V.1.0-CVIU2019/GT
+Matched 250 image-mask pairs
+Using all 250 samples
+
+Evaluating BASE model on 250 samples
+  Testing: Center-of-Mass (Single)
+    Processed 50/250
+    Processed 100/250
+    Processed 150/250
+    Processed 200/250
+    Processed 250/250
+    mIoU=0.4890, S-alpha=0.6715, MAE=0.1222
+  Testing: Edge (Single)
+    Processed 50/250
+    Processed 100/250
+    Processed 150/250
+    Processed 200/250
+    Processed 250/250
+    mIoU=0.1527, S-alpha=0.4425, MAE=0.2228
+  Testing: Multi-Point Grid (4 pts)
+    Processed 50/250
+    Processed 100/250
+    Processed 150/250
+    Processed 200/250
+    Processed 250/250
+    mIoU=0.6883, S-alpha=0.8019, MAE=0.0741
+  Testing: Multi-Point Random (3 pts)
+    Processed 50/250
+    Processed 100/250
+    Processed 150/250
+    Processed 200/250
+    Processed 250/250
+    mIoU=0.6925, S-alpha=0.7869, MAE=0.0875
+Found 250 images in data/camo/CAMO-V.1.0-CVIU2019/Images/Test
+Found 1250 masks in data/camo/CAMO-V.1.0-CVIU2019/GT
+Matched 250 image-mask pairs
+Using all 250 samples
+
+Evaluating SPECIALIZED model on 250 samples
+  Testing: Center-of-Mass (Single)
+    Processed 50/250
+    Processed 100/250
+    Processed 150/250
+    Processed 200/250
+    Processed 250/250
+    mIoU=0.6578, S-alpha=0.7875, MAE=0.0754
+  Testing: Edge (Single)
+    Processed 50/250
+    Processed 100/250
+    Processed 150/250
+    Processed 200/250
+    Processed 250/250
+    mIoU=0.6186, S-alpha=0.7551, MAE=0.0870
+  Testing: Multi-Point Grid (4 pts)
+    Processed 50/250
+    Processed 100/250
+    Processed 150/250
+    Processed 200/250
+    Processed 250/250
+    mIoU=0.6977, S-alpha=0.8140, MAE=0.0667
+  Testing: Multi-Point Random (3 pts)
+    Processed 50/250
+    Processed 100/250
+    Processed 150/250
+    Processed 200/250
+    Processed 250/250
+    mIoU=0.7030, S-alpha=0.8167, MAE=0.0653
+Found 250 images in data/camo/CAMO-V.1.0-CVIU2019/Images/Test
+Found 1250 masks in data/camo/CAMO-V.1.0-CVIU2019/GT
+Matched 250 image-mask pairs
+Using all 250 samples
+
+Evaluating LLPM model on 250 samples
+  Testing: Center-of-Mass (Single)
+    Processed 50/250
+    Processed 100/250
+    Processed 150/250
+    Processed 200/250
+    Processed 250/250
+    mIoU=0.6768, S-alpha=0.7975, MAE=0.0726
+  Testing: Edge (Single)
+    Processed 50/250
+    Processed 100/250
+    Processed 150/250
+    Processed 200/250
+    Processed 250/250
+    mIoU=0.6564, S-alpha=0.7815, MAE=0.0770
+  Testing: Multi-Point Grid (4 pts)
+    Processed 50/250
+    Processed 100/250
+    Processed 150/250
+    Processed 200/250
+    Processed 250/250
+    mIoU=0.7217, S-alpha=0.8267, MAE=0.0611
+  Testing: Multi-Point Random (3 pts)
+    Processed 50/250
+    Processed 100/250
+    Processed 150/250
+    Processed 200/250
+    Processed 250/250
+    mIoU=0.7370, S-alpha=0.8359, MAE=0.0583
+
+Results saved to results/crossdataset/camo_results.csv
+Per-category results saved to results/crossdataset/per_category_results.csv
+Per-image results saved to results/crossdataset/camo_per_image.csv (3000 rows)
+Finished camo at Sun Mar 29 23:54:40 EDT 2026
