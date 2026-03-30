@@ -2,6 +2,8 @@
 
 Tracks all SLURM jobs, their purpose, status, and results.
 
+**Last updated:** 2026-03-30 (VisCon campaign: full result CSVs in git, NC4K multi-prompt complete, `.gitignore` fix for `results/`).
+
 ---
 
 ## Job History
@@ -236,25 +238,66 @@ Tracks all SLURM jobs, their purpose, status, and results.
 - **Script:** `scripts/eval_crossdataset.sh` (SLURM array, tasks 0-1)
 - **Submitted:** 2026-03-29
 - **GPU:** A100 80GB x2 (parallel array)
-- **Status:** CAMO **COMPLETED** 2026-03-29 23:54 EDT; NC4K **incomplete in synced repo** (see below)
+- **Status:** **COMPLETED** — task 0 finished 2026-03-29 23:54 EDT (~32 min); task 1 finished 2026-03-30 07:02 EDT (~7h 35m, ExitCode 0)
 - **Configs:**
   - Task 0: `configs/eval_camo.yaml` (CAMO test, 250 images, 4 prompt types)
   - Task 1: `configs/eval_nc4k.yaml` (NC4K test, 4,121 images, 4 prompt types)
 - **Models evaluated:** Base SAM, Decoder-only, LLPM+Decoder
 - **Prompt strategies:** center, edge_single, multi_grid, multi_random (expanded from center-only in previous Job 5847371)
-- **Output:** `results/crossdataset/camo_results.csv`, `results/crossdataset/nc4k_results.csv`
+- **Output:** `results/crossdataset/camo_results.csv`, `results/crossdataset/nc4k_results.csv`, plus optional per-image: `camo_per_image.csv`, `nc4k_per_image.csv`, `per_category_results.csv` (cross-dataset)
 - **Logs:** `logs/crossdataset_5854375_0.out`, `logs/crossdataset_5854375_1.out`
-- **Purpose:** Expand cross-dataset eval to all prompt types for VisCon paper Table 3 Range row.
+- **Purpose:** Expand cross-dataset eval to all prompt types for VisCon paper Table 3 (Range column: CAMO 4.5×→1.1×; NC4K 5.8×→1.1× for decoder-only vs base).
 
-**CAMO (250 images) — mIoU from log `crossdataset_5854375_0.out`:**
+**CAMO (250 images) — mIoU (from logs / `camo_results.csv`):**
 
-| Model | CoM | Edge | Grid | Random | Range |
+| Model | CoM | Edge | Grid | Random | Range (approx.) |
 |---|---|---|---|---|---|
-| Base SAM | 0.489 | 0.153 | 0.688 | 0.692 | ~4.5x |
-| Specialized | 0.658 | 0.619 | 0.698 | 0.703 | ~1.1x |
-| LLPM+Decoder | 0.677 | 0.656 | 0.722 | 0.737 | ~1.1x |
+| Base SAM | 0.489 | 0.153 | 0.688 | 0.692 | 4.5× |
+| Specialized | 0.658 | 0.619 | 0.698 | 0.703 | 1.1× |
+| LLPM+Decoder | 0.677 | 0.656 | 0.722 | 0.737 | 1.1× |
 
-**NC4K:** Local `logs/crossdataset_5854375_1.out` ends mid-run (Base model, Multi-Point Grid, ~2450/4121). Re-pull from HPC or wait for job completion; `results/crossdataset/nc4k_results.csv` may be partial until the run finishes.
+**NC4K (4,121 images) — mIoU (from `nc4k_results.csv`, completed 2026-03-30):**
+
+| Model | CoM | Edge | Grid | Random | Range (approx.) |
+|---|---|---|---|---|---|
+| Base SAM | 0.567 | 0.127 | 0.726 | 0.739 | 5.8× |
+| Specialized | 0.741 | 0.715 | 0.770 | 0.780 | 1.1× |
+| LLPM+Decoder | 0.752 | 0.742 | 0.779 | 0.786 | 1.1× |
+
+---
+
+### Job 5854478 — Qualitative figure (VisCon refresh)
+- **Script:** `scripts/qualitative.sh` (or equivalent; job name `sam-quali+` on cluster)
+- **Submitted:** 2026-03-30 (~02:15 UTC end time per `sacct`)
+- **GPU:** A100 80GB
+- **Runtime:** ~33 min
+- **Status:** COMPLETED (ExitCode 0)
+- **Output:** `paper/VisCon/figures/qualitative_comparison.png` (updated grid; contour overlays / IoU badges per pipeline changes)
+- **Logs:** `logs/qualitative_5854478.out`, `logs/qualitative_5854478.err`
+- **Git:** Included in commit `17e818d` on HPC, then full repo sync to `origin/main`.
+
+---
+
+## Git / reproducibility (2026-03-29 — 2026-03-30)
+
+These commits preserve HPC outputs without relying on cluster scratch long-term.
+
+| Commit | Summary |
+|--------|---------|
+| `2808fcc` | Begin tracking `results/crossdataset/` CSVs; gitignore exceptions |
+| `7fb16a0` | Ablation + cross-dataset CSVs, SLURM logs |
+| `17e818d` | Full NC4K `nc4k_results.csv`, qualitative figure, log updates |
+| `a898500` | Refine `.gitignore` (`results/*` + un-ignore subfolders so `git add results/...` works), VisCon manuscript + `ablation_comparison_table.txt`, `todo.md` |
+| `58ab349` | **Full HPC bundle:** all ablation CSVs (point/box, LLPM variants, BCE/Dice), per-image CSVs (~26 MB total: NC4K per-image ~15 MB), `center_fixed_*`, `per_image_results.csv`, etc. |
+
+**`.gitignore` note:** Plain `results/` blocked negated paths; replaced with `results/*` plus explicit `!results/crossdataset/**`, `!results/ablation/**`, `!results/tables/**`, `!results/*.csv`. Checkpoints remain ignored (`checkpoints/`, `*.pth`).
+
+**Tracked files under `results/` (20 files):** run `git ls-files results/` — includes `comprehensive_evaluation_results.csv`, `per_category_results.csv`, `per_image_results.csv`, `center_fixed_results.csv`, `center_fixed_per_image.csv`, full `crossdataset/*`, full `ablation/*` (including `point_only_results.csv`, `box_only_results.csv`, `llpm_*_results.csv`, loss ablations, `ablation_comparison_table.txt`).
+
+**SLURM logs for this campaign (filenames):**
+- `logs/ablation_prompt_5854374_0.out`, `logs/ablation_prompt_5854374_1.out`
+- `logs/crossdataset_5854375_0.out`, `logs/crossdataset_5854375_1.out`
+- `logs/qualitative_5854478.out`, `logs/qualitative_5854478.err`
 
 ---
 

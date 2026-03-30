@@ -8,7 +8,9 @@ Target venue: CVPR 2026 SVC Workshop (deadline: March 20, 2026).
 ## Current Status
 
 Phase 1 (decoder-only baseline) is complete. All experiments run, paper drafted in LaTeX.
-Phase 2 (LLPM module) is planned, implementation not yet started.
+Phase 2 (LLPM module) is implemented; joint training and eval completed on Pegasus.
+
+**VisCon workshop track (2026-03):** Full prompt ablation (SLURM 5854374), cross-dataset CAMO/NC4K with four prompts (5854375), qualitative figure refresh (5854478). Outputs and SLURM logs are recorded in `logs/HPC_RUN_LOG.md` and `EXPERIMENTS.md`; full result CSVs are in git (see commits listed in the HPC log).
 
 ---
 

@@ -128,3 +128,13 @@ Training details:
 Finding: Both branches contribute complementarily (+1.9 each, +2.5 combined).
 Learnable gate matters — fixing α=1 is the worst variant (+1.5).
 Edge-only α barely moves from init, suggesting edge attention alone has limited value.
+
+## VisCon workshop revision — HPC jobs (2026-03-29 — 2026-03-30)
+
+| Job ID   | Script                      | Description                                      | Status    | Notes |
+|----------|-----------------------------|--------------------------------------------------|-----------|-------|
+| 5854374  | `scripts/ablation_prompt.sh` | Point-only vs box-only training; full eval pairs | Completed | Tasks 0–1; logs `logs/ablation_prompt_5854374_*.out`; outputs `results/ablation/point_only_results.csv`, `box_only_results.csv`. Eval uses ~4k matched pairs (see `logs/HPC_RUN_LOG.md`). |
+| 5854375  | `scripts/eval_crossdataset.sh` | CAMO + NC4K, 4 prompt types × 3 models        | Completed | Task 0 ~32 min; task 1 ~7h35m; `camo_results.csv`, `nc4k_results.csv`; Table 3 Range in `paper/VisCon/main.tex`. |
+| 5854478  | qualitative script          | Regenerated qualitative grid for VisCon        | Completed | `paper/VisCon/figures/qualitative_comparison.png`; logs `logs/qualitative_5854478.out` |
+
+**Canonical run log:** `logs/HPC_RUN_LOG.md` (job tables, NC4K timings, git commits `2808fcc` … `58ab349`, `.gitignore` rules for `results/`).

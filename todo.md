@@ -24,10 +24,8 @@
 - [x] Prompt ablation `5854374` — Table 2 + `ablation_comparison_table.txt`
 - [x] Cross-dataset CAMO `5854375_0` — `camo_results.csv`; Table 3 CAMO + Range
 - [x] Cross-dataset NC4K `5854375_1` — `nc4k_results.csv`; Table 3 NC4K Range (5.8× / 1.1×) + prose in `paper/VisCon/main.tex`
-- [x] Qualitative `5854478` — `paper/figures/qualitative_comparison.png` (commit on HPC: `17e818d`)
-
-## Optional
-- [ ] Add `results/ablation/point_only_results.csv` and `box_only_results.csv` to git from HPC
+- [x] Qualitative `5854478` — `paper/VisCon/figures/qualitative_comparison.png` (commit on HPC: `17e818d`)
+- [x] Full HPC result bundle in git (`58ab349`): ablation CSVs including `point_only` / `box_only`, per-image exports, cross-dataset tables; docs synced in `logs/HPC_RUN_LOG.md` + `EXPERIMENTS.md`
 
 ## Final (no HPC)
 - [ ] Page-budget / VisCon submission checklist
