@@ -14,15 +14,23 @@
 \title{Where Do Visual Concepts Break Down? Decoder-Only Adaptation of SAM for Camouflaged Segmentation}
 \author{Anonymous CVPR submission\\Paper ID \paperID}
 
+% Patch \@maketitle to include teaser in the full-width header
+\makeatletter
+\let\old@maketitle\@maketitle
+\renewcommand{\@maketitle}{%
+  \old@maketitle
+  \vspace{-0.5em}
+  \begin{center}
+    \includegraphics[width=0.95\textwidth]{figures/teaser.png}
+    \captionof{figure}{\textbf{Decoder-only adaptation.} Base SAM poorly segments a camouflaged organism; our specialized decoder follows the true boundary because the frozen encoder already encodes the relevant texture cues. No encoder modification, no new parameters: only the 4M-parameter mask decoder is fine-tuned.}
+    \label{fig:teaser}
+  \end{center}
+  \vspace{0.5em}
+}
+\makeatother
+
 \begin{document}
 \maketitle
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\textwidth]{figures/teaser.png}
-    \caption{\textbf{Decoder-only adaptation.} Base SAM poorly segments a camouflaged organism; our specialized decoder follows the true boundary because the frozen encoder already encodes the relevant texture cues. No encoder modification, no new parameters: only the 4M-parameter mask decoder is fine-tuned.}
-    \label{fig:teaser}
-\end{figure}
 
 \begin{abstract}
 SAM's ViT-H encoder, pre-trained on over one billion masks, learns strong visual features, but its decoder fails to produce correct masks when objects are camouflaged. We isolate this failure by freezing the encoder and fine-tuning only the 4M-parameter mask decoder on COD10K. This raises mIoU from 57.2\% to 73.8\% and reduces prompt sensitivity from 3.5$\times$ to 1.1$\times$ across four prompt types. The decoder generalizes without retraining: +16.9 mIoU on CAMO and +17.4 on NC4K (decoder-only, center-of-mass prompts). Our findings indicate that the encoder already captures camouflage-relevant cues (texture gradients, subtle edge discontinuities), but the general-purpose decoder does not translate them into boundary predictions. Camouflage is therefore a useful diagnostic: it exposes a bottleneck in feature utilization, not feature representation.
