@@ -1,0 +1,329 @@
+==========================================
+Generating ALL qualitative figure variants
+==========================================
+Started at Mon Mar 30 20:18:19 EDT 2026
+GPU: Tesla V100-SXM2-16GB
+
+>>> [1/6] Best mode, 4 rows
+======================================================================
+Qualitative Figure Generation
+======================================================================
+  Config:       configs/eval.yaml
+  Num examples: 4
+  Selection:    best-improvement
+  Output:       paper/VisCon/figures/variants/best_4rows.png
+
+Loading base SAM for candidate scoring...
+Loading specialized SAM for candidate scoring...
+Found 4000 images in data/cod10k/COD10K-v3/Test/Image
+Found 4000 masks in data/cod10k/COD10K-v3/Test/GT_Object
+Matched 4000 image-mask pairs
+Using all 4000 samples
+Scoring 4000 test images with both models...
+  Scored 100/4000
+  Scored 200/4000
+  Scored 300/4000
+  Scored 400/4000
+  Scored 500/4000
+  Scored 600/4000
+  Scored 700/4000
+  Scored 800/4000
+  Scored 900/4000
+  Scored 1000/4000
+  Scored 1100/4000
+  Scored 1200/4000
+  Scored 1300/4000
+  Scored 1400/4000
+  Scored 1500/4000
+  Scored 1600/4000
+  Scored 1700/4000
+  Scored 1800/4000
+  Scored 1900/4000
+  Scored 2000/4000
+Collected 2026 valid candidates
+Viable candidates (spec IoU >= 0.65): 1518
+  Row 1: base=0.003 -> ours=0.977 (+0.974)  COD10K-CAM-1-Aquatic-11-Octopus-472.jpg
+  Row 2: base=0.013 -> ours=0.983 (+0.971)  COD10K-CAM-3-Flying-65-Owl-4599.jpg
+  Row 3: base=0.003 -> ours=0.964 (+0.961)  COD10K-CAM-4-Amphibian-68-Toad-5022.jpg
+  Row 4: base=0.001 -> ours=0.955 (+0.954)  COD10K-CAM-3-Flying-61-Katydid-4115.jpg
+Selected 4 best-improvement examples
+Loading base SAM for figure generation...
+Loading specialized SAM for figure generation...
+
+Figure saved to: paper/VisCon/figures/variants/best_4rows.png
+  Resolution: 4560 x 4020 px
+
+Done.
+>>> [2/6] Best mode, 6 rows
+======================================================================
+Qualitative Figure Generation
+======================================================================
+  Config:       configs/eval.yaml
+  Num examples: 6
+  Selection:    best-improvement
+  Output:       paper/VisCon/figures/variants/best_6rows.png
+
+Loading base SAM for candidate scoring...
+Loading specialized SAM for candidate scoring...
+Found 4000 images in data/cod10k/COD10K-v3/Test/Image
+Found 4000 masks in data/cod10k/COD10K-v3/Test/GT_Object
+Matched 4000 image-mask pairs
+Using all 4000 samples
+Scoring 4000 test images with both models...
+  Scored 100/4000
+  Scored 200/4000
+  Scored 300/4000
+  Scored 400/4000
+  Scored 500/4000
+  Scored 600/4000
+  Scored 700/4000
+  Scored 800/4000
+  Scored 900/4000
+  Scored 1000/4000
+  Scored 1100/4000
+  Scored 1200/4000
+  Scored 1300/4000
+  Scored 1400/4000
+  Scored 1500/4000
+  Scored 1600/4000
+  Scored 1700/4000
+  Scored 1800/4000
+  Scored 1900/4000
+  Scored 2000/4000
+Collected 2026 valid candidates
+Viable candidates (spec IoU >= 0.65): 1518
+  Row 1: base=0.003 -> ours=0.977 (+0.974)  COD10K-CAM-1-Aquatic-11-Octopus-472.jpg
+  Row 2: base=0.013 -> ours=0.983 (+0.971)  COD10K-CAM-3-Flying-65-Owl-4599.jpg
+  Row 3: base=0.003 -> ours=0.964 (+0.961)  COD10K-CAM-4-Amphibian-68-Toad-5022.jpg
+  Row 4: base=0.001 -> ours=0.955 (+0.954)  COD10K-CAM-3-Flying-61-Katydid-4115.jpg
+  Row 5: base=0.015 -> ours=0.967 (+0.952)  COD10K-CAM-1-Aquatic-3-Crab-30.jpg
+  Row 6: base=0.010 -> ours=0.960 (+0.950)  COD10K-CAM-2-Terrestrial-44-Snake-2492.jpg
+Selected 6 best-improvement examples
+Loading base SAM for figure generation...
+Loading specialized SAM for figure generation...
+
+Figure saved to: paper/VisCon/figures/variants/best_6rows.png
+  Resolution: 4560 x 5940 px
+
+Done.
+>>> [3/6] Best mode, 1 row (teaser candidate)
+======================================================================
+Qualitative Figure Generation
+======================================================================
+  Config:       configs/eval.yaml
+  Num examples: 1
+  Selection:    best-improvement
+  Output:       paper/VisCon/figures/variants/best_1row_teaser.png
+
+Loading base SAM for candidate scoring...
+Loading specialized SAM for candidate scoring...
+Found 4000 images in data/cod10k/COD10K-v3/Test/Image
+Found 4000 masks in data/cod10k/COD10K-v3/Test/GT_Object
+Matched 4000 image-mask pairs
+Using all 4000 samples
+Scoring 4000 test images with both models...
+  Scored 100/4000
+  Scored 200/4000
+  Scored 300/4000
+  Scored 400/4000
+  Scored 500/4000
+  Scored 600/4000
+  Scored 700/4000
+  Scored 800/4000
+  Scored 900/4000
+  Scored 1000/4000
+  Scored 1100/4000
+  Scored 1200/4000
+  Scored 1300/4000
+  Scored 1400/4000
+  Scored 1500/4000
+  Scored 1600/4000
+  Scored 1700/4000
+  Scored 1800/4000
+  Scored 1900/4000
+  Scored 2000/4000
+Collected 2026 valid candidates
+Viable candidates (spec IoU >= 0.65): 1518
+  Row 1: base=0.003 -> ours=0.977 (+0.974)  COD10K-CAM-1-Aquatic-11-Octopus-472.jpg
+Selected 1 best-improvement examples
+Loading base SAM for figure generation...
+Loading specialized SAM for figure generation...
+
+Figure saved to: paper/VisCon/figures/variants/best_1row_teaser.png
+  Resolution: 4560 x 1140 px
+
+Done.
+>>> [4/6] Diverse mode, 4 rows
+======================================================================
+Qualitative Figure Generation
+======================================================================
+  Config:       configs/eval.yaml
+  Num examples: 4
+  Selection:    diverse-bucket
+  Output:       paper/VisCon/figures/variants/diverse_4rows.png
+
+Loading base SAM for candidate scoring...
+Found 4000 images in data/cod10k/COD10K-v3/Test/Image
+Found 4000 masks in data/cod10k/COD10K-v3/Test/GT_Object
+Matched 4000 image-mask pairs
+Using all 4000 samples
+Scoring 4000 test images with base SAM...
+  Scored 100/4000
+  Scored 200/4000
+  Scored 300/4000
+  Scored 400/4000
+  Scored 500/4000
+  Scored 600/4000
+  Scored 700/4000
+  Scored 800/4000
+  Scored 900/4000
+  Scored 1000/4000
+  Scored 1100/4000
+  Scored 1200/4000
+  Scored 1300/4000
+  Scored 1400/4000
+  Scored 1500/4000
+  Scored 1600/4000
+  Scored 1700/4000
+  Scored 1800/4000
+  Scored 1900/4000
+  Scored 2000/4000
+Collected 2026 valid candidates
+Candidate pool: 1011 easy, 480 medium, 535 hard
+Selected 4 examples for figure
+Loading base SAM for figure generation...
+Loading specialized SAM for figure generation...
+
+Figure saved to: paper/VisCon/figures/variants/diverse_4rows.png
+  Resolution: 4560 x 4020 px
+
+Done.
+>>> [5/6] Diverse mode, 6 rows
+======================================================================
+Qualitative Figure Generation
+======================================================================
+  Config:       configs/eval.yaml
+  Num examples: 6
+  Selection:    diverse-bucket
+  Output:       paper/VisCon/figures/variants/diverse_6rows.png
+
+Loading base SAM for candidate scoring...
+Found 4000 images in data/cod10k/COD10K-v3/Test/Image
+Found 4000 masks in data/cod10k/COD10K-v3/Test/GT_Object
+Matched 4000 image-mask pairs
+Using all 4000 samples
+Scoring 4000 test images with base SAM...
+  Scored 100/4000
+  Scored 200/4000
+  Scored 300/4000
+  Scored 400/4000
+  Scored 500/4000
+  Scored 600/4000
+  Scored 700/4000
+  Scored 800/4000
+  Scored 900/4000
+  Scored 1000/4000
+  Scored 1100/4000
+  Scored 1200/4000
+  Scored 1300/4000
+  Scored 1400/4000
+  Scored 1500/4000
+  Scored 1600/4000
+  Scored 1700/4000
+  Scored 1800/4000
+  Scored 1900/4000
+  Scored 2000/4000
+Collected 2026 valid candidates
+Candidate pool: 1011 easy, 480 medium, 535 hard
+Selected 6 examples for figure
+Loading base SAM for figure generation...
+Loading specialized SAM for figure generation...
+
+Figure saved to: paper/VisCon/figures/variants/diverse_6rows.png
+  Resolution: 4560 x 5940 px
+
+Done.
+>>> [6/6] Diverse mode, 8 rows (full spread)
+======================================================================
+Qualitative Figure Generation
+======================================================================
+  Config:       configs/eval.yaml
+  Num examples: 8
+  Selection:    diverse-bucket
+  Output:       paper/VisCon/figures/variants/diverse_8rows.png
+
+Loading base SAM for candidate scoring...
+Found 4000 images in data/cod10k/COD10K-v3/Test/Image
+Found 4000 masks in data/cod10k/COD10K-v3/Test/GT_Object
+Matched 4000 image-mask pairs
+Using all 4000 samples
+Scoring 4000 test images with base SAM...
+  Scored 100/4000
+  Scored 200/4000
+  Scored 300/4000
+  Scored 400/4000
+  Scored 500/4000
+  Scored 600/4000
+  Scored 700/4000
+  Scored 800/4000
+  Scored 900/4000
+  Scored 1000/4000
+  Scored 1100/4000
+  Scored 1200/4000
+  Scored 1300/4000
+  Scored 1400/4000
+  Scored 1500/4000
+  Scored 1600/4000
+  Scored 1700/4000
+  Scored 1800/4000
+  Scored 1900/4000
+  Scored 2000/4000
+Collected 2026 valid candidates
+Candidate pool: 1011 easy, 480 medium, 535 hard
+Selected 8 examples for figure
+Loading base SAM for figure generation...
+Loading specialized SAM for figure generation...
+
+Figure saved to: paper/VisCon/figures/variants/diverse_8rows.png
+  Resolution: 4560 x 7860 px
+
+Done.
+>>> Cropping individual rows as teaser candidates...
+  Saved best_row0_teaser.png (3440x798)
+  Saved best_row1_teaser.png (3440x798)
+  Saved best_row2_teaser.png (3440x798)
+  Saved best_row3_teaser.png (3440x798)
+  Saved diverse_row0_teaser.png (3440x798)
+  Saved diverse_row1_teaser.png (3440x798)
+  Saved diverse_row2_teaser.png (3440x798)
+  Saved diverse_row3_teaser.png (3440x798)
+Done cropping teasers.
+
+==========================================
+All variants generated:
+==========================================
+total 65M
+-rw-rw-r-- 1 g37014071 MG-plessgrp 2.8M Mar 30 22:20 best_1row_teaser.png
+-rw-rw-r-- 1 g37014071 MG-plessgrp 7.2M Mar 30 21:00 best_4rows.png
+-rw-rw-r-- 1 g37014071 MG-plessgrp  16M Mar 30 21:40 best_6rows.png
+-rw-rw-r-- 1 g37014071 MG-plessgrp 2.1M Mar 30 23:23 best_row0_teaser.png
+-rw-rw-r-- 1 g37014071 MG-plessgrp 1.7M Mar 30 23:23 best_row1_teaser.png
+-rw-rw-r-- 1 g37014071 MG-plessgrp 1.8M Mar 30 23:23 best_row2_teaser.png
+-rw-rw-r-- 1 g37014071 MG-plessgrp 1.7M Mar 30 23:23 best_row3_teaser.png
+-rw-rw-r-- 1 g37014071 MG-plessgrp 5.3M Mar 30 22:42 diverse_4rows.png
+-rw-rw-r-- 1 g37014071 MG-plessgrp  14M Mar 30 23:03 diverse_6rows.png
+-rw-rw-r-- 1 g37014071 MG-plessgrp  12M Mar 30 23:23 diverse_8rows.png
+-rw-rw-r-- 1 g37014071 MG-plessgrp 1.6M Mar 30 23:23 diverse_row0_teaser.png
+-rw-rw-r-- 1 g37014071 MG-plessgrp 1.6M Mar 30 23:23 diverse_row1_teaser.png
+-rw-rw-r-- 1 g37014071 MG-plessgrp 905K Mar 30 23:23 diverse_row2_teaser.png
+-rw-rw-r-- 1 g37014071 MG-plessgrp 1.4M Mar 30 23:23 diverse_row3_teaser.png
+
+Finished at Mon Mar 30 23:23:59 EDT 2026
+
+NEXT STEPS:
+  1. Browse the variants/ folder and pick your favorites
+  2. Copy your chosen qualitative figure:
+     cp paper/VisCon/figures/variants/diverse_4rows.png paper/VisCon/figures/qualitative_comparison.png
+  3. Copy your chosen teaser:
+     cp paper/VisCon/figures/variants/best_row0_teaser.png paper/VisCon/figures/teaser.png
+  4. git add + commit + push
