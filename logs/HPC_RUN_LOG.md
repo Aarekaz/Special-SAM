@@ -299,18 +299,25 @@ These commits preserve HPC outputs without relying on cluster scratch long-term.
 - `logs/crossdataset_5854375_0.out`, `logs/crossdataset_5854375_1.out`
 - `logs/qualitative_5854478.out`, `logs/qualitative_5854478.err`
 
-### Job 5855959 — All Qualitative Figure Variants
+### Job 5855959 — All Qualitative Figure Variants (CANCELLED)
 - **Script:** `scripts/generate_all_figures.sh`
 - **Submitted:** 2026-03-30
 - **GPU:** A100 80GB
-- **Wall time:** 4 hrs (estimated ~2-3 hrs)
-- **Status:** RUNNING
+- **Status:** CANCELLED — stuck in Priority queue (estimated start Apr 4)
+- **Replaced by:** Job 5857617
+
+### Job 5857617 — All Qualitative Figure Variants (V100 resubmit)
+- **Script:** `scripts/generate_all_figures.sh`
+- **Submitted:** 2026-03-30
+- **GPU:** V100 32GB (resubmitted to avoid A100 queue)
+- **Wall time:** 4 hrs
+- **Status:** SUBMITTED
 - **Purpose:** Generate multiple qualitative figure variants for VisCon paper — best/diverse selection modes, 1/4/6/8 row counts, plus auto-cropped teaser candidates.
 - **Output:** `paper/VisCon/figures/variants/` (14 files):
   - `best_1row_teaser.png`, `best_4rows.png`, `best_6rows.png`
   - `diverse_4rows.png`, `diverse_6rows.png`, `diverse_8rows.png`
   - `best_row{0-3}_teaser.png`, `diverse_row{0-3}_teaser.png`
-- **Logs:** `logs/allfigs_5855959.out`, `logs/allfigs_5855959.err`
+- **Logs:** `logs/allfigs_5857617.out`, `logs/allfigs_5857617.err`
 - **What to do with results:** Browse `variants/`, pick favorites, copy to `paper/VisCon/figures/qualitative_comparison.png` and `paper/VisCon/figures/teaser.png`.
 
 ---

@@ -33,24 +33,23 @@
 \maketitle
 
 \begin{abstract}
-SAM's ViT-H encoder, pre-trained on over one billion masks, learns strong visual features, but its decoder fails to produce correct masks when objects are camouflaged. We isolate this failure by freezing the encoder and fine-tuning only the 4M-parameter mask decoder on COD10K. This raises mIoU from 57.2\% to 73.8\% and reduces prompt sensitivity from 3.5$\times$ to 1.1$\times$ across four prompt types. The decoder generalizes without retraining: +16.9 mIoU on CAMO and +17.4 on NC4K (decoder-only, center-of-mass prompts). Our findings indicate that the encoder already captures camouflage-relevant cues (texture gradients, subtle edge discontinuities), but the general-purpose decoder does not translate them into boundary predictions. Camouflage is therefore a useful diagnostic: it exposes a bottleneck in feature utilization, not feature representation.
+SAM's ViT-H encoder, pre-trained on over one billion masks, learns strong visual features, but its decoder fails to produce correct masks when objects are camouflaged. We isolate this failure by freezing the encoder and fine-tuning only the 4M-parameter mask decoder on COD10K. This raises mIoU from 57.2\% to 73.8\% and reduces prompt sensitivity from 3.5$\times$ to 1.1$\times$ across four prompt types. The decoder generalizes without retraining: +16.9 mIoU on CAMO and +17.4 on NC4K. Our findings indicate baseline feature representations contain all the information necessary to detect and segment the objects, and while the general-purpose decoder does not translate them into correct boundary predictions, simply fine-tuning the decoder gives improvements that generalize across datasets.
 \end{abstract}
 
 \section{Introduction}
 
-Foundation segmentation models learn to represent boundaries, texture transitions, and spatial layout from large-scale supervision. SAM~\cite{kirillov2023sam}, trained on over one billion masks, segments almost anything. Yet camouflaged objects expose a clear failure: on COD10K~\cite{fan2020cod10k}, SAM ViT-H achieves only 57.2\% mIoU with center-of-mass prompts and 20.5\% with edge prompts (\cref{tab:main_viscon}). Camouflaged organisms have evolved to defeat visual detection, and SAM's general-purpose decoder has never learned to read subtle texture disruptions as boundaries.
+Foundation segmentation models learn to represent boundaries, texture transitions, and spatial layout from large-scale supervision. SAM~\cite{kirillov2023sam}, trained on over one billion masks, segments almost anything. Yet camouflaged objects expose a clear failure: on COD10K~\cite{fan2020cod10k}, SAM ViT-H achieves only 57.2\% mIoU with center-of-mass prompts and 20.5\% with edge prompts (\cref{tab:main_viscon}). Camouflaged organisms have evolved to defeat visual detection, and SAM's default ability to segment these masks is affected as well.
 
 This raises a direct question: does the encoder lack the relevant features, or does the decoder fail to use them? If the ViT-H encoder, pre-trained on 11M images, already encodes the texture gradients that distinguish camouflaged foreground from background, then specializing only the decoder should recover most of the gap. That is what we observe.
 
 Prior SAM adaptation methods typically modify the encoder via adapters~\cite{chen2023samadapter}, redesign prompt pathways~\cite{hao2024comprompter}, or add dual-stream modules~\cite{liu2025dualstream}. These approaches improve performance but conflate two questions: whether the encoder needs better features, and whether the decoder needs better feature utilization. By changing only the decoder, we isolate the latter.
 
-The more telling result is how behavior changes across prompts. Decoder specialization sharply reduces prompt sensitivity (\cref{tab:main_viscon}), and an ablation shows this is learned: mixed point/box training consistently outperforms point-only and box-only alternatives (\cref{tab:prompt_ablation_viscon}). The specialized decoder also generalizes to held-out camouflage datasets (CAMO, NC4K) without retraining, which suggests transferable camouflage-detection behavior rather than dataset-specific shortcuts.
+The more telling result is how behavior changes across prompts. Decoder specialization sharply reduces prompt sensitivity (\cref{tab:main_viscon}), and an ablation shows this is learned: mixed point/box training consistently outperforms point-only and box-only alternatives (\cref{tab:prompt_ablation_viscon}). The specialized decoder also generalizes to held-out camouflage datasets (CAMO, NC4K) without retraining.
 
 \noindent\textbf{Contributions.}
-\begin{enumerate}
-    \item We show that decoder-only adaptation yields +16.6 mIoU on COD10K with no architecture changes, 90-minute training, and a 16MB checkpoint---evidence that SAM's encoder already represents camouflage-relevant visual concepts.
-    \item We demonstrate prompt robustness: mixed-prompt training reduces sensitivity from 3.5$\times$ to 1.1$\times$, and the gain transfers to held-out datasets (+16.9 mIoU on CAMO, +17.4 on NC4K).
-    \item We frame camouflage as a diagnostic that separates feature representation (encoder) from feature utilization (decoder) in foundation segmentation models. The same lens may apply to other low-contrast domains such as medical imaging and underwater scenes.
+\begin{enumerate}[nosep]
+    \item We develop a decoder-only adaptation approach for segmenting camouflaged objects, achieving +16.6 mIoU on COD10K with no architecture changes, 90-minute training, and a 16MB checkpoint.
+    \item We demonstrate this improvement is robust across datasets (CAMO, NC4K) and prompt styles, with mixed-prompt training reducing sensitivity from 3.5$\times$ to 1.1$\times$.
 \end{enumerate}
 
 \section{Related Work}
@@ -113,7 +112,7 @@ Multi-Random & .727 & .830 & .776 & .874 & +.049 \\
 
 \begin{table}[t]
 \centering
-\caption{\textbf{Per-category mIoU} (Center-of-Mass prompt, COD10K). Terrestrial animals---the hardest category due to strong background-matching---show the largest gain.}
+\caption{\textbf{Per-category mIoU} (Center-of-Mass prompt, COD10K). Terrestrial animals, the hardest category due to strong background-matching, show the largest gain.}
 \label{tab:category}
 \small
 \begin{tabular}{lcccr}
@@ -152,7 +151,7 @@ Box-only & .385 & .523 & .424 & .491 \\
 {\footnotesize \textsuperscript{$\ddagger$}Point-only and box-only evaluated on all matched COD10K test pairs ($\sim$4k); mixed row from the 2,026-image camouflaged subset.}
 \end{table}
 
-\Cref{tab:prompt_ablation_viscon} shows that prompt robustness comes from mixed training, not from fine-tuning alone. Mixed-prompt training outperforms point-only on all test strategies (by up to $\sim$2 mIoU) and box-only by 17--35 mIoU depending on the test prompt. Box-only training collapses on point prompts (0.385 CoM), which confirms that robustness requires exposure to multiple prompt modalities during training. By alternating point and box prompts, the decoder learns \emph{what} the camouflaged object is rather than \emph{where the user clicked}, grounding the mapping in object appearance rather than prompt geometry.
+\Cref{tab:prompt_ablation_viscon} shows that prompt robustness comes from mixed training, not from fine-tuning alone. Mixed-prompt training outperforms point-only on all test strategies (by up to $\sim$2 mIoU) and box-only by 17{-}35 mIoU depending on the test prompt. Box-only training collapses on point prompts (0.385 CoM), which confirms that robustness requires exposure to multiple prompt modalities during training. By alternating point and box prompts, the decoder learns \emph{what} the camouflaged object is rather than \emph{where the user clicked}, grounding the mapping in object appearance rather than prompt geometry.
 
 \subsection{Cross-Dataset Generalization}
 
@@ -177,7 +176,7 @@ Dataset & Model & CoM & Edge & Grid & Rand. & Range \\
 \end{tabular}}
 \end{table}
 
-The real test is whether the decoder has learned generalizable behavior or memorized COD10K. \Cref{tab:crossdataset} shows it transfers: +16.9 mIoU on CAMO (center-of-mass) and +17.4 on NC4K, with no retraining. Prompt robustness also transfers, with sensitivity dropping from 4.5$\times$ to 1.1$\times$ on CAMO and from 5.8$\times$ to 1.1$\times$ on NC4K. Edge prompts, the hardest setting, show the largest absolute gains on both datasets (+46.6 on CAMO, +58.8 on NC4K), the same pattern as on COD10K. The LLPM adds +2--4 mIoU across all prompts and datasets, again largest on edge prompts (+3.7 on CAMO, +2.7 on NC4K). Both the decoder and the LLPM generalize; neither has simply memorized COD10K-specific shortcuts.
+The real test is whether the decoder has learned generalizable behavior or memorized COD10K. \Cref{tab:crossdataset} shows it transfers: +16.9 mIoU on CAMO (center-of-mass) and +17.4 on NC4K, with no retraining. Prompt robustness also transfers, with sensitivity dropping from 4.5$\times$ to 1.1$\times$ on CAMO and from 5.8$\times$ to 1.1$\times$ on NC4K. Edge prompts, the hardest setting, show the largest absolute gains on both datasets (+46.6 on CAMO, +58.8 on NC4K), the same pattern as on COD10K. The LLPM adds +2{-}4 mIoU across all prompts and datasets, again largest on edge prompts (+3.7 on CAMO, +2.7 on NC4K). Both the decoder and the LLPM generalize; neither has simply memorized COD10K-specific shortcuts.
 
 \subsection{Non-Camouflage Sanity Check}
 
