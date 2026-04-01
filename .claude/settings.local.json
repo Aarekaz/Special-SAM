@@ -18,7 +18,10 @@
       "Skill(humanizer)",
       "Skill(humanizer:*)",
       "Bash(pdflatex -interaction=nonstopmode architecture_diagram.tex)",
-      "Bash(ls -la /Users/aarekaz/Development/Special-SAM/paper/VisCon/figures/architecture_diagram.*)"
+      "Bash(ls -la /Users/aarekaz/Development/Special-SAM/paper/VisCon/figures/architecture_diagram.*)",
+      "Skill(browse)",
+      "Skill(browse:*)",
+      "WebSearch"
     ]
   }
 }

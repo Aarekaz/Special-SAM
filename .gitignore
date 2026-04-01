@@ -81,3 +81,4 @@ venv/
 !paper/figures/*.jpg
 !paper/**/figures/*.pdf
 !paper/**/main.pdf
+.gstack/
