@@ -49,7 +49,7 @@ Decoder specialization also reduces prompt sensitivity (\cref{tab:main_viscon}).
 \noindent\textbf{Contributions.}
 \begin{enumerate}[nosep]
     \item We develop a decoder-only adaptation approach for segmenting camouflaged objects, achieving +16.6 mIoU on COD10K with no architecture changes, 90-minute training, and a 16MB checkpoint.
-    \item We demonstrate this improvement is robust across datasets (CAMO, NC4K) and prompt styles, with mixed-prompt training reducing sensitivity from 3.5$\times$ to 1.1$\times$.
+    \item We demonstrate this improvement is robust across datasets (CAMO, NC4K) and prompt styles.
 \end{enumerate}
 
 \section{Related Work}
@@ -72,7 +72,7 @@ SAM consists of a ViT-H image encoder~\cite{dosovitskiy2020vit} ($\sim$632M para
 
 \noindent\textbf{Loss and optimization.} We minimize $\mathcal{L} = 0.5 \cdot \mathcal{L}_{\text{BCE}} + 0.5 \cdot \mathcal{L}_{\text{Dice}}$, where BCE enforces pixel-level boundaries and Dice maintains region-level coherence. Ablations over four weighting variants (BCE-only, Dice-only, 0.7/0.3, 0.3/0.7) show all fall within $\pm$2.1 mIoU of the 0.5/0.5 baseline; the choice is not sensitive. We use AdamW (lr $10^{-4}$, cosine schedule, 1-epoch warmup, 15 epochs). Training takes $\sim$90 minutes on a single A100 with pre-computed embeddings.
 
-\noindent\textbf{Evaluation protocol.} We evaluate four prompt strategies of increasing difficulty: \textbf{Center-of-Mass} (1pt), \textbf{Edge} (1pt on boundary contour), \textbf{Multi-Grid} (4pt), and \textbf{Multi-Random} (3pt). Following SAM's standard protocol~\cite{kirillov2023sam}, prompts are derived from ground-truth masks to simulate idealized user clicks. We report mIoU, structure measure $S_\alpha$~\cite{fan2017smeasure}, enhanced alignment $E_\phi$~\cite{fan2018emeasure}, weighted F-measure $F_\beta^w$~\cite{margolin2014fmeasure}, and MAE. Evaluation uses the full 2,026-image COD10K camouflaged test set, as well as CAMO~\cite{le2019anabranch} (250 images) and NC4K (4,121 images) for cross-dataset evaluation.
+\noindent\textbf{Evaluation protocol.} We evaluate four prompt strategies of increasing difficulty: \textbf{Center-of-Mass} (1pt), \textbf{Edge} (1pt on boundary contour), \textbf{Multi-Grid} (4pt), and \textbf{Multi-Random} (3pt). Following SAM's standard protocol~\cite{kirillov2023sam}, prompts are derived from ground-truth masks to simulate idealized user clicks. We report mIoU, $S_\alpha$~\cite{fan2017smeasure}, $E_\phi$~\cite{fan2018emeasure}, $F_\beta^w$~\cite{margolin2014fmeasure}, and MAE on the 2,026-image COD10K test set, CAMO~\cite{le2019anabranch} (250), and NC4K (4,121).
 
 \begin{figure}[t]
     \centering
@@ -82,8 +82,7 @@ SAM consists of a ViT-H image encoder~\cite{dosovitskiy2020vit} ($\sim$632M para
 \end{figure}
 
 \section{Results}
-
-\subsection{Decoder Adaptation Improves All Prompt Types}
+\subsection{Decoder Adaptation Improves All Prompts}
 
 \begin{table}[t]
 \centering
@@ -182,7 +181,7 @@ We evaluate on two datasets not seen during training. \Cref{tab:crossdataset} sh
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=\columnwidth,height=8cm,keepaspectratio]{figures/coco_comparison.png}
+    \includegraphics[width=\columnwidth,keepaspectratio]{figures/coco_comparison.png}
     \caption{\textbf{Regular-scene sanity check.} COCO val2017 images with a fixed image-center prompt (no GT). The specialized decoder produces comparable masks, confirming that camouflage training does not degrade general segmentation.}
     \label{fig:coco}
 \end{figure}
@@ -202,9 +201,6 @@ Does camouflage-specific decoder training hurt performance on ordinary scenes? \
 Method & Type & $S_\alpha$ & $E_\phi$ & $F_\beta^w$ & MAE$\downarrow$ \\
 \midrule
 SINet~\cite{fan2020cod10k} & Auto & .776 & .864 & .631 & .043 \\
-PFNet~\cite{mei2021pfnet} & Auto & .800 & .877 & .660 & .040 \\
-SINet-V2~\cite{fan2022sinetv2} & Auto & .815 & .887 & .680 & .037 \\
-SegMaR~\cite{jia2022segmar} & Auto & .833 & .899 & .724 & .034 \\
 ZoomNet~\cite{pang2022zoomnet} & Auto & .838 & .911 & .729 & .029 \\
 SAM-Adpt.~\cite{chen2023samadapter} & Enc.\ adapt & .883 & .918 & .801 & .025 \\
 COMPr.~\cite{hao2024comprompter} & Prompt adapt & .889 & .949 & .821 & .023 \\
@@ -221,10 +217,10 @@ COMPr.~\cite{hao2024comprompter} & Prompt adapt & .889 & .949 & .821 & .023 \\
 \section{Discussion}
 
 \noindent\textbf{What this reveals about visual concept representation.}
-The ViT-H encoder, having seen 1B+ masks during pre-training, appears to already encode texture gradients and edge patterns that matter for camouflage. The decoder, trained on general segmentation, has not learned that \emph{subtle} texture disruptions signify boundaries. That a 16.6-point mIoU gain comes from training only 0.6\% of parameters (\cref{tab:main_viscon}) is consistent with the bottleneck being in feature utilization (decoder) rather than feature representation (encoder).
+The ViT-H encoder, having seen 1B+ masks during pre-training, appears to already encode texture gradients and edge patterns that matter for camouflage. The decoder, trained on general segmentation, has not learned that \emph{subtle} texture disruptions signify boundaries. The 16.6-point mIoU gain from training only 0.6\% of parameters (\cref{tab:main_viscon}) is consistent with the bottleneck being in feature utilization (decoder) rather than feature representation (encoder).
 
 \noindent\textbf{Effect of prompt mixing.}
-Mixed-prompt training reduces prompt sensitivity from 3.5$\times$ to 1.1$\times$ (\cref{tab:main_viscon}). Point-only and box-only training each produce decoders that perform well on their own prompt type but degrade on others (\cref{tab:prompt_ablation_viscon}). Mixed training improves results on all prompts, with the largest gains on prompt styles not seen during training.
+Mixed-prompt training reduces prompt sensitivity from 3.5$\times$ to 1.1$\times$ (\cref{tab:main_viscon}). Point-only and box-only training each produce decoders that perform well on only on their own prompt type (\cref{tab:prompt_ablation_viscon}). Mixed training improves results on all prompts, with the largest gains on prompt styles not seen during training.
 
 \noindent\textbf{Where the decoder still fails.}
 Analyzing the bottom quartile of predictions (400 worst images) reveals structured failure modes, not random noise. Disjoint objects (multiple connected components) account for 44\% of failures; dark images (brightness $<$ 80) account for 26\%. Tiny objects ($<$1\% of image area) are the hardest category, with a mean IoU of 0.29. These patterns point to single-point prompting and fixed-resolution decoding as the remaining bottlenecks, not missing encoder features.
@@ -243,15 +239,16 @@ A Learnable Local Preprocessing Module (LLPM, $\sim$31K parameters) placed befor
 \section{Conclusion}
 Freezing SAM's encoder and fine-tuning only its 4M-parameter decoder raises mIoU by 16.6 points on COD10K, generalizes to held-out datasets, and reduces prompt sensitivity from 3.5$\times$ to 1.1$\times$. The size of this improvement from modifying only 0.6\% of parameters is consistent with the encoder already containing the features needed for camouflage segmentation.
 
+\clearpage
 {\small
 \bibliographystyle{ieeenat_fullname}
 \bibliography{main}
 }
 
+\newpage 
 \onecolumn
 \appendix
 \section{Qualitative Examples}
-
 \begin{center}
     \includegraphics[width=\textwidth,height=0.85\textheight,keepaspectratio]{figures/qualitative_comparison.png}
     \captionof{figure}{\textbf{Qualitative comparison} (center-of-mass prompts, diverse difficulty). Columns: input with prompt point, GT boundary (green), base SAM prediction (with GT contour overlaid), and our decoder-only prediction (with GT contour). IoU scores appear per prediction. Examples span hard, medium, and easy cases.}
