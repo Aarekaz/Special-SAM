@@ -21,7 +21,8 @@
       "Bash(ls -la /Users/aarekaz/Development/Special-SAM/paper/VisCon/figures/architecture_diagram.*)",
       "Skill(browse)",
       "Skill(browse:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(pdflatex -interaction=nonstopmode architecture_simple.tex)"
     ]
   }
 }
