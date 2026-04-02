@@ -76,8 +76,8 @@ SAM consists of a ViT-H image encoder~\cite{dosovitskiy2020vit} ($\sim$632M para
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=\columnwidth]{figures/architecture_diagram.pdf}
-    \caption{\textbf{Our approach.} (a)~Training: we freeze the encoder, cache embeddings offline, and fine-tune only the 4M-parameter mask decoder with mixed point/box prompts. (b)~Inference: the frozen encoder and specialized decoder produce segmentation masks from a user prompt.}
+    \includegraphics[width=\columnwidth]{figures/architecture_diagram.png}
+    \caption{\textbf{Our approach.} We freeze the image encoder and prompt encoder, and fine-tune only the 4M-parameter mask decoder with mixed point/box prompts. Backpropagation updates the decoder only (red dashed path).}
     \label{fig:architecture}
 \end{figure}
 
