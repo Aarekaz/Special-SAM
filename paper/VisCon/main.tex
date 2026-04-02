@@ -174,15 +174,14 @@ Dataset & Model & CoM & Edge & Grid & Rand. & Range \\
 We evaluate on two datasets not seen during training. \Cref{tab:crossdataset} shows the decoder transfers: +16.9 mIoU on CAMO (center-of-mass) and +17.4 on NC4K, with no retraining. Prompt robustness also transfers, with sensitivity dropping from 4.5$\times$ to 1.1$\times$ on CAMO and from 5.8$\times$ to 1.1$\times$ on NC4K. Edge prompts, the hardest setting, show the largest absolute gains on both datasets (+46.6 on CAMO, +58.8 on NC4K), the same pattern as on COD10K.
 
 \subsection{Non-Camouflage Sanity Check}
+Does camouflage-specific decoder training hurt performance on ordinary scenes? \Cref{fig:coco} shows COCO val2017 results using a fixed image-center prompt (no ground truth). The specialized decoder produces masks visually comparable to base SAM. We observe no degradation on non-camouflage images.
 
-\begin{figure}[t]
+\begin{figure}[t!]
     \centering
     \includegraphics[width=\columnwidth,keepaspectratio]{figures/coco_comparison.png}
     \caption{\textbf{Regular-scene sanity check.} COCO val2017 images with a fixed image-center prompt (no GT). The specialized decoder produces comparable masks, confirming that camouflage training does not degrade general segmentation.}
     \label{fig:coco}
 \end{figure}
-
-Does camouflage-specific decoder training hurt performance on ordinary scenes? \Cref{fig:coco} shows COCO val2017 results using a fixed image-center prompt (no ground truth). The specialized decoder produces masks visually comparable to base SAM. We observe no degradation on non-camouflage images.
 
 \subsection{Context: Comparison with Existing Methods}
 
