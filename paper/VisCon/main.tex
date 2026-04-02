@@ -132,7 +132,7 @@ Terrestrial & 699 & .519 & .703 & \textbf{+35.5\%} \\
 
 \begin{table}[t]
 \centering
-\caption{\textbf{Prompt-mix ablation} (COD10K test set). Mixed training produces the most robust decoder; box-only collapses on point prompts.\textsuperscript{$\ddagger$}}
+\caption{\textbf{Prompt-mix ablation} (COD10K test set). Mixed training produces the most robust decoder; box-only collapses on point prompts. Point-only and box-only use all matched test pairs; mixed uses the 2,026-image camouflaged subset.}
 \label{tab:prompt_ablation_viscon}
 \small
 \begin{tabular}{lcccc}
@@ -146,8 +146,6 @@ Box-only & .385 & .523 & .424 & .491 \\
 \textbf{Mixed (ours)} & \textbf{.738} & \textbf{.694} & \textbf{.756} & \textbf{.776} \\
 \bottomrule
 \end{tabular}
-\vspace{1pt}
-{\footnotesize \textsuperscript{$\ddagger$}Point-only and box-only evaluated on all matched COD10K test pairs ($\sim$4k); mixed row from the 2,026-image camouflaged subset.}
 \end{table}
 
 \Cref{tab:prompt_ablation_viscon} compares three training regimes. Mixed-prompt training outperforms point-only on all test strategies (by up to $\sim$2 mIoU) and box-only by 17{-}35 mIoU depending on the test prompt. Box-only training collapses on point prompts (0.385 CoM). Mixed training improves behavior on all prompts, with the largest gains over other training regimes on prompt styles not seen during training.
@@ -221,7 +219,7 @@ COMPr.~\cite{hao2024comprompter} & Prompt adapt & .889 & .949 & .821 & .023 \\
 The ViT-H encoder, having seen 1B+ masks during pre-training, appears to already encode texture gradients and edge patterns that matter for camouflage. The decoder, trained on general segmentation, has not learned that \emph{subtle} texture disruptions signify boundaries. The 16.6-point mIoU gain from training only 0.6\% of parameters (\cref{tab:main_viscon}) is consistent with the bottleneck being in feature utilization (decoder) rather than feature representation (encoder), though direct probing of the encoder's internal representations would be needed to confirm this.
 
 \noindent\textbf{Effect of prompt mixing.}
-Mixed-prompt training reduces prompt sensitivity from 3.5$\times$ to 1.1$\times$ (\cref{tab:main_viscon}). Point-only and box-only training each produce decoders that perform well on only on their own prompt type (\cref{tab:prompt_ablation_viscon}). Mixed training improves results on all prompts, with the largest gains on prompt styles not seen during training.
+Mixed-prompt training reduces prompt sensitivity from 3.5$\times$ to 1.1$\times$ (\cref{tab:main_viscon}). Point-only and box-only training each produce decoders that perform well only on their own prompt type (\cref{tab:prompt_ablation_viscon}). Mixed training improves results on all prompts, with the largest gains on prompt styles not seen during training.
 
 \noindent\textbf{Where the decoder still fails.}
 Analyzing the bottom quartile of predictions (400 worst images) reveals structured failure modes, not random noise. Disjoint objects (multiple connected components) account for 44\% of failures; dark images (brightness $<$ 80) account for 26\%. Tiny objects ($<$1\% of image area) are the hardest category, with a mean IoU of 0.29. These patterns point to single-point prompting and fixed-resolution decoding as the remaining bottlenecks, not missing encoder features.
