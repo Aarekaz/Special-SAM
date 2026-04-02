@@ -22,7 +22,8 @@
       "Skill(browse)",
       "Skill(browse:*)",
       "WebSearch",
-      "Bash(pdflatex -interaction=nonstopmode architecture_simple.tex)"
+      "Bash(pdflatex -interaction=nonstopmode architecture_simple.tex)",
+      "Bash(pdflatex -interaction=nonstopmode architecture_minimal.tex)"
     ]
   }
 }
